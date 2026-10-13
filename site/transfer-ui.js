@@ -1,5 +1,7 @@
 import {exportSave,importSave,progressForStage,commitSave,readBackup,describeProgress,MAX_SAVE_BYTES,BACKUP_KEY} from './save-transfer.js';
 
+import {MIGRATION_KEY} from './progress.js';
+
 export function setupTransfer({snapshot,normalise,onCommit,pause,onClose}){
   const $=id=>document.getElementById(id),dialog=$('transfer-dialog'),status=$('transfer-status'),preview=$('transfer-preview'),apply=$('apply-transfer');
   let pending=null,ticket=0;
@@ -13,17 +15,24 @@ export function setupTransfer({snapshot,normalise,onCommit,pause,onClose}){
   function open(){
     pause();$('help-dialog').close();clear();ticket++;$('import-save').value='';
     message('파일을 내보내거나 가져올 수 있어요. 기록은 서버에 보내지 않아요.');
-    try{$('restore-backup').disabled=!localStorage.getItem(BACKUP_KEY);}catch{$('restore-backup').disabled=true;}
+    try{$('restore-backup').disabled=!localStorage.getItem(BACKUP_KEY);$('export-previous-map').disabled=!localStorage.getItem(MIGRATION_KEY);}catch{$('restore-backup').disabled=true;$('export-previous-map').disabled=true;}
     dialog.showModal();
   }
   $('open-transfer').addEventListener('click',open);
   $('close-transfer').addEventListener('click',()=>dialog.close());
   dialog.addEventListener('close',()=>{ticket++;clear();onClose();});
+  function download(text,name){
+    const url=URL.createObjectURL(new Blob([text],{type:'application/json'})),a=document.createElement('a');
+    a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  $('export-previous-map').addEventListener('click',()=>{
+    try{const raw=localStorage.getItem(MIGRATION_KEY);if(!raw)throw new Error('Missing backup');
+      download(raw,'captains-aquarium-before-layout-v4.json');message('개편 전 원본 기록 다운로드를 요청했어요. 기기의 다운로드 목록에서 확인해 주세요.');
+    }catch{message('개편 전 기록을 읽지 못했어요. 현재 진행은 그대로예요.');}
+  });
   $('export-save').addEventListener('click',()=>{
     try{
-      const text=exportSave(snapshot()),url=URL.createObjectURL(new Blob([text],{type:'application/json'})),a=document.createElement('a');
-      a.href=url;a.download='captains-aquarium-save-'+new Date().toISOString().slice(0,10)+'.json';
-      document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+      download(exportSave(snapshot()),'captains-aquarium-save-'+new Date().toISOString().slice(0,10)+'.json');
       message('저장 파일 다운로드를 요청했어요. 기기의 다운로드 목록에서 확인해 주세요.');
     }catch{message('저장 파일을 만들지 못했어요. 현재 진행은 그대로예요.');}
   });
@@ -35,7 +44,7 @@ export function setupTransfer({snapshot,normalise,onCommit,pause,onClose}){
   });
   const stage=$('restore-stage'),slots=[0,1,2].map(i=>$('restore-slot-'+i));
   function updateSlots(){
-    const value=Number(stage.value);slots.forEach((slot,i)=>{slot.disabled=value<3;slot.value=value>=4?['rock','','seaweed'][i]:'';});
+    const value=({11:1,12:5,13:8})[Number(stage.value)]??Number(stage.value);slots.forEach((slot,i)=>{slot.disabled=value<3;slot.value=value>=4?['rock','','seaweed'][i]:'';});
   }
   stage.addEventListener('change',()=>{ticket++;clear();updateSlots();message('단계와 장식을 고른 뒤 복원 내용 보기를 눌러 주세요.');});
   for(const slot of slots)slot.addEventListener('change',()=>{ticket++;clear();message('장식을 바꿨어요. 복원 내용을 다시 확인해 주세요.');});

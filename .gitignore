@@ -2,3 +2,4 @@ captains-aquarium-save-*.json
 node_modules/
 *.log
 .DS_Store
+captains-aquarium-before-layout-*.json

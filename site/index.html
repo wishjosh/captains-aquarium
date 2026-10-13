@@ -13,7 +13,7 @@
 <body>
   <main class="game-shell">
     <header class="topbar">
-      <div><p class="eyebrow">선장의 바다 여행 · 제주</p><h1>선장의 아쿠아리움</h1></div>
+      <div><p class="eyebrow">제주 · <span id="area-name">선착장·해안</span></p><h1>선장의 아쿠아리움</h1></div>
       <button id="help" class="help-button" type="button" aria-label="조작 방법과 저장 안내">?</button>
     </header>
     <section class="world-wrap" aria-label="제주 수족관 탐험">
@@ -22,7 +22,7 @@
         <div class="mission-top"><span id="chapter">첫 번째 임무</span><span id="mission-count">0 / 4</span></div>
         <p id="mission-title">바다에서 범돔을 만나자!</p>
         <p id="mission-detail">아래쪽 바다 탐사 구역으로 가 보세요.</p>
-        <div class="mission-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <div class="mission-dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
       </div>
       <div class="bag"><img src="assets/stripey-flat.png" alt=""><span id="bag-count">가방 0</span></div>
       <div id="waypoint" class="waypoint" aria-hidden="true">↓ 바다 탐사</div>
@@ -40,10 +40,10 @@
   </main>
   <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
     <h2 id="help-title">선장님, 첫 탐험을 시작해요</h2>
-    <ol><li>빈 바닥을 누르고 원하는 방향으로 끌어요.</li><li>누른 채로 있으면 계속 걷고, 손을 떼면 멈춰요.</li><li>바다 가까이 가서 범돔을 수집해요.</li><li>범돔 수조로 돌아와 친구를 넣고 관찰해요.</li><li>제주 돌과 바다풀을 골라 첫 수조를 꾸며요.</li><li>다음은 왼쪽 해안의 자리돔, 그다음 오른쪽 바다의 해파리예요.</li><li>각 친구를 이름이 같은 수조에 넣고 가까이 관찰해요.</li></ol>
+    <ol><li>빈 바닥을 누르고 원하는 방향으로 끌어요.</li><li>누른 채로 있으면 계속 걷고, 손을 떼면 멈춰요.</li><li>바다 가까이 가서 범돔을 수집해요.</li><li>광장 왼쪽 관리동의 입수대에 친구를 데려가요.</li><li>위쪽 전시관의 범돔 수조에 배치하고 관찰해요.</li><li>제주 돌과 바다풀을 골라 첫 수조를 꾸며요.</li><li>다음은 왼쪽 해안의 자리돔, 그다음 오른쪽 바다의 해파리예요.</li><li>각 친구는 관리동 입수 → 전시관 배치 → 관찰 순서로 데려와요.</li></ol>
     <p>수조나 생물은 가까이에서 짧게 눌러도 돼요. 컴퓨터에서는 방향키 또는 WASD로 걸을 수 있어요.</p>
     <p class="storage-note">진행은 이 기기의 브라우저에 저장돼요. 다른 기기와는 연동되지 않으며, 브라우저의 사이트 데이터를 지우면 기록도 지워져요.</p>
-    <p>검토 버전: 2026-10-13 · 저장 이전 준비</p>
+    <p>검토 버전: 2026-10-13 · 관리동·전시관 첫 개편</p>
     <button id="open-transfer" type="button">저장 기록 옮기기</button>
     <button id="close-help" type="button">알겠어요</button>
   </dialog>
@@ -60,20 +60,33 @@
       <p id="decor-status" role="status" aria-live="polite">제주 돌과 바다풀을 하나씩 놓아 주세요.</p><button id="save-decor" class="interact" type="button">이대로 꾸미기</button>
     </section>
   </dialog>
+  <dialog id="management-dialog" class="help-dialog management-dialog" aria-labelledby="management-title">
+    <h2 id="management-title">관리동 · 생물 현황</h2>
+    <p id="management-summary" role="status"></p>
+    <p>해안에서 만난 친구는 여기서 입수해요. 보관 중인 친구는 전시관의 같은 이름 수조에서 배치할 수 있어요.</p>
+    <ul class="management-list">
+      <li><strong>범돔</strong><span id="management-fish"></span></li>
+      <li><strong>자리돔</strong><span id="management-chromis"></span></li>
+      <li><strong>해파리</strong><span id="management-jelly"></span></li>
+    </ul>
+    <p>전시 중인 친구는 전시관에서 관찰해요. 범돔의 수조 꾸미기도 그대로 할 수 있어요.</p>
+    <button id="close-management" type="button">관리동으로 돌아가기</button>
+  </dialog>
   <dialog id="transfer-dialog" class="help-dialog transfer-dialog" aria-labelledby="transfer-title">
     <h2 id="transfer-title">저장 기록 옮기기</h2>
     <p>기록은 이 브라우저에 저장돼요. 다른 주소나 기기로 옮기려면 파일을 내보낸 뒤 새 게임에서 가져오세요.</p>
     <button id="export-save" type="button">저장 파일 내보내기</button>
+    <button id="export-previous-map" class="secondary" type="button" disabled>개편 전 기록 내보내기</button><p>예전 기록을 이어왔다면 개편 전 원본도 내보낼 수 있어요.</p>
     <section aria-label="저장 파일 가져오기">
       <label for="import-save">가져올 저장 파일<input id="import-save" type="file" accept=".json,application/json"></label>
       <button id="restore-backup" class="secondary" type="button" disabled>교체 전 기록 불러오기</button>
     </section>
     <section>
       <details><summary>파일 없이 이전 진행 복원하기</summary>
-        <p>예전 사이트에서 파일을 꺼낼 수 없을 때 사용해요. 원본을 읽는 기능이 아니라, 직접 고른 달성 상태를 복원해요.</p>
+        <p>예전 사이트에서 파일을 꺼낼 수 없을 때 사용해요. 원본을 읽는 기능이 아니라, 직접 고른 달성 상태를 복원해요. 예전 버전에서 수조에 넣은 친구는 전시관 배치 완료로 고르세요.</p>
         <form id="manual-restore">
           <label for="restore-stage">마지막으로 마친 단계<select id="restore-stage">
-            <option value="0">아직 수집 전</option><option value="1">범돔 운반 중</option><option value="2">범돔 수조 입수 완료</option><option value="3">범돔 관찰 완료</option><option value="4">범돔 꾸미기 완료</option><option value="5">자리돔 운반 중</option><option value="6">자리돔 수조 입수 완료</option><option value="7">자리돔 관찰 완료</option><option value="8">해파리 운반 중</option><option value="9">해파리 수조 입수 완료</option><option value="10">제주 3종 관찰 완료</option>
+            <option value="0">아직 수집 전</option><option value="1">범돔 운반 중</option><option value="11">범돔 관리동 보관 · 전시 전</option><option value="2">범돔 전시관 배치 완료</option><option value="3">범돔 관찰 완료</option><option value="4">범돔 꾸미기 완료</option><option value="5">자리돔 운반 중</option><option value="12">자리돔 관리동 보관 · 전시 전</option><option value="6">자리돔 전시관 배치 완료</option><option value="7">자리돔 관찰 완료</option><option value="8">해파리 운반 중</option><option value="13">해파리 관리동 보관 · 전시 전</option><option value="9">해파리 전시관 배치 완료</option><option value="10">제주 3종 관찰 완료</option>
           </select></label>
           <p>장식은 현재 배치를 고르세요. 꾸미기 달성 뒤 장식을 치웠어도 달성 기록은 유지돼요. 위치는 안전한 시작점으로 옮겨요.</p>
           <label for="restore-slot-0">왼쪽 장식<select id="restore-slot-0"><option value="">빈 자리</option><option value="rock">제주 돌</option><option value="seaweed">바다풀</option></select></label>

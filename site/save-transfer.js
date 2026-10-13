@@ -1,4 +1,4 @@
-import {SAVE_KEY,emptyProgress,parseSave,hasStarterDecor} from './progress.js';
+import {SAVE_KEY,SAVE_VERSION,emptyProgress,parseSave,hasStarterDecor,writeSave} from './progress.js';
 
 export const BACKUP_KEY=SAVE_KEY+'-before-import';
 export const MAX_SAVE_BYTES=65536;
@@ -18,20 +18,24 @@ export function importSave(text){
   try{return clean(data);}catch{throw new Error('저장 형식이나 임무 순서가 맞지 않아요. 기존 기록은 바꾸지 않았어요.');}
 }
 export function progressForStage(stage,decorations=[null,null,null]){
-  if(!Number.isInteger(stage)||stage<0||stage>10)throw new Error('완료한 임무를 골라 주세요.');
-  const p={v:3,...emptyProgress(),x:0,z:1};
-  p.bag=stage===1;p.placed=stage>=2;p.observed=stage>=3;p.decorated=stage>=4;
+  if(!Number.isInteger(stage)||stage<0||stage>13)throw new Error('완료한 임무를 골라 주세요.');
+  const requested=stage;stage=({11:1,12:5,13:8})[stage]??stage;
+  const p={v:SAVE_VERSION,...emptyProgress(),x:0,z:1};
+  p.bag=stage===1;p.admitted=stage>=2;p.placed=stage>=2;p.observed=stage>=3;p.decorated=stage>=4;
   p.decorations=stage>=3?[...decorations]:[null,null,null];
   if(stage===3&&hasStarterDecor(p.decorations))throw new Error('돌과 바다풀을 모두 놓았다면 범돔 꾸미기 완료를 골라 주세요.');
-  p.chromis={bag:stage===5,placed:stage>=6,observed:stage>=7};
-  p.jelly={bag:stage===8,placed:stage>=9,observed:stage>=10};
+  p.chromis={bag:stage===5,admitted:stage>=6,placed:stage>=6,observed:stage>=7};
+  p.jelly={bag:stage===8,admitted:stage>=9,placed:stage>=9,observed:stage>=10};
+  if(requested===11){p.bag=false;p.admitted=true;}
+  if(requested===12){p.chromis.bag=false;p.chromis.admitted=true;}
+  if(requested===13){p.jelly.bag=false;p.jelly.admitted=true;}
   return clean(p);
 }
 export function commitSave(storage,incoming,current,now=new Date()){
   const next=clean(incoming),session=clean(current),raw=storage.getItem(SAVE_KEY);
   // Save the current session and untouched original before replacing anything.
   storage.setItem(BACKUP_KEY,JSON.stringify({game:GAME,format:1,savedAt:now.toISOString(),progress:session,original:raw}));
-  storage.setItem(SAVE_KEY,JSON.stringify(next));
+  writeSave(storage,next);
   return next;
 }
 export function readBackup(storage){
@@ -40,7 +44,7 @@ export function readBackup(storage){
   return clean(data.progress);
 }
 export function describeProgress(p){
-  const lines=[['범돔',p],['자리돔',p.chromis],['해파리',p.jelly]].map(([name,s])=>name+': '+(s.observed?'관찰 완료':s.placed?'수조 입수 완료':s.bag?'운반 중':'미수집'));
+  const lines=[['범돔',p],['자리돔',p.chromis],['해파리',p.jelly]].map(([name,s])=>name+': '+(s.observed?'관찰 완료':s.placed?'전시관 배치 완료':s.admitted?'관리동 보관 중':s.bag?'운반 중':'미수집'));
   lines.push('범돔 꾸미기: '+(p.decorated?'달성 기록 있음':'아직 완료 전'));
   const names={rock:'제주 돌',seaweed:'바다풀'};
   lines.push('장식 (왼쪽 / 뒤쪽 / 오른쪽): '+p.decorations.map(k=>names[k]||'빈 자리').join(' / '));
