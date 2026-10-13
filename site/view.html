@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f8f5e7">
+  <meta name="description" content="범돔이 헤엄치고 보름달물해파리가 떠오르는 선장의 아쿠아리움 · 제주">
+  <title>제주 아쿠아리움 · 움직임 시험</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="aquarium">
+    <header class="heading">
+      <div><p class="eyebrow">선장의 바다 여행</p><h1>선장의 아쿠아리움</h1></div>
+      <span class="edition">그림체·움직임 시험</span>
+    </header>
+    <div class="tank-tabs" role="tablist" aria-label="수조 선택">
+      <button id="fish-tab" type="button" role="tab" aria-controls="tank-panel" aria-selected="true" data-tank="fish">바위·모래</button>
+      <button id="jelly-tab" type="button" role="tab" aria-controls="tank-panel" aria-selected="false" data-tank="jelly">해파리</button>
+    </div>
+    <section id="tank-panel" class="tank" role="tabpanel" aria-labelledby="fish-tab">
+      <canvas id="water" aria-hidden="true"></canvas>
+      <canvas id="animals" role="img" aria-label="범돔 세 마리가 꼬리와 지느러미를 움직이며 헤엄치는 수조"></canvas>
+      <div class="tank-label"><span class="status-light" aria-hidden="true"></span><span id="tank-name">바위·모래 수조</span></div>
+      <span id="live-label" class="live-label">헤엄치는 중</span>
+      <div id="loading" class="loading" role="status">바다 친구들을 데려오고 있어요…</div>
+      <p id="load-error" class="load-error" role="alert" hidden>그림을 불러오지 못했어요. 새로고침해서 다시 만나 주세요.</p>
+      <div class="species-label"><span id="species-name">범돔</span><span id="view-label">수조 전체</span></div>
+    </section>
+    <div class="actions">
+      <button id="pause" type="button" aria-pressed="false"><span id="pause-icon" aria-hidden="true">Ⅱ</span><span id="pause-text">움직임 멈추기</span></button>
+      <button id="zoom" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 5 5M7 10h6m-3-3v6"/></svg><span id="zoom-text">가까이 보기</span></button>
+    </div>
+    <label class="speed-control" for="speed"><span>움직임 속도</span><input id="speed" type="range" min="0.5" max="1.5" step="0.25" value="1" aria-valuetext="보통, 1배"><output id="speed-value" for="speed">보통 · 1배</output></label>
+    <footer><span id="animal-note">노란 몸에 검은 줄무늬가 있는 친구</span><span class="footer-mark" aria-hidden="true">JEJU</span></footer>
+    <p id="screen-status" class="sr-only" role="status" aria-live="polite"></p>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

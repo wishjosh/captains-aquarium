@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f8f5e7">
+  <meta name="description" content="손가락으로 탐험하고 범돔을 수집해 나만의 제주 수족관에 데려와요.">
+  <title>선장의 아쿠아리움 · 제주</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="game.css">
+  <link rel="stylesheet" href="transfer.css">
+</head>
+<body>
+  <main class="game-shell">
+    <header class="topbar">
+      <div><p class="eyebrow">선장의 바다 여행 · 제주</p><h1>선장의 아쿠아리움</h1></div>
+      <button id="help" class="help-button" type="button" aria-label="조작 방법과 저장 안내">?</button>
+    </header>
+    <section class="world-wrap" aria-label="제주 수족관 탐험">
+      <canvas id="world" tabindex="0" aria-label="수족관 바닥을 누른 채 끌어서 이동하세요. 컴퓨터에서는 방향키로 이동할 수 있습니다."></canvas>
+      <div class="mission-card">
+        <div class="mission-top"><span id="chapter">첫 번째 임무</span><span id="mission-count">0 / 4</span></div>
+        <p id="mission-title">바다에서 범돔을 만나자!</p>
+        <p id="mission-detail">아래쪽 바다 탐사 구역으로 가 보세요.</p>
+        <div class="mission-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      </div>
+      <div class="bag"><img src="assets/stripey-flat.png" alt=""><span id="bag-count">가방 0</span></div>
+      <div id="waypoint" class="waypoint" aria-hidden="true">↓ 바다 탐사</div>
+      <div id="drag-guide" class="drag-guide" hidden><span></span></div>
+      <p id="toast" class="toast" role="status" aria-live="polite" hidden></p>
+      <div id="loading" class="scene-message" role="status"><span class="wave-icon">≈</span>선장님과 제주 항구를 준비하고 있어요…</div>
+      <div id="game-error" class="scene-message" role="alert" hidden><p>3D 수족관을 열지 못했어요.<br>Chrome에서 다시 열어 주세요.</p><button type="button" id="retry">다시 열기</button><a href="view.html">생물 감상 화면 열기</a></div>
+      <div class="bottom-hud">
+        <div class="nearby"><span id="nearby-title">바닥을 누르고 끌어 보세요</span><span id="nearby-detail">손을 떼면 멈춰요</span></div>
+        <button id="observe" class="observe" type="button" hidden>범돔 가까이 보기</button>
+        <button id="interact" class="interact" type="button" hidden>범돔 수집하기</button>
+      </div>
+    </section>
+    <footer class="game-footer"><span id="save-status">이 기기에 저장돼요</span><span id="collection-count">수조 친구 0 / 3종</span></footer>
+  </main>
+  <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
+    <h2 id="help-title">선장님, 첫 탐험을 시작해요</h2>
+    <ol><li>빈 바닥을 누르고 원하는 방향으로 끌어요.</li><li>누른 채로 있으면 계속 걷고, 손을 떼면 멈춰요.</li><li>바다 가까이 가서 범돔을 수집해요.</li><li>범돔 수조로 돌아와 친구를 넣고 관찰해요.</li><li>제주 돌과 바다풀을 골라 첫 수조를 꾸며요.</li><li>다음은 왼쪽 해안의 자리돔, 그다음 오른쪽 바다의 해파리예요.</li><li>각 친구를 이름이 같은 수조에 넣고 가까이 관찰해요.</li></ol>
+    <p>수조나 생물은 가까이에서 짧게 눌러도 돼요. 컴퓨터에서는 방향키 또는 WASD로 걸을 수 있어요.</p>
+    <p class="storage-note">진행은 이 기기의 브라우저에 저장돼요. 다른 기기와는 연동되지 않으며, 브라우저의 사이트 데이터를 지우면 기록도 지워져요.</p>
+    <p>검토 버전: 2026-10-13 · 저장 이전 준비</p>
+    <button id="open-transfer" type="button">저장 기록 옮기기</button>
+    <button id="close-help" type="button">알겠어요</button>
+  </dialog>
+  <dialog id="viewer-dialog" class="viewer-dialog" aria-label="수조 가까이 보기">
+    <div class="viewer-bar"><button id="close-viewer" type="button">← 수족관으로</button><span id="viewer-title">범돔 수조</span></div>
+    <iframe id="viewer-frame" title="움직이는 해양생물 감상" src="about:blank"></iframe>
+  </dialog>
+  <dialog id="decorate-dialog" class="decorate-dialog" aria-labelledby="decor-title">
+    <header class="decor-heading"><div><span>제주 · 첫 꾸미기</span><h2 id="decor-title">범돔의 집을 꾸며요</h2></div><button id="cancel-decor" type="button">취소</button></header>
+    <div class="decor-preview"><canvas id="decor-canvas" aria-label="장식을 놓을 세 자리. 아래 자리 버튼으로도 놓을 수 있어요."></canvas><p>장식을 고르고 동그란 자리를 눌러요</p><p id="decor-error" role="alert" hidden>미리보기를 열지 못했어요. 취소한 뒤 다시 열어 주세요.</p></div>
+    <section class="decor-tools" aria-label="수조 장식 고르기">
+      <div class="decor-choices"><button data-decor-kind="rock" aria-pressed="true"><span aria-hidden="true">🪨</span>제주 돌</button><button data-decor-kind="seaweed" aria-pressed="false"><span aria-hidden="true">🌿</span>바다풀</button><button data-decor-kind="erase" aria-pressed="false"><span aria-hidden="true">↶</span>치우기</button></div>
+      <div class="decor-slots" aria-label="장식 놓을 자리"><button data-decor-slot="0">왼쪽<small>빈 자리</small></button><button data-decor-slot="1">뒤쪽<small>빈 자리</small></button><button data-decor-slot="2">오른쪽<small>빈 자리</small></button></div>
+      <p id="decor-status" role="status" aria-live="polite">제주 돌과 바다풀을 하나씩 놓아 주세요.</p><button id="save-decor" class="interact" type="button">이대로 꾸미기</button>
+    </section>
+  </dialog>
+  <dialog id="transfer-dialog" class="help-dialog transfer-dialog" aria-labelledby="transfer-title">
+    <h2 id="transfer-title">저장 기록 옮기기</h2>
+    <p>기록은 이 브라우저에 저장돼요. 다른 주소나 기기로 옮기려면 파일을 내보낸 뒤 새 게임에서 가져오세요.</p>
+    <button id="export-save" type="button">저장 파일 내보내기</button>
+    <section aria-label="저장 파일 가져오기">
+      <label for="import-save">가져올 저장 파일<input id="import-save" type="file" accept=".json,application/json"></label>
+      <button id="restore-backup" class="secondary" type="button" disabled>교체 전 기록 불러오기</button>
+    </section>
+    <section>
+      <details><summary>파일 없이 이전 진행 복원하기</summary>
+        <p>예전 사이트에서 파일을 꺼낼 수 없을 때 사용해요. 원본을 읽는 기능이 아니라, 직접 고른 달성 상태를 복원해요.</p>
+        <form id="manual-restore">
+          <label for="restore-stage">마지막으로 마친 단계<select id="restore-stage">
+            <option value="0">아직 수집 전</option><option value="1">범돔 운반 중</option><option value="2">범돔 수조 입수 완료</option><option value="3">범돔 관찰 완료</option><option value="4">범돔 꾸미기 완료</option><option value="5">자리돔 운반 중</option><option value="6">자리돔 수조 입수 완료</option><option value="7">자리돔 관찰 완료</option><option value="8">해파리 운반 중</option><option value="9">해파리 수조 입수 완료</option><option value="10">제주 3종 관찰 완료</option>
+          </select></label>
+          <p>장식은 현재 배치를 고르세요. 꾸미기 달성 뒤 장식을 치웠어도 달성 기록은 유지돼요. 위치는 안전한 시작점으로 옮겨요.</p>
+          <label for="restore-slot-0">왼쪽 장식<select id="restore-slot-0"><option value="">빈 자리</option><option value="rock">제주 돌</option><option value="seaweed">바다풀</option></select></label>
+          <label for="restore-slot-1">뒤쪽 장식<select id="restore-slot-1"><option value="">빈 자리</option><option value="rock">제주 돌</option><option value="seaweed">바다풀</option></select></label>
+          <label for="restore-slot-2">오른쪽 장식<select id="restore-slot-2"><option value="">빈 자리</option><option value="rock">제주 돌</option><option value="seaweed">바다풀</option></select></label>
+          <button type="submit" class="secondary">복원 내용 보기</button>
+        </form>
+      </details>
+    </section>
+    <pre id="transfer-preview" class="transfer-preview" hidden></pre>
+    <p id="transfer-status" role="status" aria-live="polite"></p>
+    <button id="apply-transfer" type="button" disabled>이 기록으로 바꾸기</button>
+    <button id="close-transfer" class="secondary" type="button">게임으로 돌아가기</button>
+  </dialog>
+  <script type="module" src="game.js"></script>
+</body>
+</html>

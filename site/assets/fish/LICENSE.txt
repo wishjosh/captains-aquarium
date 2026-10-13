@@ -1,0 +1,37 @@
+Quaternius — Animated Cute Fish Pack (February 2020)
+Original author: Quaternius, https://quaternius.com/
+Original pack/license declaration: https://quaternius.com/packs/cutefish.html
+CC0 1.0 Universal: https://creativecommons.org/publicdomain/zero/1.0/
+
+Model: ButterflyFish; the original FBX is distributed in the author's public folder.
+The author's FBX downloads returned a Google Drive quota-exceeded page on 2026-10-13.
+This local study uses a glTF conversion attributed to Quaternius by the following public project:
+https://github.com/Nihdao/three-aquarium-challenge
+Exact converted file:
+https://github.com/Nihdao/three-aquarium-challenge/blob/b8537cefe29c707971e0fa5621394ba8af3f86a3/public/assets/ButterflyFish.glb
+Conversion generator in file: FBX2glTF v0.9.7
+Retrieved: 2026-10-13
+SHA256: D43E7F55AE3FFF23DD48C09661382836B1498F773C561F486D9A0277D0590853
+Only the fish model is reused; no project code or custom aquarium assets are reused.
+The converted file contains one source skin and six source animation clips.
+Byte-for-byte identity with the author's FBX has not been verified.
+
+Local derivative, revised 2026-10-13 after silhouette feedback:
+dist/stripey-geometry.js rebuilds the body, eyes and fins as code-generated geometry.
+dist/fish.js reuses a clone of the source skeleton and Swimming_Normal animation,
+and assigns new normalized skin weights to the new geometry. The source GLB,
+its original skin weights and all six source clips remain untouched.
+The first variant only shortened the snout and changed thickness, eyes and stripes;
+that silhouette was rejected by the user and is superseded by the rebuilt surface.
+Shape references viewed (not copied or embedded as game assets):
+https://fishdb.sinica.edu.tw/taxon/381916-fishdb
+https://minna-museum.jp/data/1757
+The revised silhouette is still a stylized visual study pending user review,
+not a finished species-accurate model.
+
+Cute detail revision, 2026-10-13: the user approved the rebuilt silhouette and
+requested larger eyes and continued Cute Fish Pack styling. The body and fin
+outline are unchanged; code-generated eye lenses, golden rims, highlights,
+subtle faceted shading and a few tail fin rays restore the cute detail language.
+
+2026-10-13: Chromis notata uses an independently authored simplified surface in chromis-geometry.js, retaining the same CC0 source skeleton and swimming clip. No external reference photographs or illustrations are embedded.
