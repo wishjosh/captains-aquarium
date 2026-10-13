@@ -8,6 +8,8 @@ Third-party components and assets:
 - Quaternius Animated Cute Fish Pack source skeleton/model/animation:
   see assets/fish/LICENSE.txt for CC0 declaration, conversion provenance,
   exact source commit/hash and the unverified FBX byte identity.
+- Public Aquarium and Marine Centre by 3DAssets.dev: provider declares CC0;
+  see assets/aquarium/LICENSE.txt for original asset URLs and hashes.
 - Generated PNG illustrations: see assets/IMAGE-SOURCES.txt.
 
 The third-party licenses apply to their respective materials only.

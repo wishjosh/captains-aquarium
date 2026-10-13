@@ -1,6 +1,6 @@
 import {exportSave,importSave,progressForStage,commitSave,readBackup,describeProgress,MAX_SAVE_BYTES,BACKUP_KEY} from './save-transfer.js';
 
-import {MIGRATION_KEY} from './progress.js';
+import {MIGRATION_KEY,EDITOR_MIGRATION_KEY} from './progress.js';
 
 export function setupTransfer({snapshot,normalise,onCommit,pause,onClose}){
   const $=id=>document.getElementById(id),dialog=$('transfer-dialog'),status=$('transfer-status'),preview=$('transfer-preview'),apply=$('apply-transfer');
@@ -15,7 +15,7 @@ export function setupTransfer({snapshot,normalise,onCommit,pause,onClose}){
   function open(){
     pause();$('help-dialog').close();clear();ticket++;$('import-save').value='';
     message('파일을 내보내거나 가져올 수 있어요. 기록은 서버에 보내지 않아요.');
-    try{$('restore-backup').disabled=!localStorage.getItem(BACKUP_KEY);$('export-previous-map').disabled=!localStorage.getItem(MIGRATION_KEY);}catch{$('restore-backup').disabled=true;$('export-previous-map').disabled=true;}
+    try{$('export-before-exhibition').disabled=!localStorage.getItem(EDITOR_MIGRATION_KEY);$('restore-backup').disabled=!localStorage.getItem(BACKUP_KEY);$('export-previous-map').disabled=!localStorage.getItem(MIGRATION_KEY);}catch{$('export-before-exhibition').disabled=true;$('restore-backup').disabled=true;$('export-previous-map').disabled=true;}
     dialog.showModal();
   }
   $('open-transfer').addEventListener('click',open);
@@ -25,6 +25,9 @@ export function setupTransfer({snapshot,normalise,onCommit,pause,onClose}){
     const url=URL.createObjectURL(new Blob([text],{type:'application/json'})),a=document.createElement('a');
     a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
+  $('export-before-exhibition').addEventListener('click',()=>{
+try{const raw=localStorage.getItem(EDITOR_MIGRATION_KEY);if(!raw)throw Error('Missing backup');download(raw,'captains-aquarium-before-exhibition-v5.json');message('전시 편집 도입 전 원본 기록 다운로드를 요청했어요.');}catch{message('이전 기록을 읽지 못했어요. 현재 진행은 그대로예요.');}
+});
   $('export-previous-map').addEventListener('click',()=>{
     try{const raw=localStorage.getItem(MIGRATION_KEY);if(!raw)throw new Error('Missing backup');
       download(raw,'captains-aquarium-before-layout-v4.json');message('개편 전 원본 기록 다운로드를 요청했어요. 기기의 다운로드 목록에서 확인해 주세요.');

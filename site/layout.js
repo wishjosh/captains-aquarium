@@ -10,17 +10,18 @@ export const SPOTS={
   sea:{x:0,z:6.6},'chromis-sea':{x:-4,z:9.8},'jelly-sea':{x:4,z:11.5}
 };
 export const WALLS=[{"x": -4.2, "z": -2, "w": 4.1, "d": 0.25, "zone": "exhibition"}, {"x": 4.2, "z": -2, "w": 4.1, "d": 0.25, "zone": "exhibition"}, {"x": -3.7, "z": -0.7, "w": 4.5, "d": 0.2, "zone": "management"}, {"x": -3.7, "z": 4.5, "w": 4.5, "d": 0.2, "zone": "management"}, {"x": -5.95, "z": 1.9, "w": 0.2, "d": 5.2, "zone": "management"}, {"x": -1.45, "z": 0, "w": 0.2, "d": 1.4, "zone": "management"}, {"x": -1.45, "z": 3.8, "w": 0.2, "d": 1.4, "zone": "management"}];
-export const COLLIDERS=[{x:-3,z:-5.8,w:3.6,d:2.6},{x:3,z:-5.8,w:3.6,d:2.6},{x:0,z:-10.4,r:1.65},{x:0,z:9.5,w:4.8,d:3.8},...WALLS,{x:-4.7,z:1.9,w:1.1,d:2.6}];
-export function blocked(x,z){
+const collidersFor=exhibition=>[...Object.entries(TANKS).map(([id,t])=>(exhibition?.[id]?.shape||t.shape)==='cylinder'?{x:t.x,z:t.z,r:1.65}:{x:t.x,z:t.z,w:3.6,d:2.6}),{x:0,z:9.5,w:4.8,d:3.8},...WALLS,{x:-4.7,z:1.9,w:1.1,d:2.6}];
+export const COLLIDERS=collidersFor();
+export function blocked(x,z,exhibition){
   if(!Number.isFinite(x)||!Number.isFinite(z)||x < -5.8||x > 5.8||z < -13.3||z > 12.8)return true;
-  return COLLIDERS.some(c=>c.r?Math.hypot(x-c.x,z-c.z)<c.r+.44:Math.abs(x-c.x)<c.w/2+.44&&Math.abs(z-c.z)<c.d/2+.44);
+  return (exhibition?collidersFor(exhibition):COLLIDERS).some(c=>c.r?Math.hypot(x-c.x,z-c.z)<c.r+.44:Math.abs(x-c.x)<c.w/2+.44&&Math.abs(z-c.z)<c.d/2+.44);
 }
 export const zoneAt=(x,z)=>z < -2.1?'exhibition':x < -1.45&&z > -.7&&z < 4.5?'management':'harbor';
 export const ZONE_NAMES={exhibition:'전시관',management:'관리동',harbor:'선착장·해안'};
-export function normalisePosition(data){return blocked(data.x,data.z)?{...data,...START}:data;}
+export function normalisePosition(data){return blocked(data.x,data.z,data.exhibition)?{...data,...START}:data;}
 
 const ROUTE_POINTS=[
- ...Object.entries(SPOTS).map(([name,p])=>({...p,name,label:({management:'관리동 입수',fish:'전시관 · 범돔',chromis:'전시관 · 자리돔',jelly:'전시관 · 해파리',sea:'바다 탐사','chromis-sea':'왼쪽 바위 해안','jelly-sea':'오른쪽 잔잔한 바다'})[name]})),
+ ...Object.entries(SPOTS).map(([name,p])=>({...p,name,label:({management:'관리동 입수',fish:'전시관 · 1번 수조',chromis:'전시관 · 2번 수조',jelly:'전시관 · 3번 수조',sea:'바다 탐사','chromis-sea':'왼쪽 바위 해안','jelly-sea':'오른쪽 잔잔한 바다'})[name]})),
  {name:'plaza',x:0,z:1.9,label:'광장 중앙'},
  {name:'front-corridor',x:0,z:-1.3,label:'전시관 입구'},
  {name:'care-north',x:-2.9,z:0,label:'관리동 출입문'},
@@ -52,8 +53,12 @@ function clearSegment(a,b){
   return enter<=leave;
  });
 }
-const edges=ROUTE_POINTS.map((a,i)=>ROUTE_POINTS.map((b,j)=>i!==j&&clearSegment(a,b)?Math.hypot(a.x-b.x,a.z-b.z):Infinity));
+let edges=ROUTE_POINTS.map((a,i)=>ROUTE_POINTS.map((b,j)=>i!==j&&clearSegment(a,b)?Math.hypot(a.x-b.x,a.z-b.z):Infinity));
 const routes=new Map();
+export function configureExhibition(exhibition){
+ COLLIDERS.splice(0,COLLIDERS.length,...collidersFor(exhibition));
+ edges=ROUTE_POINTS.map((a,i)=>ROUTE_POINTS.map((b,j)=>i!==j&&clearSegment(a,b)?Math.hypot(a.x-b.x,a.z-b.z):Infinity));routes.clear();
+}
 export function routeWaypoint(x,z,target){
  const end=ROUTE_POINTS.findIndex(p=>p.name===target);if(end<0)return null;
  if(!routes.has(target)){

@@ -3,3 +3,4 @@ node_modules/
 *.log
 .DS_Store
 captains-aquarium-before-layout-*.json
+captains-aquarium-before-exhibition-*.json

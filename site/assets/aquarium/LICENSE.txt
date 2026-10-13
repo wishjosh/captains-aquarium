@@ -1,0 +1,27 @@
+Public Aquarium and Marine Centre — 3DAssets.dev
+Pack: https://3dassets.dev/packs/public-aquarium-and-marine-centre
+Provider: 3D Assets (@3dassets)
+Provider licence declaration: CC0 1.0 Universal
+Licence text: https://creativecommons.org/publicdomain/zero/1.0/
+Retrieved: 2026-10-13
+Provider reports AI-assisted geometry (Claude Opus 5). This is the provider's declaration.
+Selected original GLB files are preserved unmodified:
+wall-tank.glb — https://cdn.3dassets.dev/assets/34143/v1/model.glb
+SHA256 5db204a2ac5faf873c70932dae7edfd5992414a312bcfd5d04df2ecce07002bc
+column-tank.glb — https://cdn.3dassets.dev/assets/34145/v1/model.glb
+SHA256 3a18377a8a61ad88d881c59e0dcc941494ef0a8e1c3c0e54b8e0c004fc5f998c
+care-tank.glb — https://cdn.3dassets.dev/assets/34178/v1/model.glb
+SHA256 ba1693acd06b0bc565ed8c87b906f3ce32db1e53d7697f30d59526fb97e87d66
+sign.glb — https://cdn.3dassets.dev/assets/34153/v1/model.glb
+SHA256 7d3f11899cf3011d2599229c850d230dd91ce1a16e832d6e0b215264ac6e0693
+floor.glb — https://cdn.3dassets.dev/assets/34156/v1/model.glb
+SHA256 643689aa5df089204137ca3a0d2bf3730ed93178dc4945779797bf630a439829
+
+The browser loads these local files, with no CDN request during gameplay.
+Instances are scaled to the existing game layout; supplied reef dressing is
+hidden in display tanks to keep the player's decorations visible.
+Display instances omit opaque top triangles for the overhead camera.
+The downloaded GLB files are unchanged. Repeated floor tiles are instanced.
+Water, animals, collisions, routes and game state are supplied by this game.
+These display modules are game illustrations, not animal husbandry guidance.
+The licence applies only to these assets, not to the whole game.

@@ -2,20 +2,24 @@ import * as THREE from './vendor/three.module.js';
 import {loadPirateKit,createCaptain,placeProp} from './pirate.js';
 import {loadFish,createFish} from './fish.js';
 import {SAVE_KEY,SAVE_VERSION,emptyProgress,parseSave,writeSave,hasStarterDecor,missionFor} from './progress.js';
-import {START,TANKS,SPOTS as spots,WALLS,blocked,zoneAt,ZONE_NAMES,normalisePosition,routeWaypoint} from './layout.js';
+import {START,TANKS,SPOTS as spots,WALLS,blocked,zoneAt,ZONE_NAMES,normalisePosition,routeWaypoint,configureExhibition} from './layout.js';
 import {paintDecorations} from './decorations.js';
 import {setupDecorationEditor} from './decorate.js';
 import {setupTransfer} from './transfer-ui.js';
+import {SPECIES,SLOT_IDS,SLOT_NAMES,SHAPES,slotFor,editExhibition} from './exhibition.js';
+import {setupExhibition} from './exhibition-ui.js';
+import {loadAquariumKit,aquariumModule,aquariumProp,aquariumFloorGrid} from './aquarium-kit.js';
 
 const $=id=>document.getElementById(id),canvas=$('world'),viewport=document.querySelector('.world-wrap');
 const decor=$('decorate-dialog'),viewer=$('viewer-dialog'),help=$('help-dialog'),transfer=$('transfer-dialog'),inventory=$('management-dialog');
-const modalOpen=()=>viewer.open||help.open||decor.open||transfer.open||inventory.open;
+const exhibitionDialog=$('exhibition-dialog');
+const modalOpen=()=>viewer.open||help.open||decor.open||transfer.open||inventory.open||exhibitionDialog.open;
 const player={...START,angle:0},progress=emptyProgress();
-let tankDecor,decorationEditor,chromisSprite,seaChromis,seaJelly,chromisSign,jellySeaSign;
+let aquariumKit,exhibitionEditor,exhibitionKey='',tankDecor,decorationEditor,chromisSprite,seaChromis,seaJelly,chromisSign,jellySeaSign;
 let renderer,scene,camera,avatar,fishSprite,poolFish,jellySprite,marker;
 let ready=false,moving=false,nearby=null,toastTimer,time=0,last=0,lastPaint=0,saveOkay=true,migrated=false;
 let gesture=null;
-const input={x:0,z:0},keys=new Set(),clickable=[],holdingCrates={};
+const input={x:0,z:0},keys=new Set(),clickable=[],holdingCrates={},tanks={};
 const names={fish:'범돔',chromis:'자리돔',jelly:'해파리'};
 const speciesState=kind=>kind==='fish'?progress:progress[kind];
 const heldKind=()=>['fish','chromis','jelly'].find(k=>speciesState(k).bag);
@@ -47,10 +51,12 @@ function stop(){
  if(ready)save();
 }
 function stage(){return progress.decorated?4:progress.observed?3:progress.placed?2:progress.bag||progress.admitted?1:0;}
+const occupant=id=>progress.exhibition[id].kind;
+const pendingKind=id=>SPECIES.find(k=>k===id&&speciesState(k).admitted&&!speciesState(k).placed)||SPECIES.find(k=>speciesState(k).admitted&&!speciesState(k).placed);
 function refreshInventory(){
  let holding=0,exhibiting=0,registered=0;
  for(const kind of Object.keys(names)){
-  const p=speciesState(kind),status=p.placed?(p.observed?'전시 중 · 관찰 완료':'전시 중 · 관찰 전'):p.admitted?'관리동 보관 · 전시 준비':p.bag?'탐사 후 운반 중':'아직 만나기 전';
+  const p=speciesState(kind),at=slotFor(progress,kind),status=(at?SLOT_NAMES[at]+' 수조 전시 중':p.admitted?'관리동 보관':p.bag?'탐사 후 운반 중':'아직 만나기 전')+(p.observed?' · 관찰 완료':p.admitted?' · 관찰 전':'');
   $('management-'+kind).textContent=status;
   if(p.admitted)registered++;if(p.placed)exhibiting++;else if(p.admitted)holding++;
   if(holdingCrates[kind])holdingCrates[kind].material.color.set(p.admitted&&!p.placed?'#7bbfaa':'#cfdbc8');
@@ -58,6 +64,7 @@ function refreshInventory(){
  $('management-summary').textContent='등록 '+registered+' / 3종 · 관리동 보관 '+holding+' · 전시 '+exhibiting;
 }
 function updateMission(){
+ refreshExhibition();
  const m=missionFor(progress);
  $('mission-title').textContent=m.title;$('mission-detail').textContent=m.detail;
  $('mission-count').textContent=m.step+' / '+m.total;$('chapter').textContent=m.target?'제주 · '+m.chapter+'번째 임무':'제주 · 수집 완료';
@@ -71,7 +78,8 @@ function updateMission(){
  if(chromisSign)chromisSign.visible=seaChromis.visible;
  if(seaJelly)seaJelly.visible=unlocked('jelly')&&!progress.jelly.bag&&!progress.jelly.admitted;
  if(jellySeaSign)jellySeaSign.visible=seaJelly.visible;
- if(jellySprite)jellySprite.visible=progress.jelly.placed||!unlocked('jelly');
+ if(jellySprite)jellySprite.visible=progress.jelly.placed||!unlocked('jelly')&&!occupant('jelly');
+ if(tankDecor)tankDecor.visible=progress.placed;
  refreshInventory();updateNearby(true);
 }
 function updateNearby(force=false){
@@ -83,7 +91,7 @@ function updateNearby(force=false){
   if(d<2.0&&d<distance){target=name;distance=d;}
  }
  if(!force&&target===nearby)return;nearby=target;
- const button=$('interact'),secondary=$('observe');button.hidden=!target;secondary.hidden=true;
+ const button=$('interact'),secondary=$('observe');button.hidden=!target;secondary.hidden=true;$('edit-exhibition').hidden=!Object.hasOwn(names,target);
  let title=ZONE_NAMES[zone],detail=zone==='harbor'?'왼쪽은 관리동 · 위쪽은 전시관':'바닥을 누르고 끌어 이동해요',label='';
  if(target==='management'){
   const kind=heldKind();title='관리동 · 입수와 보유 현황';
@@ -97,14 +105,15 @@ function updateNearby(force=false){
   else if(p.bag||p.admitted){detail=objectName(kind)+' 이미 만났어요';button.hidden=true;}
   else{detail=kind==='fish'?'노란 줄무늬 친구를 발견했어요':kind==='chromis'?'가슴에 검은 무늬가 있는 친구예요':'둥근 우산을 가진 친구예요';label=names[kind]+' 수집하기';}
  }else if(Object.hasOwn(names,target)){
-  const p=speciesState(target);title='전시관 · '+names[target]+' 수조';
-  if(p.placed){
-   detail='직접 데려온 '+names[target]+' 1마리';label=target==='fish'&&p.observed?(p.decorated?'꾸미기 바꾸기':'수조 꾸미기'):names[target]+' 가까이 보기';
-   if(target==='fish'&&p.observed){secondary.hidden=false;secondary.textContent='범돔 가까이 보기';}
-  }else if(p.admitted){detail='관리동에서 입수를 마쳤어요';label=objectName(target)+' 전시관에 배치';}
-  else if(p.bag){detail='광장 왼쪽 관리동에서 먼저 입수해요';button.hidden=true;}
+  const kind=occupant(target),pending=pendingKind(target);
+  title='전시관 · '+SLOT_NAMES[target]+' '+SHAPES[progress.exhibition[target].shape]+' 수조';
+  if(kind){
+   const p=speciesState(kind);detail=names[kind]+' 전시 중'+(p.observed?' · 관찰 완료':' · 관찰 전');
+   label=kind==='fish'&&p.observed?(p.decorated?'꾸미기 바꾸기':'수조 꾸미기'):names[kind]+' 가까이 보기';
+   if(kind==='fish'&&p.observed){secondary.hidden=false;secondary.textContent='범돔 가까이 보기';}
+  }else if(pending){detail='관리동에서 입수를 마쳤어요';label=objectName(pending)+' 전시관에 배치';}
   else if(target==='jelly'&&!unlocked('jelly')){detail='보름달물해파리 · 관찰용';label='해파리 가까이 보기';}
-  else{detail=unlocked(target)?'해안에서 만난 뒤 관리동으로 데려와요':'앞선 임무를 마치면 수집할 수 있어요';button.hidden=true;}
+  else{detail='전시 편집에서 수조와 입수한 친구를 골라요';button.hidden=true;}
  }
  $('nearby-title').textContent=title;$('nearby-detail').textContent=detail;button.textContent=label;
 }
@@ -131,11 +140,11 @@ function interact(target=nearby){
   stop();p.bag=true;save();updateMission();canvas.focus({preventScroll:true});avatar.userData.controller.celebrate('Wave');toast(objectName(kind)+' 만났어요! 관리동으로 데려가요.');return;
  }
  if(Object.hasOwn(names,target)){
-  const p=speciesState(target);
-  if(p.admitted&&!p.placed){stop();p.placed=true;save();updateMission();canvas.focus({preventScroll:true});toast(names[target]+' 전시를 준비했어요. 가까이 관찰해요.');}
-  else if(p.placed){if(target==='fish'&&p.observed){stop();decorationEditor.open();}else openTank(target);}
-  else if(p.bag)toast('관리동에서 입수를 먼저 마쳐 주세요.');
-  else openTank(target);
+  const kind=occupant(target),pending=pendingKind(target);
+  if(kind){if(kind==='fish'&&progress.observed){stop();decorationEditor.open();}else openTank(kind);}
+  else if(pending){
+   stop();try{commitExhibition(editExhibition(snapshot(),target,{...progress.exhibition[target],kind:pending}));toast(names[pending]+' 전시를 준비했어요. 가까이 관찰해요.');}catch{toast('기기에 저장하지 못해 배치하지 않았어요.');}
+  }else if(target==='jelly'&&!unlocked('jelly'))openTank('jelly');
  }
 }
 
@@ -155,44 +164,71 @@ function groundRing(x,z,color,radius=.7) {
   const mesh=new THREE.Mesh(new THREE.RingGeometry(radius-.045,radius,36),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.7,side:THREE.DoubleSide}));
   mesh.rotation.x=-Math.PI/2;mesh.position.set(x,.18,z);scene.add(mesh);return mesh;
 }
-function createTank(x,z,kind,texture,fishAsset){
- const group=new THREE.Group();group.position.set(x,0,z);scene.add(group);
- const addTarget=mesh=>{mesh.userData.target=kind;clickable.push(mesh);return mesh;};
- if(TANKS[kind].shape==='cylinder'){
-  const cylinder=(radius,height,y,color,extra={})=>{const mesh=new THREE.Mesh(new THREE.CylinderGeometry(radius,radius,height,24),material(color,extra));mesh.position.y=y;group.add(mesh);return mesh;};
-  addTarget(cylinder(1.65,.55,.3,'#ece8d4'));
-  addTarget(cylinder(1.47,1.10,1.02,'#536fa6',{transparent:true,opacity:.32,depthWrite:false}));
-  addTarget(cylinder(1.60,1.36,1.12,'#c6e8ea',{transparent:true,opacity:.12,depthWrite:false,side:THREE.DoubleSide}));
-  const rim=new THREE.Mesh(new THREE.TorusGeometry(1.60,.055,6,24),material('#e4efdf'));rim.rotation.x=Math.PI/2;rim.position.y=1.83;group.add(rim);
- }else{
-  addTarget(box(group,3.6,.55,2.6,0,.3,0,'#f1ebd6'));
-  addTarget(box(group,3.15,.65,2.15,0,.84,0,'#52b9cb',{transparent:true,opacity:.24,depthWrite:false}));
-  box(group,3.4,.05,2.4,0,1.20,0,'#b0e4e3',{transparent:true,opacity:.3});
-  for(const side of [-1,1]){
-   box(group,.12,1.18,2.45,side*1.69,1.05,0,'#d6f0e8',{transparent:true,opacity:.5});
-   box(group,3.4,1.18,.10,0,1.05,side*1.18,'#b0e4e3',{transparent:true,opacity:.2,depthWrite:false});
-   box(group,.12,1.35,.12,side*1.68,1.08,1.18,'#f4f4df');
-  }
-  box(group,3.55,.13,.15,0,1.72,1.18,'#f4f4df');
+function setTankBody(id){
+ const t=tanks[id],shape=progress.exhibition[id].shape;
+ if(t.body){
+  const old=new Set();t.body.traverse(n=>old.add(n));
+  for(let i=clickable.length-1;i>=0;i--)if(old.has(clickable[i]))clickable.splice(i,1);
+  scene.remove(t.body);for(const g of t.body.userData.ownedGeometry||[])g.dispose();t.water.geometry.dispose();t.water.material.dispose();
  }
+ const {group,glass}=aquariumModule(aquariumKit,shape),size=glass.getSize(new THREE.Vector3()),center=glass.getCenter(new THREE.Vector3());
+ const water=new THREE.Mesh(shape==='cylinder'?new THREE.CylinderGeometry(size.x*.45,size.x*.45,size.y*.85,24):new THREE.BoxGeometry(size.x*.93,size.y*.85,size.z*.88),material('#399caf',{transparent:true,opacity:.14,depthWrite:false}));
+ water.position.copy(center);group.add(water);
+ const sign=aquariumProp(aquariumKit,'sign',{width:.48,height:.55,depth:.28});sign.position.set(1.1,0,.55);group.add(sign);
+ group.position.set(TANKS[id].x,.13,TANKS[id].z);
+ group.traverse(n=>{if(n.isMesh&&n.visible){n.userData.target=id;clickable.push(n);}});
+ scene.add(group);t.body=group;t.water=water;t.glass={bottom:glass.min.y,center:center.y};t.shape=shape;
+ t.host.position.y=.13+center.y;
+}
+function refreshExhibition(){
+ if(!aquariumKit||!tanks.fish||!tanks.chromis||!tanks.jelly)return;
+ const key=JSON.stringify(progress.exhibition);if(key===exhibitionKey)return;
+ exhibitionKey=key;configureExhibition(progress.exhibition);guide=null;guideTarget=null;
+ for(const id of SLOT_IDS){
+  const t=tanks[id],choice=progress.exhibition[id];if(t.shape!==choice.shape)setTankBody(id);
+  if(t.sign){scene.remove(t.sign);t.sign.material.map.dispose();t.sign.material.dispose();}
+  t.sign=label(SLOT_NAMES[id]+' · '+(names[choice.kind]||'빈 수조'),TANKS[id].x,3.1,TANKS[id].z,'#245c56',2.9);
+ }
+ for(const kind of SPECIES){
+  const id=slotFor(progress,kind)||(kind==='jelly'&&!unlocked('jelly')&&!occupant('jelly')?'jelly':null);
+  const sprite=({fish:fishSprite,chromis:chromisSprite,jelly:jellySprite})[kind];
+  if(id&&sprite)tanks[id].host.add(sprite);
+ }
+ const stripey=slotFor(progress,'fish');
+ if(stripey){tanks[stripey].body.add(tankDecor);tankDecor.position.set(0,tanks[stripey].glass.bottom+.02,0);}
+}
+function commitExhibition(next){
+ const data=normalisePosition(next);writeSave(localStorage,data);
+ for(const key of Object.keys(progress))progress[key]=data[key];
+ player.x=data.x;player.z=data.z;saveOkay=true;$('save-status').textContent='이 기기에 저장됨';updateMission();
+}
+function createTank(x,z,kind,texture,fishAsset){
+ const host=new THREE.Group();host.position.set(x,1,z);scene.add(host);
+ tanks[kind]={host};setTankBody(kind);
  let sprite;
- if(kind!=='jelly'){sprite=createFish(fishAsset,{length:kind==='chromis'?1.4:1.6,variant:kind==='chromis'?'chromis':'stripey'});sprite.position.set(0,.96,0);sprite.rotation.y=Math.PI/2;}
- else{sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,depthWrite:false}));sprite.position.set(0,1.2,0);sprite.scale.set(1.25,1.05,1);}
- group.add(sprite);
- if(kind==='fish'){tankDecor=new THREE.Group();tankDecor.position.y=.59;tankDecor.scale.set(.72,.55,.72);group.add(tankDecor);paintDecorations(tankDecor,progress.decorations);}
- label(({fish:'1 · ',chromis:'2 · ',jelly:'3 · '})[kind]+names[kind]+' 수조',x,2.55,z,'#245c56',2.9);
+ if(kind!=='jelly'){sprite=createFish(fishAsset,{length:kind==='chromis'?1.4:1.6,variant:kind==='chromis'?'chromis':'stripey'});sprite.rotation.y=Math.PI/2;}
+ else{sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,depthWrite:false}));sprite.scale.set(1.25,1.05,1);}
+ host.add(sprite);
+ if(kind==='fish'){tankDecor=new THREE.Group();tankDecor.scale.set(.72,.55,.72);paintDecorations(tankDecor,progress.decorations);}
  groundRing(spots[kind].x,spots[kind].z,'#d1ab57',.68);
  return sprite;
 }
 function buildFacilities(){
- box(scene,12.3,.025,12.1,0,.10,-8,'#e5ead7');
+ const floorPositions=[];for(let x=-5;x<=5;x+=2)for(let z=-3;z>=-13;z-=2)floorPositions.push([x,z]);
+ scene.add(aquariumFloorGrid(aquariumKit,floorPositions));
+ box(scene,12.3,.025,12.1,0,.08,-8,'#bcc9c1');
  box(scene,4.5,.03,5.2,-3.7,.10,1.9,'#d3e2d1');
  for(const w of WALLS)box(scene,w.w,.50,w.d,w.x,.35,w.z,w.zone==='management'?'#6f9a85':'#c1d2b9');
  label('관리동 · 입수',-3.7,1.55,-.45,'#376d58',3.4);
  label('전시관 입구',0,1.15,-1.65,'#56764e',2.7);
  label('바다 친구 전시관',0,1.75,-13.7,'#42775f',4.5);
  const desk=box(scene,1.1,.8,2.6,-4.7,.55,1.9,'#8caa90');desk.userData.target='management';clickable.push(desk);
- for(const [i,kind] of Object.keys(names).entries())holdingCrates[kind]=box(scene,.65,.35,.65,-4.7,1.12,.95+i*.95,'#cfdbc8');
+ for(const [i,kind] of Object.keys(names).entries()){
+  const care=aquariumProp(aquariumKit,'care-tank',{width:.82,height:.92,depth:.74});care.rotation.y=Math.PI/2;care.position.set(-4.7,.13,.95+i*.95);scene.add(care);
+  holdingCrates[kind]=box(scene,.08,.09,.25,-4.27,.82,.95+i*.95,'#cfdbc8');
+ }
+ // The original counter collider still bounds all three care modules.
+ desk.visible=false;
  groundRing(spots.management.x,spots.management.z,'#659b78',.65);
  // A connected visitor route leads to the two rectangular tanks and the cylinder.
  box(scene,1.3,.02,7.2,0,.13,-5.0,'#cadbbd');box(scene,7.2,.02,1.0,0,.13,-3.4,'#cadbbd');
@@ -200,7 +236,8 @@ function buildFacilities(){
   const arrow=new THREE.Mesh(new THREE.ConeGeometry(.18,.48,3),new THREE.MeshBasicMaterial({color:'#739c67'}));arrow.rotation.set(-Math.PI/2,0,angle);arrow.position.set(x,.18,z);scene.add(arrow);
  }
 }
-function buildScene(textures,kit,fishAsset) {
+function buildScene(textures,kit,fishAsset,facilityKit) {
+  aquariumKit=facilityKit;
   scene=new THREE.Scene();scene.background=new THREE.Color('#cbe6df');scene.fog=new THREE.Fog('#cbe6df',24,48);
   camera=new THREE.OrthographicCamera(-7,7,10,-10,.1,80);
   scene.add(new THREE.HemisphereLight('#fff8ed','#638d87',1.8));
@@ -295,7 +332,7 @@ function frame(stamp) {
     avatar.position.set(player.x,.12,player.z);avatar.rotation.y=player.angle;
     avatar.userData.controller.update(dt,moving);
     desiredTarget.set(player.x,0,player.z-1.1);cameraTarget.lerp(desiredTarget,1-Math.exp(-dt*5));camera.position.copy(cameraTarget).add(cameraOffset);camera.lookAt(cameraTarget);
-    if(!reducedMotion.matches){fishSprite.userData.update(dt);poolFish.userData.update(dt);fishSprite.position.x=Math.sin(time*.7)*.45;fishSprite.position.z=Math.cos(time*.7)*.12;fishSprite.rotation.y=Math.atan2(.45*Math.cos(time*.7),-.12*Math.sin(time*.7));poolFish.position.x=Math.sin(time*.7)*.6;poolFish.position.z=9.5+Math.cos(time*.7)*.16;poolFish.rotation.y=Math.atan2(.6*Math.cos(time*.7),-.16*Math.sin(time*.7));jellySprite.position.y=1.2+Math.sin(time*1.6)*.10;jellySprite.scale.set(1.25+Math.sin(time*2.45)*.05,1.05-Math.sin(time*2.45)*.06,1);}
+    if(!reducedMotion.matches){fishSprite.userData.update(dt);poolFish.userData.update(dt);fishSprite.position.x=Math.sin(time*.7)*.45;fishSprite.position.z=Math.cos(time*.7)*.12;fishSprite.rotation.y=Math.atan2(.45*Math.cos(time*.7),-.12*Math.sin(time*.7));poolFish.position.x=Math.sin(time*.7)*.6;poolFish.position.z=9.5+Math.cos(time*.7)*.16;poolFish.rotation.y=Math.atan2(.6*Math.cos(time*.7),-.16*Math.sin(time*.7));jellySprite.position.y=Math.sin(time*1.6)*.10;jellySprite.scale.set(1.25+Math.sin(time*2.45)*.05,1.05-Math.sin(time*2.45)*.06,1);}
     if(!reducedMotion.matches){
       chromisSprite.userData.update(dt*1.25);seaChromis.userData.update(dt*1.25);
       chromisSprite.position.x=Math.sin(time*1.05)*.5;chromisSprite.position.z=Math.cos(time*1.05)*.18;chromisSprite.rotation.y=Math.atan2(.5*Math.cos(time*1.05),-.18*Math.sin(time*1.05));
@@ -309,7 +346,7 @@ function frame(stamp) {
 function tap(event) {
   const rect=canvas.getBoundingClientRect();pointer.set((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1);raycaster.setFromCamera(pointer,camera);
   const hit=raycaster.intersectObjects(clickable,false)[0];
-  if(hit){const target=hit.object.userData.target;if(nearby===target&&(target==='fish'&&progress.placed||target==='chromis'&&progress.chromis.placed||target==='jelly'&&progress.jelly.placed))openTank(target);else interact(target);}
+  if(hit){const target=hit.object.userData.target,kind=Object.hasOwn(names,target)?occupant(target):null;if(nearby===target&&kind)openTank(kind);else interact(target);}
 }
 canvas.addEventListener('pointerdown',event=>{
   if(!ready||modalOpen()||gesture||event.button!==0||!event.isPrimary)return;
@@ -342,7 +379,7 @@ window.addEventListener('keydown',event=>{
 });
 window.addEventListener('keyup',event=>{const key=event.key.length===1?event.key.toLowerCase():event.key;keys.delete(key);if(ready&&keys.size===0)save();});
 $('interact').addEventListener('click',()=>interact());
-$('observe').addEventListener('click',()=>{if(!ready||modalOpen())return;if(nearby==='management')openManagement();else if(nearby==='fish'&&progress.placed)openTank('fish');});
+$('observe').addEventListener('click',()=>{if(!ready||modalOpen())return;if(nearby==='management')openManagement();else if(Object.hasOwn(names,nearby)&&occupant(nearby)==='fish')openTank('fish');});
 decor.addEventListener('close',()=>{stop();last=0;canvas.focus({preventScroll:true});});
 $('help').addEventListener('click',()=>{stop();help.showModal();});
 $('close-help').addEventListener('click',()=>help.close());
@@ -367,18 +404,20 @@ setupTransfer({
   onClose:()=>{stop();last=0;canvas.focus({preventScroll:true});}
 });
 
-loadSave();updateMission();
+exhibitionEditor=setupExhibition({snapshot,pause:stop,onCommit:commitExhibition,onClose:()=>{stop();last=0;canvas.focus({preventScroll:true});}});
+$('edit-exhibition').addEventListener('click',()=>{if(ready&&!modalOpen()&&Object.hasOwn(names,nearby))exhibitionEditor.open(nearby);});
+loadSave();configureExhibition(progress.exhibition);updateMission();
 try {
   renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'low-power'});
   renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;
   const loader=new THREE.TextureLoader();
-  const [fish,jelly,kit,fishAsset]=await Promise.all([loader.loadAsync('assets/stripey-flat.png'),loader.loadAsync('assets/moon-jelly-flat.png'),loadPirateKit(),loadFish()]);
+  const [fish,jelly,kit,fishAsset,facilityKit]=await Promise.all([loader.loadAsync('assets/stripey-flat.png'),loader.loadAsync('assets/moon-jelly-flat.png'),loadPirateKit(),loadFish(),loadAquariumKit()]);
   fish.colorSpace=jelly.colorSpace=THREE.SRGBColorSpace;
-  buildScene({fish,jelly},kit,fishAsset);ready=true;$('loading').hidden=true;resize();
+  buildScene({fish,jelly},kit,fishAsset,facilityKit);ready=true;$('loading').hidden=true;resize();
   new ResizeObserver(resize).observe(viewport);
-  if(!saveOkay)toast('저장 기록을 읽지 못해 새 탐험으로 열었어요.');else if(migrated)toast('기존 친구와 장식을 이어왔어요. 새 입구에서 시작해요.');
+  if(!saveOkay)toast('저장 기록을 읽지 못해 새 탐험으로 열었어요.');else if(migrated)toast('기존 친구와 장식, 달성 기록을 이어왔어요.');
   // Read-only state and projection let browser checks exercise real input and rendering.
-  window.jejuGame={getState:()=>({ready,zone:zoneAt(player.x,player.z),tankShapes:Object.fromEntries(Object.entries(TANKS).map(([k,t])=>[k,t.shape])),...progress,decorations:[...progress.decorations],placedDecorations:tankDecor.children.map(n=>n.name),player:{...player},moving,nearby,stage:stage(),saveOkay,dragging:!!gesture,captain:avatar.userData.controller.inspect(),fish:fishSprite.userData.inspect(),chromisModel:chromisSprite.userData.inspect(),mission:missionFor(progress),exhibits:{fish:progress.placed?1:0,chromis:progress.chromis.placed?1:0,jelly:progress.jelly.placed?1:0}}),screenPoint:(name)=>{
+  window.jejuGame={getState:()=>({ready,zone:zoneAt(player.x,player.z),tankShapes:Object.fromEntries(Object.entries(progress.exhibition).map(([k,t])=>[k,t.shape])),aquariumKit:{source:'Public Aquarium and Marine Centre',slots:Object.keys(tanks),care:3},decorationSlot:slotFor(progress,'fish'),decorationWorld:tankDecor.getWorldPosition(new THREE.Vector3()),renderedSpecies:Object.fromEntries([['fish',fishSprite],['chromis',chromisSprite],['jelly',jellySprite]].map(([kind,model])=>[kind,{visible:model.visible,position:model.getWorldPosition(new THREE.Vector3())}])),...progress,decorations:[...progress.decorations],placedDecorations:tankDecor.children.map(n=>n.name),player:{...player},moving,nearby,stage:stage(),saveOkay,dragging:!!gesture,captain:avatar.userData.controller.inspect(),fish:fishSprite.userData.inspect(),chromisModel:chromisSprite.userData.inspect(),mission:missionFor(progress),exhibits:{fish:progress.placed?1:0,chromis:progress.chromis.placed?1:0,jelly:progress.jelly.placed?1:0}}),screenPoint:(name)=>{
     const kind=name.endsWith('-tank')?name.slice(0,-5):null;const point=name==='player'?new THREE.Vector3(player.x,.5,player.z):kind?new THREE.Vector3(TANKS[kind].x,1.2,TANKS[kind].z):new THREE.Vector3(spots[name].x,.2,spots[name].z);
     const rect=canvas.getBoundingClientRect();point.project(camera);return {x:rect.left+(point.x+1)*rect.width/2,y:rect.top+(1-point.y)*rect.height/2};
   }};
