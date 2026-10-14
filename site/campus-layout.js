@@ -4,7 +4,7 @@ export const DOORS={management:{x:-8,z:1.15,to:'management',label:'관리동 문
 export const EXITS={management:{x:-1.98,z:1.9,to:'harbor',label:'광장으로',dx:1,dz:0},exhibition:{x:0,z:-2.75,to:'harbor',label:'광장으로',dx:0,dz:1}};
 export const SPAWNS={management:{x:-2.8,z:1.9},exhibition:{x:0,z:-3.6}};
 export const COAST={sea:{x:12,z:14.3},'chromis-sea':{x:-11,z:8},'jelly-sea':{x:16,z:6.1}};
-export function spotsFor(area){return area==='harbor'?COAST:area==='management'?{management:legacySpots.management}:{fish:legacySpots.fish,chromis:legacySpots.chromis,jelly:legacySpots.jelly};}
+export function spotsFor(area){return area==='harbor'?{sea:COAST.sea}:area==='management'?{management:legacySpots.management}:{fish:legacySpots.fish,chromis:legacySpots.chromis,jelly:legacySpots.jelly};}
 export function blocked(area,x,z,exhibition){
  if(!Number.isFinite(x)||!Number.isFinite(z))return true;
  if(area==='management')return x < -5.65||x > -1.85||z < -.3||z >4.05||legacyBlocked(x,z,exhibition);
@@ -16,6 +16,7 @@ export function blocked(area,x,z,exhibition){
 }
 export function normaliseCampus(data){
  const l=data.location;
+ if(l?.area==='underwater')return {...data,location:{map:'campus-1',area:'underwater',x:0,z:8}};
  const location=l&&l.map==='campus-1'&&['harbor','management','exhibition'].includes(l.area)&&!blocked(l.area,l.x,l.z,data.exhibition)?{...l}:{map:'campus-1',...CAMPUS_START};
  return {...data,location};
 }

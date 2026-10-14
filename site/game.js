@@ -1,7 +1,9 @@
+import {DIVE_START,createUnderwater,swimStep} from './underwater.js';
+import {setupCare} from './care.js';
 import * as THREE from './vendor/three.module.js';
 import {loadPirateKit,createCaptain,placeProp} from './pirate.js';
 import {loadFish,createFish} from './fish.js';
-import {SAVE_KEY,SAVE_VERSION,emptyProgress,parseSave,writeSave,hasStarterDecor,missionFor} from './progress.js';
+import {SAVE_KEY,SAVE_VERSION,emptyProgress,parseSave,writeSave,hasStarterDecor,missionFor,canCollect} from './progress.js';
 import {START,TANKS,ZONE_NAMES,configureExhibition} from './layout.js';
 import {CAMPUS_START,DOORS,EXITS,SPAWNS,COAST,spotsFor,blocked,normaliseCampus,nearDoor,waypoint} from './campus-layout.js';
 import {loadCampus,createCampus} from './campus.js';
@@ -15,7 +17,9 @@ import {loadAquariumKit,aquariumModule,aquariumProp,aquariumFloorGrid} from './a
 const $=id=>document.getElementById(id),canvas=$('world'),viewport=document.querySelector('.world-wrap');
 const decor=$('decorate-dialog'),viewer=$('viewer-dialog'),help=$('help-dialog'),transfer=$('transfer-dialog'),inventory=$('management-dialog');
 const exhibitionDialog=$('exhibition-dialog');
-const modalOpen=()=>viewer.open||help.open||decor.open||transfer.open||inventory.open||exhibitionDialog.open;
+let underwater,careUI,lookGesture=null;
+const dive={...DIVE_START};
+const modalOpen=()=>careUI?.dialog.open||viewer.open||help.open||decor.open||transfer.open||inventory.open||exhibitionDialog.open;
 const player={x:CAMPUS_START.x,z:CAMPUS_START.z,angle:.38},progress=emptyProgress();
 let area='harbor',campusGroup,managementGroup,galleryGroup,doorHold=0,doorId=null,doorCooldown=0;
 const currentSpots=()=>spotsFor(area);
@@ -29,7 +33,7 @@ const names={fish:'범돔',chromis:'자리돔',jelly:'해파리'};
 const speciesState=kind=>kind==='fish'?progress:progress[kind];
 const heldKind=()=>['fish','chromis','jelly'].find(k=>speciesState(k).bag);
 const objectName=kind=>names[kind]+(kind==='jelly'?'를':'을');
-const unlocked=kind=>kind==='fish'||(kind==='chromis'?progress.decorated:progress.chromis.observed);
+const unlocked=kind=>canCollect(progress,kind);
 const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
 const direction=new THREE.Vector3(),cameraTarget=new THREE.Vector3(),desiredTarget=new THREE.Vector3();
@@ -51,6 +55,7 @@ function toast(message){
  toastTimer=setTimeout(()=>$('toast').hidden=true,2800);
 }
 function stop(){
+ const lookId=lookGesture?.id;lookGesture=null;if(lookId!==undefined&&canvas.hasPointerCapture(lookId))canvas.releasePointerCapture(lookId);
  const activeId=gesture?.id;gesture=null;input.x=0;input.z=0;keys.clear();moving=false;doorHold=0;doorId=null;$('drag-guide').hidden=true;
  if(activeId!==undefined&&canvas.hasPointerCapture(activeId))canvas.releasePointerCapture(activeId);
  if(ready)save();
@@ -63,6 +68,7 @@ function refreshInventory(){
  for(const kind of Object.keys(names)){
   const p=speciesState(kind),at=slotFor(progress,kind),status=(at?SLOT_NAMES[at]+' 수조 전시 중':p.admitted?'관리동 보관':p.bag?'탐사 후 운반 중':'아직 만나기 전')+(p.observed?' · 관찰 완료':p.admitted?' · 관찰 전':'');
   $('management-'+kind).textContent=status;
+  const careButton=$('care-'+kind);if(careButton){careButton.disabled=!p.admitted;careButton.textContent=p.admitted?names[kind]+' · '+['첫 돌봄','돌봄 이어가기','다시 돌보기'][progress.care[kind]]:'입수 후 돌보기';}
   if(p.admitted)registered++;if(p.placed)exhibiting++;else if(p.admitted)holding++;
   if(holdingCrates[kind])holdingCrates[kind].material.color.set(p.admitted&&!p.placed?'#c79b51':'#d8c7a4');
  }
@@ -77,17 +83,33 @@ function updateMission(){
  const held=heldKind();$('bag-count').textContent=held?'가방 · '+names[held]+' 1':'가방 0';document.querySelector('.bag img').hidden=held&&held!=='fish';
  $('collection-count').textContent='전시 친구 '+Object.keys(names).filter(k=>speciesState(k).placed).length+' / 3종';
  if(fishSprite)fishSprite.visible=progress.placed;
- if(poolFish)poolFish.visible=!progress.admitted&&!progress.bag;
+ if(poolFish)poolFish.visible=false;
  if(chromisSprite)chromisSprite.visible=progress.chromis.placed;
- if(seaChromis)seaChromis.visible=unlocked('chromis')&&!progress.chromis.bag&&!progress.chromis.admitted;
+ if(seaChromis)seaChromis.visible=false;
  if(chromisSign)chromisSign.visible=seaChromis.visible;
- if(seaJelly)seaJelly.visible=unlocked('jelly')&&!progress.jelly.bag&&!progress.jelly.admitted;
+ if(seaJelly)seaJelly.visible=false;
  if(jellySeaSign)jellySeaSign.visible=seaJelly.visible;
  if(jellySprite)jellySprite.visible=progress.jelly.placed||!unlocked('jelly')&&!occupant('jelly');
  if(tankDecor)tankDecor.visible=progress.placed;
  refreshInventory();updateNearby(true);
 }
 function updateNearby(force=false){
+ if(area==='underwater'){
+  const target=underwater?.target(dive);nearby=target?'dive-'+target:null;
+  $('area-name').textContent='얕은 바다 · 수중 탐사';$('mission-detail').textContent=heldKind()?'입구의 붉은 고리와 줄로 돌아가요.':'해초와 바위 사이에서 움직이는 친구를 찾아요.';$('edit-exhibition').hidden=true;$('observe').hidden=true;
+  const button=$('interact');button.hidden=!target;
+  let title='해초와 바위 사이를 살펴봐요',detail='왼쪽 이동 · 오른쪽 끌어 시선 · 위아래를 보며 헤엄치기';
+  if(target==='return'){title='부두로 돌아가는 줄';detail='빈손으로도 돌아갈 수 있어요';button.textContent='부두로 돌아가기';}
+  else if(target){
+   const p=speciesState(target);title=names[target];
+   if(!progress.discovered[target]){progress.discovered[target]=true;save();}
+   if(p.admitted){detail='이미 관리동에 있는 친구예요. 바다에서도 관찰해요';button.textContent='특징 살펴보기';}
+   else if(!unlocked(target)){detail='앞선 친구의 첫 돌봄을 마치면 수집할 수 있어요';button.hidden=true;}
+   else if(heldKind()){detail='한 번에 한 마리 · 먼저 부두로 돌아가요';button.hidden=true;}
+   else{detail='충분히 가까이 왔어요. 친구를 데려갈 수 있어요';button.textContent=names[target]+' 수집하기';}
+  }
+  $('nearby-title').textContent=title;$('nearby-detail').textContent=detail;return;
+ }
  const zone=area;$('area-name').textContent=ZONE_NAMES[zone];
  let target=null,distance=Infinity;
  for(const [name,spot] of Object.entries(currentSpots())){
@@ -102,15 +124,11 @@ function updateNearby(force=false){
  if(target==='door'){title=door.label;detail='문 쪽으로 1초간 걸으면 출입해요';label='문 열기';}
  else if(target==='management'){
   const kind=heldKind();title='관리동 · 입수와 보유 현황';
-  detail=kind?names[kind]+'의 입수를 마친 뒤 전시관으로 가요':'입수한 친구와 전시 상태를 살펴봐요';
+  detail=kind?names[kind]+'의 입수를 마친 뒤 첫 돌봄을 시작해요':'입수한 친구를 고르고 첫 돌봄을 이어가요';
   label=kind?objectName(kind)+' 관리동에 입수':'관리동 현황 보기';
   secondary.hidden=!kind;secondary.textContent='보유 생물 보기';
- }else if(target==='sea'||target?.endsWith('-sea')){
-  const kind=target==='sea'?'fish':target.slice(0,-4),p=speciesState(kind);
-  title=kind==='fish'?'제주 바다 탐사':kind==='chromis'?'왼쪽 바위 해안':'오른쪽 잔잔한 바다';
-  if(!unlocked(kind)){detail=kind==='chromis'?'범돔의 집을 꾸미면 탐사가 열려요':'자리돔을 관찰하면 탐사가 열려요';button.hidden=true;}
-  else if(p.bag||p.admitted){detail=objectName(kind)+' 이미 만났어요';button.hidden=true;}
-  else{detail=kind==='fish'?'노란 줄무늬 친구를 발견했어요':kind==='chromis'?'가슴에 검은 무늬가 있는 친구예요':'둥근 우산을 가진 친구예요';label=names[kind]+' 수집하기';}
+ }else if(target==='sea'){
+  title='부두 · 바다 탐사';detail='잠수해서 바다 친구를 직접 찾아봐요';label='잠수하기';
  }else if(Object.hasOwn(names,target)){
   const kind=occupant(target),pending=pendingKind(target);
   title='전시관 · '+SLOT_NAMES[target]+' '+SHAPES[progress.exhibition[target].shape]+' 수조';
@@ -136,17 +154,18 @@ function openTank(tank){
 function interact(target=nearby){
  if(!ready||modalOpen()||!target)return;
  if(target!==nearby){toast('조금 더 가까이 걸어가 보세요.');return;}
+ if(target.startsWith('dive-')){
+  const k=target.slice(5);if(k==='return'){changeDive(false);return;}
+  const p=speciesState(k);if(p.admitted){toast({fish:'범돔의 검은 줄무늬를 찾아보세요.',chromis:'자리돔의 가슴 쪽 검은 무늬를 찾아보세요.',jelly:'해파리의 우산이 오므라들었다 펴져요.'}[k]);return;}
+  if(!unlocked(k)||p.bag||heldKind())return;stop();p.bag=true;progress.discovered[k]=true;save();updateMission();toast(objectName(k)+' 만났어요! 뒤쪽 귀환 줄을 찾아 돌아가요.');return;
+ }
  if(target==='door'){const door=nearDoor(area,player.x,player.z);if(door)changeArea(door);return;}
  if(target==='management'){
   const kind=heldKind();if(!kind){openManagement();return;}
   stop();const p=speciesState(kind);p.bag=false;p.admitted=true;save();updateMission();canvas.focus({preventScroll:true});avatar.userData.controller.celebrate('Yes');
-  toast(names[kind]+' 입수 완료! 전시관의 수조에 배치해요.');return;
+  toast(names[kind]+' 입수 완료! 관리동에서 첫 돌봄을 시작해요.');careUI.open(kind);return;
  }
- if(target==='sea'||target.endsWith('-sea')){
-  const kind=target==='sea'?'fish':target.slice(0,-4),p=speciesState(kind);
-  if(!unlocked(kind)||p.bag||p.admitted||heldKind())return;
-  stop();p.bag=true;save();updateMission();canvas.focus({preventScroll:true});avatar.userData.controller.celebrate('Wave');toast(objectName(kind)+' 만났어요! 관리동으로 데려가요.');return;
- }
+ if(target==='sea'){changeDive(true);return;}
  if(Object.hasOwn(names,target)){
   const kind=occupant(target),pending=pendingKind(target);
   if(kind){if(kind==='fish'&&progress.observed){stop();decorationEditor.open();}else openTank(kind);}
@@ -243,10 +262,19 @@ function buildFacilities(){
  }
  groundRing(-2.9,1.9,'#bd914c',.65,managementGroup);
 }
+function changeDive(enter){
+ stop();area=enter?'underwater':'harbor';Object.assign(dive,DIVE_START);
+ player.x=enter?dive.x:COAST.sea.x;player.z=enter?dive.z:COAST.sea.z;
+ applyArea();save();toast(enter?'물속에서는 오른쪽 화면을 끌어 둘러봐요.':'부두로 돌아왔어요.');
+}
 function applyArea(){
+ underwater.group.visible=area==='underwater';avatar.visible=area!=='underwater';
+ if(area==='underwater'){Object.assign(dive,DIVE_START);player.x=dive.x;player.z=dive.z;}
+
  campusGroup.visible=area==='harbor';managementGroup.visible=area==='management';galleryGroup.visible=area==='exhibition';
- scene.background.set(area==='harbor'?'#94c9ed':area==='management'?'#3e536b':'#314c65');
+ scene.background.set(area==='underwater'?'#226779':area==='harbor'?'#94c9ed':area==='management'?'#3e536b':'#314c65');
  scene.fog=new THREE.Fog(area==='harbor'?'#94c9ed':'#314c65',area==='harbor'?90:35,area==='harbor'?230:70);
+ if(area==='underwater')scene.fog=new THREE.Fog('#226779',10,34);
  avatar.scale.setScalar(area==='harbor'?1.2:1);avatar.position.set(player.x,area==='harbor'?1.06:.12,player.z);
  guide=null;guideTarget=null;nearby=null;updateNearby(true);updateCamera(true);resize();
 }
@@ -257,6 +285,7 @@ function changeArea(door){
  applyArea();save();toast(area==='harbor'?'해안 광장으로 나왔어요':ZONE_NAMES[area]+'에 들어왔어요');
 }
 function updateDoor(dt){
+ if(area==='underwater')return;
  doorCooldown=Math.max(0,doorCooldown-dt);const door=nearDoor(area,player.x,player.z);
  if(!door||doorCooldown||direction.lengthSq()<.01||direction.x*door.dx+direction.z*door.dz<.65){doorHold=0;doorId=null;return;}
  if(doorId!==door.id){doorId=door.id;doorHold=0;}doorHold+=dt;
@@ -264,6 +293,7 @@ function updateDoor(dt){
  if(doorHold>=1)changeArea(door);
 }
 function updateCamera(snap=false){
+ if(area==='underwater'){camera.position.set(dive.x,dive.y,dive.z);camera.lookAt(dive.x+Math.sin(dive.yaw)*Math.cos(dive.pitch),dive.y+Math.sin(dive.pitch),dive.z-Math.cos(dive.yaw)*Math.cos(dive.pitch));return;}
  if(area==='harbor'){camera.position.set(18,16,40);camera.lookAt(0,3.4,-1);return;}
  desiredTarget.set(area==='management'?-3.7:player.x,1,area==='management'?1.8:player.z-1.1);
  if(snap)cameraTarget.copy(desiredTarget);else cameraTarget.lerp(desiredTarget,.12);
@@ -275,6 +305,8 @@ function buildScene(textures,kit,fishAsset,facilityKit,campusAssets){
  scene.add(new THREE.HemisphereLight('#fff5da','#687d8b',2.1));
  const sun=new THREE.DirectionalLight('#fff3d4',2.7);sun.position.set(-18,40,25);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-38,right:38,top:38,bottom:-38,near:1,far:110});sun.shadow.bias=-.0002;sun.shadow.normalBias=.035;scene.add(sun);
  campusGroup=createCampus(kit,campusAssets);scene.add(campusGroup);buildFacilities();
+ underwater=createUnderwater(fishAsset,textures.jelly,campusAssets);scene.add(underwater.group);
+ careUI=setupCare(fishAsset,textures.jelly,{progress,pause:stop,commit:()=>{save();updateMission();refreshInventory();}});
  fishSprite=createTank(TANKS.fish.x,TANKS.fish.z,'fish',textures.fish,fishAsset);jellySprite=createTank(TANKS.jelly.x,TANKS.jelly.z,'jelly',textures.jelly);chromisSprite=createTank(TANKS.chromis.x,TANKS.chromis.z,'chromis',null,fishAsset);
  poolFish=createFish(fishAsset,{length:1.5});poolFish.position.set(9.8,-.3,15.5);campusGroup.add(poolFish);
  seaChromis=createFish(fishAsset,{length:1.35,variant:'chromis'});seaChromis.position.set(-11,-.2,11);campusGroup.add(seaChromis);
@@ -285,7 +317,7 @@ function buildScene(textures,kit,fishAsset,facilityKit,campusAssets){
  for(const spot of Object.values(COAST)){const ring=groundRing(spot.x,spot.z,'#c89e43',.65,campusGroup);ring.position.y=1.1;}
  avatar=createCaptain(kit.captain);scene.add(avatar);
  marker=new THREE.Mesh(new THREE.ConeGeometry(.17,.32,5),new THREE.MeshBasicMaterial({color:'#efbb4e'}));marker.rotation.x=Math.PI;scene.add(marker);
- decorationEditor=setupDecorationEditor(fishAsset,{getItems:()=>progress.decorations,onCommit:items=>{const completed=progress.decorated;progress.decorations=items;if(hasStarterDecor(items))progress.decorated=true;save();paintDecorations(tankDecor,items);updateMission();toast(!completed&&progress.decorated?'첫 수조 완성! 이제 자리돔을 만나러 가요.':'수조 장식을 바꿨어요.');}});
+ decorationEditor=setupDecorationEditor(fishAsset,{getItems:()=>progress.decorations,onCommit:items=>{const completed=progress.decorated;progress.decorations=items;if(hasStarterDecor(items))progress.decorated=true;save();paintDecorations(tankDecor,items);updateMission();toast(!completed&&progress.decorated?'첫 수조를 꾸몄어요!':'수조 장식을 바꿨어요.');}});
  updateMission();applyArea();
 }
 let viewportSize="";
@@ -295,12 +327,13 @@ function resize() {
   renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.setSize(width,height,false);
   const size=width+':'+height;
   if(viewportSize&&viewportSize!==size)stop();viewportSize=size;
-  const aspect=width/Math.max(height,1);camera.aspect=aspect;camera.fov=area==='harbor'?(aspect<1?68:39):48;camera.updateProjectionMatrix();
+  const aspect=width/Math.max(height,1);camera.aspect=aspect;camera.fov=area==='underwater'?68:area==='harbor'?(aspect<1?68:39):48;camera.updateProjectionMatrix();
   if(ready)renderer.render(scene,camera);
 }
 function move(dt) {
   direction.set(input.x,0,input.z);
   if(keys.size){direction.set((keys.has('ArrowRight')||keys.has('d')?1:0)-(keys.has('ArrowLeft')||keys.has('a')?1:0),0,(keys.has('ArrowDown')||keys.has('s')?1:0)-(keys.has('ArrowUp')||keys.has('w')?1:0));}
+  if(area==='underwater'){moving=swimStep(dive,direction.x,direction.z,dt);player.x=dive.x;player.z=dive.z;return;}
   moving=direction.lengthSq()>.001;
   if(!moving)return;
   direction.normalize();if(area==='harbor'){const x=direction.x,z=direction.z;direction.set(x*.916+z*.401,0,-x*.401+z*.916);}
@@ -315,6 +348,15 @@ function move(dt) {
 }
 let guide=null,guideTarget=null,guideTime=-1;
 function updateWaypoint(){
+ if(area==='underwater'){
+  const target=heldKind()?{x:0,z:9,label:'귀환 줄'}:null;marker.visible=false;
+  const node=$('waypoint');node.hidden=false;
+  const m=missionFor(progress),wanted=m.kind;
+  const bearing=Math.atan2(-dive.x,dive.z-9)-dive.yaw,side=Math.sin(bearing),front=Math.cos(bearing),arrow=front>.7?'↑':front<-.7?'↶':side>0?'→':'←';
+  node.textContent=target?arrow+' 귀환 줄까지 '+Math.round(Math.hypot(dive.x,dive.z-9))+'m · 입구 쪽으로':wanted?'찾을 친구 · '+names[wanted]:'자유 탐사 · 바다 친구 관찰';
+  node.style.top='32%';guide=null;return;
+ }
+
  const m=missionFor(progress);
  if(guideTarget!==m.target||time-guideTime>.25||!guide){guide=m.target?waypoint(area,player.x,player.z,m.target):null;guideTarget=m.target;guideTime=time;}
  const target=guide,node=$('waypoint');
@@ -328,7 +370,7 @@ function updateWaypoint(){
 function frame(stamp) {
   const dt=last?Math.min((stamp-last)/1000,.05):0;last=stamp;
   if(ready&&!document.hidden&&!modalOpen()){
-    time+=dt;move(dt);updateNearby();updateDoor(dt);updateWaypoint();
+    time+=dt;move(dt);if(area==='underwater')underwater.update(dt,time,progress,reducedMotion.matches);updateNearby();updateDoor(dt);updateWaypoint();
     avatar.position.set(player.x,area==='harbor'?1.06:.12,player.z);avatar.rotation.y=player.angle;
     avatar.userData.controller.update(dt,moving);
     updateCamera();
@@ -350,7 +392,12 @@ function tap(event) {
 }
 // One captured pointer owns movement; a second finger can use the action buttons.
 canvas.addEventListener('pointerdown',event=>{
-  if(!ready||modalOpen()||gesture||event.button!==0||!event.isPrimary)return;
+  if(!ready||modalOpen()||event.button!==0)return;
+  const lookRect=canvas.getBoundingClientRect();
+  if(area==='underwater'&&event.clientX-lookRect.left>=lookRect.width*.54){
+   if(lookGesture)return;lookGesture={id:event.pointerId,x:event.clientX,y:event.clientY};canvas.setPointerCapture(event.pointerId);return;
+  }
+  if(gesture||area!=='underwater'&&!event.isPrimary)return;
   const rect=canvas.getBoundingClientRect(),x=event.clientX-rect.left,y=event.clientY-rect.top;
   gesture={id:event.pointerId,x:event.clientX,y:event.clientY,started:performance.now(),dragged:false,move:x<rect.width*.54};
   canvas.setPointerCapture(event.pointerId);canvas.focus({preventScroll:true});
@@ -362,6 +409,8 @@ canvas.addEventListener('pointerdown',event=>{
   }
 });
 canvas.addEventListener('pointermove',event=>{
+  if(event.pointerId===lookGesture?.id){dive.yaw+=(event.clientX-lookGesture.x)*.006;dive.pitch=Math.max(-.95,Math.min(.95,dive.pitch-(event.clientY-lookGesture.y)*.005));lookGesture.x=event.clientX;lookGesture.y=event.clientY;return;}
+
   if(!gesture||event.pointerId!==gesture.id)return;
   const dx=event.clientX-gesture.x,dy=event.clientY-gesture.y,distance=Math.hypot(dx,dy);
   if(distance>=10)gesture.dragged=true;
@@ -371,12 +420,14 @@ canvas.addEventListener('pointermove',event=>{
   input.x=distance<10?0:dx/distance;input.z=distance<10?0:dy/distance;
 });
 canvas.addEventListener('pointerup',event=>{
+  if(event.pointerId===lookGesture?.id){lookGesture=null;if(canvas.hasPointerCapture(event.pointerId))canvas.releasePointerCapture(event.pointerId);save();return;}
+
   if(!gesture||event.pointerId!==gesture.id)return;
   const isTap=!gesture.dragged&&performance.now()-gesture.started<700;
   stop();if(isTap)tap(event);
 });
-canvas.addEventListener('pointercancel',event=>{if(event.pointerId===gesture?.id)stop();});
-canvas.addEventListener('lostpointercapture',event=>{if(event.pointerId===gesture?.id)stop();});
+canvas.addEventListener('pointercancel',event=>{if(event.pointerId===gesture?.id||event.pointerId===lookGesture?.id)stop();});
+canvas.addEventListener('lostpointercapture',event=>{if(event.pointerId===gesture?.id||event.pointerId===lookGesture?.id)stop();});
 // Stop before the button's click: its nearby target cannot change under the second finger.
 for(const id of ['interact','observe','edit-exhibition','help']){
  const button=$(id);let press=null,ignoreClickUntil=0;
@@ -414,6 +465,7 @@ $('observe').addEventListener('click',()=>{if(!ready||modalOpen())return;if(near
 decor.addEventListener('close',()=>{stop();last=0;canvas.focus({preventScroll:true});});
 $('help').addEventListener('click',()=>{stop();help.showModal();});
 $('close-help').addEventListener('click',()=>help.close());
+for(const k of Object.keys(names))$('care-'+k).addEventListener('click',()=>{inventory.close();careUI.open(k);});
 $('close-management').addEventListener('click',()=>inventory.close());
 inventory.addEventListener('close',()=>{stop();last=0;canvas.focus({preventScroll:true});});
 $('close-viewer').addEventListener('click',()=>viewer.close());
@@ -448,7 +500,7 @@ try {
   new ResizeObserver(resize).observe(viewport);
   if(!saveOkay)toast('저장 기록을 읽지 못해 새 탐험으로 열었어요.');else if(migrated)toast('기존 친구와 장식, 달성 기록을 이어왔어요.');
   // Read-only state and projection let browser checks exercise real input and rendering.
-  window.jejuGame={getState:()=>({ready,zone:area,doorHold,guide,doors:area==='harbor'?DOORS:EXITS,location:snapshot().location,drawCalls:renderer.info.render.calls,tankShapes:Object.fromEntries(Object.entries(progress.exhibition).map(([k,t])=>[k,t.shape])),aquariumKit:{source:'Public Aquarium and Marine Centre',slots:Object.keys(tanks),care:3},decorationSlot:slotFor(progress,'fish'),decorationWorld:tankDecor.getWorldPosition(new THREE.Vector3()),renderedSpecies:Object.fromEntries([['fish',fishSprite],['chromis',chromisSprite],['jelly',jellySprite]].map(([kind,model])=>[kind,{visible:model.visible,position:model.getWorldPosition(new THREE.Vector3())}])),...progress,decorations:[...progress.decorations],placedDecorations:tankDecor.children.map(n=>n.name),player:{...player},moving,nearby,stage:stage(),saveOkay,dragging:!!gesture,controls:{side:gesture?(gesture.move?"move":"tap"):null,input:{...input}},captain:avatar.userData.controller.inspect(),fish:fishSprite.userData.inspect(),chromisModel:chromisSprite.userData.inspect(),mission:missionFor(progress),exhibits:{fish:progress.placed?1:0,chromis:progress.chromis.placed?1:0,jelly:progress.jelly.placed?1:0}}),screenPoint:(name)=>{
+  window.jejuGame={getState:()=>({ready,dive:{...dive},underwater:underwater.inspect(),careView:careUI.inspect(),zone:area,doorHold,guide,doors:area==='harbor'?DOORS:EXITS,location:snapshot().location,drawCalls:renderer.info.render.calls,tankShapes:Object.fromEntries(Object.entries(progress.exhibition).map(([k,t])=>[k,t.shape])),aquariumKit:{source:'Public Aquarium and Marine Centre',slots:Object.keys(tanks),care:3},decorationSlot:slotFor(progress,'fish'),decorationWorld:tankDecor.getWorldPosition(new THREE.Vector3()),renderedSpecies:Object.fromEntries([['fish',fishSprite],['chromis',chromisSprite],['jelly',jellySprite]].map(([kind,model])=>[kind,{visible:model.visible,position:model.getWorldPosition(new THREE.Vector3())}])),...progress,decorations:[...progress.decorations],placedDecorations:tankDecor.children.map(n=>n.name),player:{...player},moving,nearby,stage:stage(),saveOkay,dragging:!!gesture,looking:!!lookGesture,controls:{side:gesture?(gesture.move?"move":"tap"):null,input:{...input}},captain:avatar.userData.controller.inspect(),fish:fishSprite.userData.inspect(),chromisModel:chromisSprite.userData.inspect(),mission:missionFor(progress),exhibits:{fish:progress.placed?1:0,chromis:progress.chromis.placed?1:0,jelly:progress.jelly.placed?1:0}}),screenPoint:(name)=>{
     const kind=name.endsWith('-tank')?name.slice(0,-5):null;const point=name==='player'?new THREE.Vector3(player.x,.5,player.z):kind?new THREE.Vector3(TANKS[kind].x,1.2,TANKS[kind].z):new THREE.Vector3((currentSpots()[name]||DOORS[name]).x,area==='harbor'?1.1:.2,(currentSpots()[name]||DOORS[name]).z);
     const rect=canvas.getBoundingClientRect();point.project(camera);return {x:rect.left+(point.x+1)*rect.width/2,y:rect.top+(1-point.y)*rect.height/2};
   }};

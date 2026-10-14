@@ -16,3 +16,9 @@ Third-party components and assets:
 The third-party licenses apply to their respective materials only.
 No blanket open-source or CC0 license has been selected for the game's
 original code, generated illustrations or authored derivative geometry.
+
+Underwater review update:
+- Reuses the above Cute Fish Pack source model for six ambient fish.
+- Reuses the above Kenney Nature Kit rocks with instance material adjustments.
+- Seabed, seaweed ribbons, particles, surface and return marker are authored
+  game geometry. No Coral Reef Kit files are distributed in this build.

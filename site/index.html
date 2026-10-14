@@ -41,8 +41,8 @@
     <footer class="game-footer"><span id="save-status">이 기기에 저장돼요</span><span id="collection-count">수조 친구 0 / 3종</span></footer>
   </main>
   <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
-    <h2 id="help-title">선장님, 첫 탐험을 시작해요</h2>
-    <ol><li>휴대폰을 가로로 놓고, 화면 왼쪽을 누른 뒤 원하는 방향으로 끌어요.</li><li>누른 자리에 조이스틱이 나타나요. 손을 떼면 멈춰요. 가까이 가면 오른쪽에 행동 버튼이 나타나요.</li><li>바다 가까이 가서 범돔을 수집해요.</li><li>왼쪽 건물의 원래 문으로 들어가 관리동 입수대에 친구를 데려가요.</li><li>오른쪽 건물의 문으로 들어가 전시관 수조에 배치하고 관찰해요.</li><li>제주 돌과 바다풀을 골라 첫 수조를 꾸며요.</li><li>다음은 왼쪽 해안의 자리돔, 그다음 오른쪽 바다의 해파리예요.</li><li>각 친구는 관리동 입수 → 전시관 배치 → 관찰 순서로 데려와요.</li></ol>
+    <p>물속: 왼쪽 조이스틱으로 헤엄치고 오른쪽 화면을 끌어 둘러봐요. 위아래를 보며 전진하면 수심이 바뀌어요. 입구의 붉은 고리와 줄로 돌아오면 귀환할 수 있어요.</p><h2 id="help-title">선장님, 첫 탐험을 시작해요</h2>
+    <ol><li>휴대폰을 가로로 놓고 왼쪽 조이스틱으로 이동해요.</li><li>부두에서 잠수하고 바다 속 친구를 찾아 가까이 가요.</li><li>상황별 행동 버튼으로 한 마리를 수집해요.</li><li>붉은 고리와 줄로 돌아가 귀환한 뒤 왼쪽 관리동에 입수해요.</li><li>상태를 확인하고 먹이 반응을 보면 다음 친구 수집이 열려요.</li><li>전시관 배치·관찰·꾸미기는 원하는 때 별도로 즐겨요.</li></ol>
     <p>문을 향해 1초간 계속 걸으면 출입해요. 가까이에서 ‘문 열기’를 눌러도 돼요. 구릉과 오솔길은 지금은 배경이에요. 전시된 수조는 가까이에서 짧게 눌러 관찰할 수도 있어요. 수집·입수·배치는 오른쪽 버튼으로 해요. 컴퓨터에서는 방향키 또는 WASD로 걸을 수 있어요.</p>
     <p class="storage-note">진행은 이 기기의 브라우저에 저장돼요. 다른 기기와는 연동되지 않으며, 브라우저의 사이트 데이터를 지우면 기록도 지워져요.</p>
     <p>검토 버전: 2026-10-14 · 해안 단지·건물 출입·오름 배경</p>
@@ -76,9 +76,9 @@
     <p id="management-summary" role="status"></p>
     <p>해안에서 만난 친구는 여기서 입수해요. 보관 중인 친구는 전시관의 빈 수조에 배치하거나 전시 편집에서 자리를 고를 수 있어요.</p>
     <ul class="management-list">
-      <li><strong>범돔</strong><span id="management-fish"></span></li>
-      <li><strong>자리돔</strong><span id="management-chromis"></span></li>
-      <li><strong>해파리</strong><span id="management-jelly"></span></li>
+      <li><strong>범돔</strong><span id="management-fish"></span><button id="care-fish" class="secondary" type="button">돌보기</button></li>
+      <li><strong>자리돔</strong><span id="management-chromis"></span><button id="care-chromis" class="secondary" type="button">돌보기</button></li>
+      <li><strong>해파리</strong><span id="management-jelly"></span><button id="care-jelly" class="secondary" type="button">돌보기</button></li>
     </ul>
     <p>전시 중인 친구는 전시관에서 관찰해요. 범돔의 수조 꾸미기도 그대로 할 수 있어요. 관리동으로 돌아온 친구의 관찰·꾸미기 달성 기록은 남아요.</p>
     <button id="close-management" type="button">관리동으로 돌아가기</button>
@@ -87,6 +87,7 @@
     <h2 id="transfer-title">저장 기록 옮기기</h2>
     <p>기록은 이 브라우저에 저장돼요. 다른 주소나 기기로 옮기려면 파일을 내보낸 뒤 새 게임에서 가져오세요.</p>
     <button id="export-save" type="button">저장 파일 내보내기</button>
+    <button id="export-before-dive" class="secondary" type="button" disabled>수중 탐사 도입 전 기록 내보내기</button>
     <button id="export-before-campus" class="secondary" type="button" disabled>해안 단지 개편 전 기록 내보내기</button>
     <button id="export-before-exhibition" class="secondary" type="button" disabled>전시 편집 도입 전 기록 내보내기</button>
     <button id="export-previous-map" class="secondary" type="button" disabled>개편 전 기록 내보내기</button><p>예전 기록을 이어왔다면 개편 전 원본도 내보낼 수 있어요.</p>

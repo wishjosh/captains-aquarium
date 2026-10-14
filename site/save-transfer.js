@@ -31,6 +31,7 @@ export function progressForStage(stage,decorations=[null,null,null]){
   if(requested===12){p.chromis.bag=false;p.chromis.admitted=true;}
   if(requested===13){p.jelly.bag=false;p.jelly.admitted=true;}
   p.exhibition=defaultExhibition(p);
+  for(const k of ['fish','chromis','jelly']){const s=k==='fish'?p:p[k];p.care[k]=s.admitted?2:0;p.discovered[k]=s.bag||s.admitted;}
   return clean(p);
 }
 export function commitSave(storage,incoming,current,now=new Date()){
@@ -46,7 +47,7 @@ export function readBackup(storage){
   return clean(data.progress);
 }
 export function describeProgress(p){
-  const lines=[['fish','범돔',p],['chromis','자리돔',p.chromis],['jelly','해파리',p.jelly]].map(([kind,name,s])=>{const at=slotFor(p,kind);return name+': '+(at?SLOT_NAMES[at]+' 수조 전시 중':s.admitted?'관리동 보관 중':s.bag?'운반 중':'미수집')+(s.observed?' · 관찰 완료':'');});
+  const lines=[['fish','범돔',p],['chromis','자리돔',p.chromis],['jelly','해파리',p.jelly]].map(([kind,name,s])=>{const at=slotFor(p,kind);return name+': '+(at?SLOT_NAMES[at]+' 수조 전시 중':s.admitted?'관리동 보관 중':s.bag?'운반 중':'미수집')+(s.observed?' · 전시 관찰 완료':'')+(s.admitted?' · '+['첫 돌봄 전','상태 확인 완료','첫 돌봄 완료'][p.care[kind]]:'');});
   lines.push('범돔 꾸미기: '+(p.decorated?'달성 기록 있음':'아직 완료 전'));
   const names={rock:'제주 돌',seaweed:'바다풀'};
   lines.push('장식 (왼쪽 / 뒤쪽 / 오른쪽): '+p.decorations.map(k=>names[k]||'빈 자리').join(' / '));

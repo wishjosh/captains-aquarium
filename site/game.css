@@ -39,3 +39,7 @@
 @media(orientation:portrait){
  .rotate-hint{display:block;position:absolute;top:143px;left:14px;right:14px;margin:0;text-align:center;background:#203650dd;color:#fff0d1;padding:7px 10px;border-radius:10px;font-size:10px;pointer-events:none}.bag{top:185px}.move-hint{bottom:180px;font-size:10px}.bottom-hud{left:12px;right:12px}.mission-card{max-width:none}
 }
+
+.care-dialog{width:min(740px,94vw);max-height:94dvh;box-sizing:border-box;padding:16px;background:#f3e2bc;color:#263c59;border:3px solid #b89350;border-radius:18px;overflow:auto}.care-dialog h2{margin:0 0 8px;font-size:18px}.care-dialog canvas{display:block;width:100%;height:min(45dvh,300px);border-radius:12px}.care-dialog p{font-size:14px;margin:8px 0}.care-actions{display:flex;gap:8px}.care-actions button{min-height:42px;padding:8px 14px}.care-dialog::backdrop{background:#142d43d9}
+
+.care-actions button{border:0;border-radius:12px;background:#943c34;color:#fff1cd;font-weight:700}.care-actions .secondary{background:#d8c49b;color:#263c59}.care-actions button:disabled{opacity:.65}
