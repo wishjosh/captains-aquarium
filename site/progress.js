@@ -4,6 +4,7 @@ export const SAVE_KEY='seojin-jeju-aquarium-v1';
 export const MIGRATION_KEY=SAVE_KEY+'-before-layout-v4';
 export const EDITOR_MIGRATION_KEY=SAVE_KEY+'-before-exhibition-v5';
 export const SAVE_VERSION=5;
+export const CAMPUS_BACKUP_KEY=SAVE_KEY+'-before-campus-1';
 export const DECOR_KINDS=['rock','seaweed'];
 export const emptyDecorations=()=>[null,null,null];
 const emptySpecies=()=>({bag:false,admitted:false,placed:false,observed:false});
@@ -23,11 +24,14 @@ export function parseSave(raw){
  }
  p.exhibition=d.v>=5?structuredClone(d.exhibition):defaultExhibition(p);
  if(!validExhibition(p,p.exhibition))throw new Error('Invalid exhibition');
+ if(d.location!==undefined){const l=d.location;if(!l||l.map!=='campus-1'||!['harbor','management','exhibition'].includes(l.area)||!Number.isFinite(l.x)||!Number.isFinite(l.z))throw new Error('Invalid campus location');p.location={map:l.map,area:l.area,x:l.x,z:l.z};}
  return p;
 }
 export function writeSave(storage,progress){
  const next=parseSave(JSON.stringify(progress)),raw=storage.getItem(SAVE_KEY);
  if(raw){
+  let oldLocation;try{oldLocation=JSON.parse(raw)?.location;}catch{}
+  if(progress.location&&!oldLocation&&!storage.getItem(CAMPUS_BACKUP_KEY))storage.setItem(CAMPUS_BACKUP_KEY,raw);
   let version;try{version=JSON.parse(raw)?.v;}catch{}
   if(version<4&&!storage.getItem(MIGRATION_KEY))storage.setItem(MIGRATION_KEY,raw);
   if(version<5&&!storage.getItem(EDITOR_MIGRATION_KEY))storage.setItem(EDITOR_MIGRATION_KEY,raw);

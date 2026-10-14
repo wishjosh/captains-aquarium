@@ -1,10 +1,11 @@
 Captain's Aquarium — review build
-Runtime preparation: 2026-10-13
+Runtime preparation: 2026-10-14
 This directory is a static browser game prepared for review, not a published release.
 
 Third-party components and assets:
 - Three.js: MIT; see vendor/THREE-LICENSE.txt.
-- Quaternius Pirate Kit: CC0; see assets/pirate/LICENSE.txt.
+- Quaternius Pirate Kit: CC0; see assets/pirate/LICENSE.txt and campus-sources.json.
+- Kenney Nature Kit: CC0; see assets/nature/LICENSE.txt and campus-sources.json.
 - Quaternius Animated Cute Fish Pack source skeleton/model/animation:
   see assets/fish/LICENSE.txt for CC0 declaration, conversion provenance,
   exact source commit/hash and the unverified FBX byte identity.

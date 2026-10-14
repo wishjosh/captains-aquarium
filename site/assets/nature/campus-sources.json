@@ -1,0 +1,24 @@
+{
+  "sources": [
+    "https://quaternius.com/packs/piratekit.html",
+    "https://kenney.nl/assets/nature-kit"
+  ],
+  "files": [
+    {
+      "file": "rock_largeA.glb",
+      "source": "https://kenney.nl/media/pages/assets/nature-kit/37ac38a37b-1677698939/kenney_nature-kit.zip",
+      "archiveMember": "Models/GLTF format/rock_largeA.glb",
+      "sha256": "6dd15390fd96501dcd1454765a17ba61dbbd8d47705dfe5149c8dd92b353ce25",
+      "bytes": 7552
+    },
+    {
+      "file": "rock_largeC.glb",
+      "source": "https://kenney.nl/media/pages/assets/nature-kit/37ac38a37b-1677698939/kenney_nature-kit.zip",
+      "archiveMember": "Models/GLTF format/rock_largeC.glb",
+      "sha256": "23aee8b727adeaf260207af3e0615dc69aa766c6d87de1d44cbc8c2711d74dd1",
+      "bytes": 7004
+    }
+  ],
+  "originalIdentity": "Building model bytes versus creator download unverified; fixed attributed mirror. Kenney files extracted from creator ZIP.",
+  "usage": "Original model meshes retained. Building placement/scale; terrain instance metalness adjusted."
+}

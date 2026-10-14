@@ -7,3 +7,8 @@ Source files: Characters_Captain_Barbarossa.gltf, Environment_Dock.gltf,
 Environment_House2.gltf, Environment_PalmTree_1.gltf, Environment_Rock_1.gltf,
 Prop_Anchor.gltf, Prop_Barrel.gltf, Prop_Chest_Closed.gltf.
 Names shortened locally; original meshes, embedded atlas and animation clips retained.
+
+2026-10-14 campus additions: Environment_House1.gltf and Environment_House3.gltf.
+CC0 declaration: https://quaternius.com/packs/piratekit.html
+Fixed public distribution, hashes and original-byte limitation: campus-sources.json.
+Captain Weapon_Cutlass is hidden at runtime; original model/rig preserved.

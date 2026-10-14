@@ -23,6 +23,9 @@ function fit(model, size, dimension='y') {
 export function createCaptain(asset) {
   const model=asset.scene;
   const pivot=fit(model,2.15);
+  // Preserve the original asset and rig; the aquarium captain carries no sword.
+  const cutlass=model.getObjectByName('Weapon_Cutlass');
+  if(cutlass)cutlass.visible=false;
   const mixer=new THREE.AnimationMixer(model);
   const actions=Object.fromEntries(asset.animations.map(clip=>[clip.name,mixer.clipAction(clip)]));
   if(!actions.Idle||!actions.Walk) throw new Error('Captain requires Idle and Walk clips');

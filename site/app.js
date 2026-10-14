@@ -144,19 +144,19 @@ const jellies=[{x:.33,y:.35,size:.57,phase:0},{x:.73,y:.62,size:.40,phase:1.8},{
 
 function animalsAt(time) {
   if(state.zoom){
-    const w=width*(state.tank==='fish'?.91:.86);
+    const w=Math.min(width*(state.tank==='fish'?.91:.86),height*.78/imageAspect[state.tank]);
     return [{x:width*.5,y:height*.48,w,h:w*imageAspect[state.tank],facing:1,angle:state.tank==='fish'?Math.sin(time*.65)*.025:Math.sin(time*.4)*.06,phase:time}];
   }
   if(state.tank==='fish')return fish.slice(0,fishCount).map((f,i)=>{
     const orbit=(time/f.period+f.offset)*Math.PI*2;
-    const w=width*f.size;
+    const w=Math.min(width,height*.75/imageAspect.fish)*f.size;
     // The closed ellipse brings each fish around slowly, without an edge teleport.
     const facing=Math.cos(orbit)>=0?-1:1;
     return {x:width*(.5+Math.sin(orbit)*(.47-f.size*.5)),y:height*(f.lane+Math.cos(orbit)*.045+Math.sin(time*.9+i)*.009),w,h:w*imageAspect.fish,facing,angle:Math.sin(time*.7+i)*.025,phase:time+f.phase};
   });
   return jellies.slice(0,fishCount).map(j=>{
     const phase=time+j.phase,pulse=Math.sin(phase*2.45);
-    const w=width*j.size;
+    const w=Math.min(width,height*.75/imageAspect.jelly)*j.size;
     return {x:width*(j.x+Math.sin(phase*.32)*.055),y:height*(j.y+Math.sin(phase*.28)*.038-pulse*.009),w,h:w*imageAspect.jelly,facing:1,angle:Math.sin(phase*.36)*.075,phase};
   });
 }

@@ -1,0 +1,24 @@
+{
+  "sources": [
+    "https://quaternius.com/packs/piratekit.html",
+    "https://kenney.nl/assets/nature-kit"
+  ],
+  "files": [
+    {
+      "file": "house1.gltf",
+      "source": "https://raw.githubusercontent.com/agentkaerf/FreeModels/db3df04d1e4714298a09510b26fb6de6645138a2/Pirate%20Kit%20-%20Nov%202023/glTF/Environment_House1.gltf",
+      "sha256": "85097513cfa68d9b38398a56b1c76ab14dd9a5d0ddb93e8d78401cc7de69114d",
+      "bytes": 913785,
+      "scope": "Original ship-shaped building; creator bytes unverified"
+    },
+    {
+      "file": "house3.gltf",
+      "source": "https://raw.githubusercontent.com/agentkaerf/FreeModels/db3df04d1e4714298a09510b26fb6de6645138a2/Pirate%20Kit%20-%20Nov%202023/glTF/Environment_House3.gltf",
+      "sha256": "d4da178f124de86a7c21a66e009689dff7ad1b9a19c7a70777782343ca2511a2",
+      "bytes": 798598,
+      "scope": "Original ship-shaped building; creator bytes unverified"
+    }
+  ],
+  "originalIdentity": "Building model bytes versus creator download unverified; fixed attributed mirror. Kenney files extracted from creator ZIP.",
+  "usage": "Original model meshes retained. Building placement/scale; terrain instance metalness adjusted."
+}

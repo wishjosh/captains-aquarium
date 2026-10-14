@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#f8f5e7">
+  <meta name="theme-color" content="#192d46">
   <meta name="description" content="손가락으로 탐험하고 범돔을 수집해 나만의 제주 수족관에 데려와요.">
   <title>선장의 아쿠아리움 · 제주</title>
   <link rel="icon" href="data:,">
@@ -17,7 +17,7 @@
       <button id="help" class="help-button" type="button" aria-label="조작 방법과 저장 안내">?</button>
     </header>
     <section class="world-wrap" aria-label="제주 수족관 탐험">
-      <canvas id="world" tabindex="0" aria-label="수족관 바닥을 누른 채 끌어서 이동하세요. 컴퓨터에서는 방향키로 이동할 수 있습니다."></canvas>
+      <canvas id="world" tabindex="0" aria-label="화면 왼쪽을 누른 채 끌어서 이동하고 오른쪽 행동 버튼을 누르세요. 컴퓨터에서는 방향키로 이동할 수 있습니다."></canvas>
       <div class="mission-card">
         <div class="mission-top"><span id="chapter">첫 번째 임무</span><span id="mission-count">0 / 4</span></div>
         <p id="mission-title">바다에서 범돔을 만나자!</p>
@@ -26,12 +26,14 @@
       </div>
       <div class="bag"><img src="assets/stripey-flat.png" alt=""><span id="bag-count">가방 0</span></div>
       <div id="waypoint" class="waypoint" aria-hidden="true">↓ 바다 탐사</div>
+      <p class="rotate-hint">휴대폰을 가로로 돌리면 더 넓게 볼 수 있어요</p>
+      <p class="move-hint" aria-hidden="true">왼쪽을 끌어 이동</p>
       <div id="drag-guide" class="drag-guide" hidden><span></span></div>
       <p id="toast" class="toast" role="status" aria-live="polite" hidden></p>
       <div id="loading" class="scene-message" role="status"><span class="wave-icon">≈</span>선장님과 제주 항구를 준비하고 있어요…</div>
       <div id="game-error" class="scene-message" role="alert" hidden><p>3D 수족관을 열지 못했어요.<br>Chrome에서 다시 열어 주세요.</p><button type="button" id="retry">다시 열기</button><a href="view.html">생물 감상 화면 열기</a></div>
       <div class="bottom-hud">
-        <div class="nearby"><span id="nearby-title">바닥을 누르고 끌어 보세요</span><span id="nearby-detail">손을 떼면 멈춰요</span></div>
+        <div class="nearby"><span id="nearby-title">왼쪽을 누르고 끌어 보세요</span><span id="nearby-detail">손을 떼면 멈춰요</span></div>
         <div class="exhibition-actions"><button id="observe" class="observe" type="button" hidden>범돔 가까이 보기</button><button id="edit-exhibition" class="observe" type="button" hidden>전시 편집</button></div>
         <button id="interact" class="interact" type="button" hidden>범돔 수집하기</button>
       </div>
@@ -40,10 +42,10 @@
   </main>
   <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
     <h2 id="help-title">선장님, 첫 탐험을 시작해요</h2>
-    <ol><li>빈 바닥을 누르고 원하는 방향으로 끌어요.</li><li>누른 채로 있으면 계속 걷고, 손을 떼면 멈춰요.</li><li>바다 가까이 가서 범돔을 수집해요.</li><li>광장 왼쪽 관리동의 입수대에 친구를 데려가요.</li><li>위쪽 전시관의 빈 수조에 배치하고 관찰해요.</li><li>제주 돌과 바다풀을 골라 첫 수조를 꾸며요.</li><li>다음은 왼쪽 해안의 자리돔, 그다음 오른쪽 바다의 해파리예요.</li><li>각 친구는 관리동 입수 → 전시관 배치 → 관찰 순서로 데려와요.</li></ol>
-    <p>수조나 생물은 가까이에서 짧게 눌러도 돼요. 컴퓨터에서는 방향키 또는 WASD로 걸을 수 있어요.</p>
+    <ol><li>휴대폰을 가로로 놓고, 화면 왼쪽을 누른 뒤 원하는 방향으로 끌어요.</li><li>누른 자리에 조이스틱이 나타나요. 손을 떼면 멈춰요. 가까이 가면 오른쪽에 행동 버튼이 나타나요.</li><li>바다 가까이 가서 범돔을 수집해요.</li><li>왼쪽 건물의 원래 문으로 들어가 관리동 입수대에 친구를 데려가요.</li><li>오른쪽 건물의 문으로 들어가 전시관 수조에 배치하고 관찰해요.</li><li>제주 돌과 바다풀을 골라 첫 수조를 꾸며요.</li><li>다음은 왼쪽 해안의 자리돔, 그다음 오른쪽 바다의 해파리예요.</li><li>각 친구는 관리동 입수 → 전시관 배치 → 관찰 순서로 데려와요.</li></ol>
+    <p>문을 향해 1초간 계속 걸으면 출입해요. 가까이에서 ‘문 열기’를 눌러도 돼요. 구릉과 오솔길은 지금은 배경이에요. 전시된 수조는 가까이에서 짧게 눌러 관찰할 수도 있어요. 수집·입수·배치는 오른쪽 버튼으로 해요. 컴퓨터에서는 방향키 또는 WASD로 걸을 수 있어요.</p>
     <p class="storage-note">진행은 이 기기의 브라우저에 저장돼요. 다른 기기와는 연동되지 않으며, 브라우저의 사이트 데이터를 지우면 기록도 지워져요.</p>
-    <p>검토 버전: 2026-10-13 · 무료 수족관 팩·전시 편집</p>
+    <p>검토 버전: 2026-10-14 · 해안 단지·건물 출입·오름 배경</p>
     <button id="open-transfer" type="button">저장 기록 옮기기</button>
     <button id="close-help" type="button">알겠어요</button>
   </dialog>
@@ -85,6 +87,7 @@
     <h2 id="transfer-title">저장 기록 옮기기</h2>
     <p>기록은 이 브라우저에 저장돼요. 다른 주소나 기기로 옮기려면 파일을 내보낸 뒤 새 게임에서 가져오세요.</p>
     <button id="export-save" type="button">저장 파일 내보내기</button>
+    <button id="export-before-campus" class="secondary" type="button" disabled>해안 단지 개편 전 기록 내보내기</button>
     <button id="export-before-exhibition" class="secondary" type="button" disabled>전시 편집 도입 전 기록 내보내기</button>
     <button id="export-previous-map" class="secondary" type="button" disabled>개편 전 기록 내보내기</button><p>예전 기록을 이어왔다면 개편 전 원본도 내보낼 수 있어요.</p>
     <section aria-label="저장 파일 가져오기">
