@@ -1,3 +1,6 @@
+import {loadJelly,createJelly} from './jelly.js';
+import {createManagement} from './management.js';
+import {managementSurface,managementCanStep} from './management-layout.js';
 import {DIVE_START,createUnderwater,swimStep} from './underwater.js';
 import {setupCare} from './care.js';
 import * as THREE from './vendor/three.module.js';
@@ -5,7 +8,7 @@ import {loadPirateKit,createCaptain,placeProp} from './pirate.js';
 import {loadFish,createFish} from './fish.js';
 import {SAVE_KEY,SAVE_VERSION,emptyProgress,parseSave,writeSave,hasStarterDecor,missionFor,canCollect} from './progress.js';
 import {START,TANKS,ZONE_NAMES,configureExhibition} from './layout.js';
-import {CAMPUS_START,DOORS,EXITS,SPAWNS,COAST,spotsFor,blocked,normaliseCampus,nearDoor,waypoint} from './campus-layout.js';
+import {CAMPUS_START,DOORS,EXITS,SPAWNS,COAST,MANAGEMENT,spotsFor,blocked,normaliseCampus,nearDoor,waypoint} from './campus-layout.js';
 import {loadCampus,createCampus} from './campus.js';
 import {paintDecorations} from './decorations.js';
 import {setupDecorationEditor} from './decorate.js';
@@ -17,7 +20,7 @@ import {loadAquariumKit,aquariumModule,aquariumProp,aquariumFloorGrid} from './a
 const $=id=>document.getElementById(id),canvas=$('world'),viewport=document.querySelector('.world-wrap');
 const decor=$('decorate-dialog'),viewer=$('viewer-dialog'),help=$('help-dialog'),transfer=$('transfer-dialog'),inventory=$('management-dialog');
 const exhibitionDialog=$('exhibition-dialog');
-let underwater,careUI,lookGesture=null;
+let underwater,careUI,lookGesture=null,managementFacility;
 const dive={...DIVE_START};
 const modalOpen=()=>careUI?.dialog.open||viewer.open||help.open||decor.open||transfer.open||inventory.open||exhibitionDialog.open;
 const player={x:CAMPUS_START.x,z:CAMPUS_START.z,angle:.38},progress=emptyProgress();
@@ -117,11 +120,17 @@ function updateNearby(force=false){
   const d=Math.hypot(player.x-spot.x,player.z-spot.z);
   if(d<2.0&&d<distance){target=name;distance=d;}
  }
+ if(area==='management'&&managementSurface(player.x,player.z).kind==='deck'){
+  const slot=MANAGEMENT.slots.find(s=>Math.hypot(player.x-s.x,player.z-MANAGEMENT.deck.z)<2);
+  if(slot)target=heldKind()?'management':speciesState(slot.kind).admitted?'care-'+slot.kind:'management';
+ }
+
  const door=nearDoor(area,player.x,player.z);if(door){target='door';}
  if(!force&&target===nearby)return;nearby=target;
  const button=$('interact'),secondary=$('observe');button.hidden=!target;secondary.hidden=true;$('edit-exhibition').hidden=!Object.hasOwn(names,target);
  let title=ZONE_NAMES[zone],detail=zone==='harbor'?'왼쪽 관리동 · 오른쪽 전시관 · 앞쪽 바다':'왼쪽을 누르고 끌어 이동해요',label='';
  if(target==='door'){title=door.label;detail='문 쪽으로 1초간 걸으면 출입해요';label='문 열기';}
+ else if(target?.startsWith('care-')){const kind=target.slice(5);title=names[kind]+' · 관리 수조';detail='작업 데크에서 상태와 먹이 반응을 살펴봐요';label=names[kind]+' 돌보기';}
  else if(target==='management'){
   const kind=heldKind();title='관리동 · 입수와 보유 현황';
   detail=kind?names[kind]+'의 입수를 마친 뒤 첫 돌봄을 시작해요':'입수한 친구를 고르고 첫 돌봄을 이어가요';
@@ -148,7 +157,7 @@ function openTank(tank){
  stop();if(p.placed)p.observed=true;save();updateMission();
  const demo=tank==='jelly'&&!p.placed;
  $('viewer-title').textContent=names[tank]+' 수조'+(demo?' · 관찰용':'');
- $('viewer-frame').src=tank==='fish'?'fish-view.html?count=1&decor='+progress.decorations.map(k=>k||'').join(','):tank==='chromis'?'fish-view.html?species=chromis&count=1':'view.html?tank=jelly&count='+(demo?3:1)+(demo?'':'&exhibit=1');
+ $('viewer-frame').src=tank==='fish'?'fish-view.html?count=1&decor='+progress.decorations.map(k=>k||'').join(','):tank==='chromis'?'fish-view.html?species=chromis&count=1':'fish-view.html?species=jelly&count='+(demo?3:1);
  viewer.showModal();
 }
 function interact(target=nearby){
@@ -160,6 +169,7 @@ function interact(target=nearby){
   if(!unlocked(k)||p.bag||heldKind())return;stop();p.bag=true;progress.discovered[k]=true;save();updateMission();toast(objectName(k)+' 만났어요! 뒤쪽 귀환 줄을 찾아 돌아가요.');return;
  }
  if(target==='door'){const door=nearDoor(area,player.x,player.z);if(door)changeArea(door);return;}
+ if(target.startsWith('care-')){stop();careUI.open(target.slice(5));return;}
  if(target==='management'){
   const kind=heldKind();if(!kind){openManagement();return;}
   stop();const p=speciesState(kind);p.bag=false;p.admitted=true;save();updateMission();canvas.focus({preventScroll:true});avatar.userData.controller.celebrate('Yes');
@@ -234,13 +244,13 @@ function createTank(x,z,kind,texture,fishAsset){
  tanks[kind]={host};setTankBody(kind);
  let sprite;
  if(kind!=='jelly'){sprite=createFish(fishAsset,{length:kind==='chromis'?1.4:1.6,variant:kind==='chromis'?'chromis':'stripey'});sprite.rotation.y=Math.PI/2;}
- else{sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,depthWrite:false}));sprite.scale.set(1.25,1.05,1);}
+ else{sprite=createJelly(texture,{width:1.25});}
  host.add(sprite);
  if(kind==='fish'){tankDecor=new THREE.Group();tankDecor.scale.set(.72,.55,.72);paintDecorations(tankDecor,progress.decorations);}
  groundRing(spotsFor('exhibition')[kind].x,spotsFor('exhibition')[kind].z,'#d1ab57',.68);
  return sprite;
 }
-function buildFacilities(){
+function buildFacilities(fishAsset,jellyTexture){
  managementGroup=new THREE.Group();galleryGroup=new THREE.Group();scene.add(managementGroup,galleryGroup);
  const floorPositions=[];for(let x=-5;x<=5;x+=2)for(let z=-3;z>=-13;z-=2)floorPositions.push([x,z]);
  galleryGroup.add(aquariumFloorGrid(aquariumKit,floorPositions));
@@ -251,16 +261,9 @@ function buildFacilities(){
  label('바다 친구 전시관',0,2.8,-13.6,'#263c59',4.5,galleryGroup);
  label('광장으로',0,1.3,-2.6,'#263c59',2.3,galleryGroup);
  groundRing(0,-2.75,'#d1ab57',.55,galleryGroup);
- box(managementGroup,4.6,.2,5.2,-3.7,0,1.9,'#d6c4a0');
- box(managementGroup,4.6,1.2,.2,-3.7,.6,-.7,'#384963');
- box(managementGroup,.2,.65,5.2,-5.95,.3,1.9,'#384963');
- label('관리동 · 입수',-3.7,2.3,-.45,'#263c59',3.4,managementGroup);
- label('광장으로',-1.75,1.2,3.25,'#263c59',2,managementGroup);
- for(const [i,kind] of Object.keys(names).entries()){
-  const care=aquariumProp(aquariumKit,'care-tank',{width:.82,height:.92,depth:.74});care.rotation.y=Math.PI/2;care.position.set(-4.7,.13,.95+i*.95);managementGroup.add(care);
-  holdingCrates[kind]=box(managementGroup,.08,.09,.25,-4.27,.82,.95+i*.95,'#d8c7a4');
- }
- groundRing(-2.9,1.9,'#bd914c',.65,managementGroup);
+ managementFacility=createManagement(fishAsset,jellyTexture,progress);managementGroup.add(managementFacility.group);Object.assign(holdingCrates,managementFacility.indicators);
+ managementGroup.userData.floorTileCount=0;
+
 }
 function changeDive(enter){
  stop();area=enter?'underwater':'harbor';Object.assign(dive,DIVE_START);
@@ -275,7 +278,7 @@ function applyArea(){
  scene.background.set(area==='underwater'?'#226779':area==='harbor'?'#94c9ed':area==='management'?'#3e536b':'#314c65');
  scene.fog=new THREE.Fog(area==='harbor'?'#94c9ed':'#314c65',area==='harbor'?90:35,area==='harbor'?230:70);
  if(area==='underwater')scene.fog=new THREE.Fog('#226779',10,34);
- avatar.scale.setScalar(area==='harbor'?1.2:1);avatar.position.set(player.x,area==='harbor'?1.06:.12,player.z);
+ avatar.scale.setScalar(area==='harbor'?1.2:1);avatar.position.set(player.x,area==='harbor'?1.06:area==='management'?.12+managementSurface(player.x,player.z).height:.12,player.z);
  guide=null;guideTarget=null;nearby=null;updateNearby(true);updateCamera(true);resize();
 }
 function changeArea(door){
@@ -295,22 +298,22 @@ function updateDoor(dt){
 function updateCamera(snap=false){
  if(area==='underwater'){camera.position.set(dive.x,dive.y,dive.z);camera.lookAt(dive.x+Math.sin(dive.yaw)*Math.cos(dive.pitch),dive.y+Math.sin(dive.pitch),dive.z-Math.cos(dive.yaw)*Math.cos(dive.pitch));return;}
  if(area==='harbor'){camera.position.set(18,16,40);camera.lookAt(0,3.4,-1);return;}
- desiredTarget.set(area==='management'?-3.7:player.x,1,area==='management'?1.8:player.z-1.1);
+ desiredTarget.set(player.x-(area==='management'?1.5:0),1+(area==='management'?managementSurface(player.x,player.z).height:0),player.z-1.1);
  if(snap)cameraTarget.copy(desiredTarget);else cameraTarget.lerp(desiredTarget,.12);
- camera.position.copy(cameraTarget).add(new THREE.Vector3(0,area==='management'?5.3:7,area==='management'?7.3:10));camera.lookAt(cameraTarget);
+ camera.position.copy(cameraTarget).add(new THREE.Vector3(0,area==='management'?8.4:7,area==='management'?12:10));camera.lookAt(cameraTarget);
 }
 function buildScene(textures,kit,fishAsset,facilityKit,campusAssets){
  aquariumKit=facilityKit;scene=new THREE.Scene();scene.background=new THREE.Color('#94c9ed');
  camera=new THREE.PerspectiveCamera(39,1,.1,300);
  scene.add(new THREE.HemisphereLight('#fff5da','#687d8b',2.1));
  const sun=new THREE.DirectionalLight('#fff3d4',2.7);sun.position.set(-18,40,25);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-38,right:38,top:38,bottom:-38,near:1,far:110});sun.shadow.bias=-.0002;sun.shadow.normalBias=.035;scene.add(sun);
- campusGroup=createCampus(kit,campusAssets);scene.add(campusGroup);buildFacilities();
+ campusGroup=createCampus(kit,campusAssets);scene.add(campusGroup);buildFacilities(fishAsset,textures.jelly);
  underwater=createUnderwater(fishAsset,textures.jelly,campusAssets);scene.add(underwater.group);
  careUI=setupCare(fishAsset,textures.jelly,{progress,pause:stop,commit:()=>{save();updateMission();refreshInventory();}});
  fishSprite=createTank(TANKS.fish.x,TANKS.fish.z,'fish',textures.fish,fishAsset);jellySprite=createTank(TANKS.jelly.x,TANKS.jelly.z,'jelly',textures.jelly);chromisSprite=createTank(TANKS.chromis.x,TANKS.chromis.z,'chromis',null,fishAsset);
  poolFish=createFish(fishAsset,{length:1.5});poolFish.position.set(9.8,-.3,15.5);campusGroup.add(poolFish);
  seaChromis=createFish(fishAsset,{length:1.35,variant:'chromis'});seaChromis.position.set(-11,-.2,11);campusGroup.add(seaChromis);
- seaJelly=new THREE.Sprite(new THREE.SpriteMaterial({map:textures.jelly,depthWrite:false}));seaJelly.position.set(19,.25,7);seaJelly.scale.set(1.15,1,1);campusGroup.add(seaJelly);
+ seaJelly=createJelly(textures.jelly,{width:1.15});seaJelly.position.set(19,.25,7);campusGroup.add(seaJelly);
  label('바다 탐사',12,2.1,14.3,'#294a67',3,campusGroup);
  chromisSign=label('자리돔 · 바위 해안',-11,2,10,'#294a67',3.3,campusGroup);
  jellySeaSign=label('해파리 · 잔잔한 바다',18,2,7,'#294a67',3.3,campusGroup);
@@ -340,8 +343,8 @@ function move(dt) {
   const speed=area==='harbor'?5.5:3.35;let dx=direction.x*speed*dt,dz=direction.z*speed*dt;
   const door=nearDoor(area,player.x,player.z);if(door&&direction.x*door.dx+direction.z*door.dz>.65){if(door.dx)dz=0;else dx=0;}
   const oldX=player.x,oldZ=player.z;
-  if(!blocked(area,player.x+dx,player.z))player.x+=dx;
-  if(!blocked(area,player.x,player.z+dz))player.z+=dz;
+  if(area==='management'?managementCanStep(player.x,player.z,player.x+dx,player.z):!blocked(area,player.x+dx,player.z))player.x+=dx;
+  if(area==='management'?managementCanStep(player.x,player.z,player.x,player.z+dz):!blocked(area,player.x,player.z+dz))player.z+=dz;
   const target=Math.atan2(direction.x,direction.z);
   player.angle+=Math.atan2(Math.sin(target-player.angle),Math.cos(target-player.angle))*Math.min(1,dt*13);
   moving=Math.hypot(player.x-oldX,player.z-oldZ)>.0001;
@@ -365,21 +368,21 @@ function updateWaypoint(){
   const dx=target.x-player.x,dz=target.z-player.z,arrow=Math.abs(dz)>Math.abs(dx)?(dz>0?'↓':'↑'):(dx>0?'→':'←');
   node.textContent=arrow+' '+target.label;node.style.top=dz>0?'64%':'37%';
  }
- marker.visible=!!target;if(target)marker.position.set(target.x,2.2+(reducedMotion.matches?0:Math.sin(time*3)*.12),target.z);
+ marker.visible=!!target;if(target)marker.position.set(target.x,(area==='management'?managementSurface(target.x,target.z).height:0)+2.2+(reducedMotion.matches?0:Math.sin(time*3)*.12),target.z);
 }
 function frame(stamp) {
   const dt=last?Math.min((stamp-last)/1000,.05):0;last=stamp;
   if(ready&&!document.hidden&&!modalOpen()){
-    time+=dt;move(dt);if(area==='underwater')underwater.update(dt,time,progress,reducedMotion.matches);updateNearby();updateDoor(dt);updateWaypoint();
-    avatar.position.set(player.x,area==='harbor'?1.06:.12,player.z);avatar.rotation.y=player.angle;
+    time+=dt;move(dt);if(area==='management')managementFacility.update(reducedMotion.matches?0:dt,time);if(area==='underwater')underwater.update(dt,time,progress,reducedMotion.matches);updateNearby();updateDoor(dt);updateWaypoint();
+    avatar.position.set(player.x,area==='harbor'?1.06:area==='management'?.12+managementSurface(player.x,player.z).height:.12,player.z);avatar.rotation.y=player.angle;
     avatar.userData.controller.update(dt,moving);
     updateCamera();
-    if(!reducedMotion.matches){fishSprite.userData.update(dt);poolFish.userData.update(dt);fishSprite.position.x=Math.sin(time*.7)*.45;fishSprite.position.z=Math.cos(time*.7)*.12;fishSprite.rotation.y=Math.atan2(.45*Math.cos(time*.7),-.12*Math.sin(time*.7));poolFish.position.x=9.8+Math.sin(time*.7)*.6;poolFish.position.z=15.5+Math.cos(time*.7)*.16;poolFish.rotation.y=Math.atan2(.6*Math.cos(time*.7),-.16*Math.sin(time*.7));jellySprite.position.y=Math.sin(time*1.6)*.10;jellySprite.scale.set(1.25+Math.sin(time*2.45)*.05,1.05-Math.sin(time*2.45)*.06,1);}
+    if(!reducedMotion.matches){fishSprite.userData.update(dt);poolFish.userData.update(dt);fishSprite.position.x=Math.sin(time*.7)*.45;fishSprite.position.z=Math.cos(time*.7)*.12;fishSprite.rotation.y=Math.atan2(.45*Math.cos(time*.7),-.12*Math.sin(time*.7));poolFish.position.x=9.8+Math.sin(time*.7)*.6;poolFish.position.z=15.5+Math.cos(time*.7)*.16;poolFish.rotation.y=Math.atan2(.6*Math.cos(time*.7),-.16*Math.sin(time*.7));jellySprite.position.y=Math.sin(time*1.6)*.10;jellySprite.userData.update(dt);}
     if(!reducedMotion.matches){
       chromisSprite.userData.update(dt*1.25);seaChromis.userData.update(dt*1.25);
       chromisSprite.position.x=Math.sin(time*1.05)*.5;chromisSprite.position.z=Math.cos(time*1.05)*.18;chromisSprite.rotation.y=Math.atan2(.5*Math.cos(time*1.05),-.18*Math.sin(time*1.05));
       seaChromis.position.z=11+Math.sin(time*.9)*.35;seaChromis.position.x=-11+Math.cos(time*.9)*.1;seaChromis.rotation.y=Math.atan2(-.1*Math.sin(time*.9),.35*Math.cos(time*.9));
-      seaJelly.position.y=.25+Math.sin(time*1.6)*.12;seaJelly.scale.set(1.15+Math.sin(time*2.45)*.06,1-Math.sin(time*2.45)*.06,1);
+      seaJelly.position.y=.25+Math.sin(time*1.6)*.12;seaJelly.userData.update(dt);
     }
     if(stamp-lastPaint>1000/40){renderer.render(scene,camera);lastPaint=stamp;}
   }
@@ -494,13 +497,13 @@ try {
   renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'low-power'});
   renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;
   const loader=new THREE.TextureLoader();
-  const [fish,jelly,kit,fishAsset,facilityKit,campusAssets]=await Promise.all([loader.loadAsync('assets/stripey-flat.png'),loader.loadAsync('assets/moon-jelly-flat.png'),loadPirateKit(),loadFish(),loadAquariumKit(),loadCampus()]);
-  fish.colorSpace=jelly.colorSpace=THREE.SRGBColorSpace;
+  const [fish,jelly,kit,fishAsset,facilityKit,campusAssets]=await Promise.all([loader.loadAsync('assets/stripey-flat.png'),loadJelly(),loadPirateKit(),loadFish(),loadAquariumKit(),loadCampus()]);
+  fish.colorSpace=THREE.SRGBColorSpace;
   buildScene({fish,jelly},kit,fishAsset,facilityKit,campusAssets);ready=true;$('loading').hidden=true;resize();
   new ResizeObserver(resize).observe(viewport);
   if(!saveOkay)toast('저장 기록을 읽지 못해 새 탐험으로 열었어요.');else if(migrated)toast('기존 친구와 장식, 달성 기록을 이어왔어요.');
   // Read-only state and projection let browser checks exercise real input and rendering.
-  window.jejuGame={getState:()=>({ready,dive:{...dive},underwater:underwater.inspect(),careView:careUI.inspect(),zone:area,doorHold,guide,doors:area==='harbor'?DOORS:EXITS,location:snapshot().location,drawCalls:renderer.info.render.calls,tankShapes:Object.fromEntries(Object.entries(progress.exhibition).map(([k,t])=>[k,t.shape])),aquariumKit:{source:'Public Aquarium and Marine Centre',slots:Object.keys(tanks),care:3},decorationSlot:slotFor(progress,'fish'),decorationWorld:tankDecor.getWorldPosition(new THREE.Vector3()),renderedSpecies:Object.fromEntries([['fish',fishSprite],['chromis',chromisSprite],['jelly',jellySprite]].map(([kind,model])=>[kind,{visible:model.visible,position:model.getWorldPosition(new THREE.Vector3())}])),...progress,decorations:[...progress.decorations],placedDecorations:tankDecor.children.map(n=>n.name),player:{...player},moving,nearby,stage:stage(),saveOkay,dragging:!!gesture,looking:!!lookGesture,controls:{side:gesture?(gesture.move?"move":"tap"):null,input:{...input}},captain:avatar.userData.controller.inspect(),fish:fishSprite.userData.inspect(),chromisModel:chromisSprite.userData.inspect(),mission:missionFor(progress),exhibits:{fish:progress.placed?1:0,chromis:progress.chromis.placed?1:0,jelly:progress.jelly.placed?1:0}}),screenPoint:(name)=>{
+  window.jejuGame={getState:()=>({ready,managementRoom:MANAGEMENT,managementFacility:managementFacility.inspect(),surface:managementSurface(player.x,player.z),dive:{...dive},underwater:underwater.inspect(),careView:careUI.inspect(),zone:area,doorHold,guide,doors:area==='harbor'?DOORS:EXITS,location:snapshot().location,drawCalls:renderer.info.render.calls,tankShapes:Object.fromEntries(Object.entries(progress.exhibition).map(([k,t])=>[k,t.shape])),aquariumKit:{source:'Public Aquarium and Marine Centre',slots:Object.keys(tanks),care:3,managementProps:MANAGEMENT.props.map(p=>p.name),managementFloorTiles:managementGroup.userData.floorTileCount},decorationSlot:slotFor(progress,'fish'),decorationWorld:tankDecor.getWorldPosition(new THREE.Vector3()),renderedSpecies:Object.fromEntries([['fish',fishSprite],['chromis',chromisSprite],['jelly',jellySprite]].map(([kind,model])=>[kind,{visible:model.visible,position:model.getWorldPosition(new THREE.Vector3())}])),...progress,decorations:[...progress.decorations],placedDecorations:tankDecor.children.map(n=>n.name),player:{...player},moving,nearby,stage:stage(),saveOkay,dragging:!!gesture,looking:!!lookGesture,controls:{side:gesture?(gesture.move?"move":"tap"):null,input:{...input}},captain:avatar.userData.controller.inspect(),fish:fishSprite.userData.inspect(),chromisModel:chromisSprite.userData.inspect(),jellyModel:jellySprite.userData.inspect(),mission:missionFor(progress),exhibits:{fish:progress.placed?1:0,chromis:progress.chromis.placed?1:0,jelly:progress.jelly.placed?1:0}}),screenPoint:(name)=>{
     const kind=name.endsWith('-tank')?name.slice(0,-5):null;const point=name==='player'?new THREE.Vector3(player.x,.5,player.z):kind?new THREE.Vector3(TANKS[kind].x,1.2,TANKS[kind].z):new THREE.Vector3((currentSpots()[name]||DOORS[name]).x,area==='harbor'?1.1:.2,(currentSpots()[name]||DOORS[name]).z);
     const rect=canvas.getBoundingClientRect();point.project(camera);return {x:rect.left+(point.x+1)*rect.width/2,y:rect.top+(1-point.y)*rect.height/2};
   }};

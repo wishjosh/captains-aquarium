@@ -22,3 +22,13 @@ Underwater review update:
 - Reuses the above Kenney Nature Kit rocks with instance material adjustments.
 - Seabed, seaweed ribbons, particles, surface and return marker are authored
   game geometry. No Coral Reef Kit files are distributed in this build.
+
+Moon jelly update (2026-10-16):
+- Jellyfish by Poly by Google, CC BY 3.0.
+  https://poly.pizza/m/5PxIqPamrag
+  https://creativecommons.org/licenses/by/3.0/
+  Modified into a stylized moon jelly: domed and deforming source bell,
+  short rim tentacles, four ruffled oral arms, inward-opening horseshoe
+  markings, translucent materials and contraction/relaxation/coasting animation.
+  Original and adapted asset terms: assets/jelly/LICENSE.txt.
+  Attribution is also available in game Help and the 3D observation viewer.

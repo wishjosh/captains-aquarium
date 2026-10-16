@@ -1,13 +1,15 @@
 import {blocked as legacyBlocked,SPOTS as legacySpots} from './layout.js';
 export const CAMPUS_START={area:'harbor',x:0,z:5.5};
 export const DOORS={management:{x:-8,z:1.15,to:'management',label:'관리동 문'},exhibition:{x:7.3,z:-3.35,to:'exhibition',label:'전시관 문'}};
-export const EXITS={management:{x:-1.98,z:1.9,to:'harbor',label:'광장으로',dx:1,dz:0},exhibition:{x:0,z:-2.75,to:'harbor',label:'광장으로',dx:0,dz:1}};
-export const SPAWNS={management:{x:-2.8,z:1.9},exhibition:{x:0,z:-3.6}};
+export const EXITS={management:{x:-10.6,z:11.65,to:'harbor',label:'광장으로',dx:0,dz:1},exhibition:{x:0,z:-2.75,to:'harbor',label:'광장으로',dx:0,dz:1}};
+export const SPAWNS={management:{x:-10.6,z:10.4},exhibition:{x:0,z:-3.6}};
+import {MANAGEMENT,managementBlocked,managementClear,MANAGEMENT_POINTS} from './management-layout.js';
+export {MANAGEMENT} from './management-layout.js';
 export const COAST={sea:{x:12,z:14.3},'chromis-sea':{x:-11,z:8},'jelly-sea':{x:16,z:6.1}};
-export function spotsFor(area){return area==='harbor'?{sea:COAST.sea}:area==='management'?{management:legacySpots.management}:{fish:legacySpots.fish,chromis:legacySpots.chromis,jelly:legacySpots.jelly};}
+export function spotsFor(area){return area==='harbor'?{sea:COAST.sea}:area==='management'?{management:MANAGEMENT.intake}:{fish:legacySpots.fish,chromis:legacySpots.chromis,jelly:legacySpots.jelly};}
 export function blocked(area,x,z,exhibition){
  if(!Number.isFinite(x)||!Number.isFinite(z))return true;
- if(area==='management')return x < -5.65||x > -1.85||z < -.3||z >4.05||legacyBlocked(x,z,exhibition);
+ if(area==='management')return managementBlocked(x,z);
  if(area==='exhibition')return x < -5.8||x >5.8||z < -13.3||z > -2.65||legacyBlocked(x,z,exhibition);
  if(x < -18||x >18||z < -12||z >16.3)return true;
  // Only the departure pier extends over the water.
@@ -17,6 +19,7 @@ export function blocked(area,x,z,exhibition){
 export function normaliseCampus(data){
  const l=data.location;
  if(l?.area==='underwater')return {...data,location:{map:'campus-1',area:'underwater',x:0,z:8}};
+ if(l?.map==='campus-1'&&l.area==='management'&&blocked('management',l.x,l.z))return {...data,location:{map:'campus-1',area:'management',...SPAWNS.management}};
  const location=l&&l.map==='campus-1'&&['harbor','management','exhibition'].includes(l.area)&&!blocked(l.area,l.x,l.z,data.exhibition)?{...l}:{map:'campus-1',...CAMPUS_START};
  return {...data,location};
 }
@@ -25,8 +28,9 @@ export function nearDoor(area,x,z){
  for(const [id,d] of Object.entries(doors))if(Math.hypot(x-d.x,z-d.z)<(area==='harbor'?1.15:.55))return {...d,id,dx:d.dx??0,dz:d.dz??-1};
  return null;
 }
-const points={harbor:[[-17,3],[-14,3],[-2.5,3],[0,5.5],[7.3,2],[16,2],[16,6.1],[-11,8],[12,8],[12,14.3],[12,16]],management:[[-2.8,0],[-2.8,1.9],[-2.8,3.6],[-5.4,0],[-5.4,3.8]],exhibition:[[0,-3.4],[-3,-3.4],[3,-3.4],[-5.4,-3.4],[5.4,-3.4],[-5.4,-8.3],[5.4,-8.3],[0,-8.1],[-3,-12.7],[3,-12.7]]};
-function clear(area,a,b){const d=Math.hypot(a.x-b.x,a.z-b.z),n=Math.ceil(d/.18);for(let i=0;i<=n;i++)if(blocked(area,a.x+(b.x-a.x)*i/Math.max(n,1),a.z+(b.z-a.z)*i/Math.max(n,1)))return false;return true;}
+const points={harbor:[[-17,3],[-14,3],[-2.5,3],[0,5.5],[7.3,2],[16,2],[16,6.1],[-11,8],[12,8],[12,14.3],[12,16]],management:MANAGEMENT_POINTS,exhibition:[[0,-3.4],[-3,-3.4],[3,-3.4],[-5.4,-3.4],[5.4,-3.4],[-5.4,-8.3],[5.4,-8.3],[0,-8.1],[-3,-12.7],[3,-12.7]]};
+const managementFixed=new Set([...MANAGEMENT_POINTS.map(([x,z])=>x+','+z),MANAGEMENT.intake.x+','+MANAGEMENT.intake.z,EXITS.management.x+','+EXITS.management.z]),managementLinks=new Map();
+function clear(area,a,b){if(area==='management'){const ka=a.x+','+a.z,kb=b.x+','+b.z;if(managementFixed.has(ka)&&managementFixed.has(kb)){const key=ka+'>'+kb;if(!managementLinks.has(key))managementLinks.set(key,managementClear(a,b));return managementLinks.get(key);}return managementClear(a,b);}const d=Math.hypot(a.x-b.x,a.z-b.z),n=Math.ceil(d/.18);for(let i=0;i<=n;i++)if(blocked(area,a.x+(b.x-a.x)*i/Math.max(n,1),a.z+(b.z-a.z)*i/Math.max(n,1)))return false;return true;}
 export function waypoint(area,x,z,target){
  const destination=target==='management'?'management':['fish','chromis','jelly'].includes(target)?'exhibition':'harbor';
  let end=destination===area?spotsFor(area)[target]:area==='harbor'?DOORS[destination]:EXITS[area];

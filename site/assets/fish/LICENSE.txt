@@ -35,3 +35,19 @@ outline are unchanged; code-generated eye lenses, golden rims, highlights,
 subtle faceted shading and a few tail fin rays restore the cute detail language.
 
 2026-10-13: Chromis notata uses an independently authored simplified surface in chromis-geometry.js, retaining the same CC0 source skeleton and swimming clip. No external reference photographs or illustrations are embedded.
+
+CURRENT USAGE — 2026-10-16 source-geometry policy supersedes the custom-surface revisions above.
+The live runtime preserves original model geometry, skin weights, bones, eyes, fins and swimming clips.
+ButterflyFish approximates stripey; ClownFish approximates Chromis notata.
+Only instance materials (colour and procedural markings) are changed; uniform scale sets display size.
+No stripey-geometry.js or chromis-geometry.js is loaded by the current runtime.
+These are stylized source-model approximations, not species-accurate reconstructions.
+
+Additional original converted model: ClownFish.glb
+https://github.com/Nihdao/three-aquarium-challenge/blob/b8537cefe29c707971e0fa5621394ba8af3f86a3/public/assets/ClownFish.glb
+Local filename: clown-source.glb
+Retrieved: 2026-10-16
+SHA256: 9607de8de8a0ac2d857f271272e70e6d8d3fd19852d979c2cfbe9eafe1e4fcc5
+One source skin (three material primitives), original Armature|Swim clip.
+The author's official Cute Fish Pack CC0 declaration was rechecked on 2026-10-16.
+Byte identity with the author's original FBX remains unverified for converted files.

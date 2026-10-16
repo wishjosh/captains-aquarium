@@ -1,3 +1,4 @@
+import {createJelly} from './jelly.js';
 import * as T from './vendor/three.module.js';
 import {createFish} from './fish.js';
 export const DIVE_START={x:0,y:2.8,z:8,yaw:0,pitch:0};
@@ -26,7 +27,7 @@ export function createUnderwater(fishAsset,jellyTexture,assets){
  const rope=new T.Mesh(new T.CylinderGeometry(.05,.05,6,8),mat('#ebcd78'));rope.position.set(0,3.2,9);group.add(rope);
  const ring=new T.Mesh(new T.TorusGeometry(.8,.12,8,24),mat('#d34b38'));ring.position.set(0,3.4,9);group.add(ring);
  for(const kind of ['fish','chromis','jelly']){
-  let model;if(kind==='jelly'){model=new T.Sprite(new T.SpriteMaterial({map:jellyTexture,depthWrite:false}));model.scale.set(1.5,1.4,1);}
+  let model;if(kind==='jelly'){model=createJelly(jellyTexture,{width:1.5});}
   else model=createFish(fishAsset,{length:kind==='fish'?1.5:1.25,variant:kind==='fish'?'stripey':'chromis'});
   creatures[kind]=model;group.add(model);
  }
@@ -37,7 +38,7 @@ export function createUnderwater(fishAsset,jellyTexture,assets){
  function update(dt,time,p,reduced=false){
   const t=reduced?0:time;
   const positions={fish:[Math.sin(t*.38)*1.1,2.7+Math.sin(t*.5)*.15,1+Math.cos(t*.38)*.4],chromis:[-5+Math.sin(t*.46)*1.1,2.4,-6+Math.cos(t*.46)*.45],jelly:[6+Math.sin(t*.3)*.55,3.6+Math.sin(t*.7)*.35,-11]};
-  for(const [kind,model]of Object.entries(creatures)){model.visible=!(kind==='fish'?p:p[kind]).bag;model.position.set(...positions[kind]);if(kind==='jelly')model.scale.set(1.5+Math.sin(t*2)*.07,1.4-Math.sin(t*2)*.09,1);else{model.userData.update(reduced?0:dt);model.rotation.y=Math.PI/2+Math.sin(t*.4)*.5;}}
+  for(const [kind,model]of Object.entries(creatures)){model.visible=!(kind==='fish'?p:p[kind]).bag;model.position.set(...positions[kind]);model.userData.update(reduced?0:dt);if(kind!=='jelly'){model.rotation.y=Math.PI/2+Math.sin(t*.4)*.5;}}
   for(const [i,fish]of ambient.entries()){fish.userData.update(reduced?0:dt);const a=t*.18+i*.23;fish.position.set(7*Math.sin(a)-2,4+(i%3)*.32,-6+6*Math.cos(a)+i*.35);fish.rotation.y=Math.atan2(7*Math.cos(a),-6*Math.sin(a));}
   kelp.forEach((k,i)=>{dummy.position.set(k.x,.04,k.z);dummy.rotation.set(Math.sin(t*.85+k.a)*.09,k.a,Math.sin(t+k.a)*.12);dummy.scale.set(1,k.h,1);dummy.updateMatrix();leaves.setMatrixAt(i,dummy.matrix);});leaves.instanceMatrix.needsUpdate=true;
  }
