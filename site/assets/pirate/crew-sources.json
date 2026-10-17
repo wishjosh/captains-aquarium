@@ -1,0 +1,84 @@
+{
+  "licenseSource": "https://quaternius.com/packs/piratekit.html",
+  "license": "CC0",
+  "files": [
+    {
+      "file": "anne.gltf",
+      "source": "https://raw.githubusercontent.com/agentkaerf/FreeModels/db3df04d1e4714298a09510b26fb6de6645138a2/Pirate%20Kit%20-%20Nov%202023/glTF/Characters_Anne.gltf",
+      "sha256": "9eafbfc1250652bbfd338cfd29c258ba0e0fee31586162696ee4bc3217ac3485",
+      "bytes": 1552200,
+      "animations": [
+        "Death",
+        "Duck",
+        "HitReact",
+        "Idle",
+        "Jump",
+        "Jump_Idle",
+        "Jump_Land",
+        "No",
+        "Punch",
+        "Run",
+        "Sword",
+        "Walk",
+        "Wave",
+        "Yes"
+      ],
+      "weapons": [
+        "Weapon_DoubleAxe"
+      ],
+      "originalIdentity": "Fixed attributed Pirate Kit mirror; creator-download bytes not compared"
+    },
+    {
+      "file": "henry.gltf",
+      "source": "https://raw.githubusercontent.com/agentkaerf/FreeModels/db3df04d1e4714298a09510b26fb6de6645138a2/Pirate%20Kit%20-%20Nov%202023/glTF/Characters_Henry.gltf",
+      "sha256": "fc52c1ea8b87a8c24e1710a75290e9f0b520d3f30d2e4be6d3616d82e41fef7e",
+      "bytes": 1491195,
+      "animations": [
+        "Death",
+        "Duck",
+        "HitReact",
+        "Idle",
+        "Jump",
+        "Jump_Idle",
+        "Jump_Land",
+        "No",
+        "Punch",
+        "Run",
+        "Sword",
+        "Walk",
+        "Wave",
+        "Yes"
+      ],
+      "weapons": [
+        "Weapon_Lute"
+      ],
+      "originalIdentity": "Fixed attributed Pirate Kit mirror; creator-download bytes not compared"
+    },
+    {
+      "file": "mako.gltf",
+      "source": "https://raw.githubusercontent.com/agentkaerf/FreeModels/db3df04d1e4714298a09510b26fb6de6645138a2/Pirate%20Kit%20-%20Nov%202023/glTF/Characters_Mako.gltf",
+      "sha256": "2c86b7ab4019a938a5164fc88176e60460fe266fa33b350eb9af275fcfd369e8",
+      "bytes": 1800069,
+      "animations": [
+        "Death",
+        "Duck",
+        "HitReact",
+        "Idle",
+        "Jump",
+        "Jump_Idle",
+        "Jump_Land",
+        "No",
+        "Punch",
+        "Run",
+        "Sword",
+        "Walk",
+        "Wave",
+        "Yes"
+      ],
+      "weapons": [
+        "Weapon_Sword"
+      ],
+      "originalIdentity": "Fixed attributed Pirate Kit mirror; creator-download bytes not compared"
+    }
+  ]
+}

@@ -1,10 +1,10 @@
-import {aquariumLighting,lightingState} from './lighting.js?v=2026-10-17-clownfish-lighting-c-1';
-import * as T from './vendor/three.module.js?v=2026-10-17-clownfish-lighting-c-1';
-import {createFish} from './fish.js?v=2026-10-17-clownfish-lighting-c-1';
+import {aquariumLighting,lightingState} from './lighting.js?v=2026-10-17-expedition-crew-1';
+import * as T from './vendor/three.module.js?v=2026-10-17-expedition-crew-1';
+import {createFish} from './fish.js?v=2026-10-17-expedition-crew-1';
 export function setupCare(asset,{progress,pause,commit}){
  const dialog=document.createElement('dialog');dialog.id='care-dialog';dialog.className='care-dialog';dialog.innerHTML='<h2 id="care-title"></h2><canvas id="care-canvas" aria-label="관리 수조의 생물과 먹이 반응"></canvas><p id="care-status" role="status"></p><div class="care-actions"><button id="care-action"></button><button id="close-care" class="secondary">관리동으로</button></div>';document.body.append(dialog);
  const $=id=>dialog.querySelector('#'+id),renderer=new T.WebGLRenderer({canvas:$('care-canvas'),antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;
- const scene=new T.Scene();aquariumLighting(scene);scene.background=new T.Color('#17475d');
+ const scene=new T.Scene();aquariumLighting(scene,{renderer});scene.background=new T.Color('#17475d');
  const camera=new T.PerspectiveCamera(40,1,.1,30);camera.position.set(0,.6,4.2);camera.lookAt(0,0,0);
  const models={fish:createFish(asset,{length:2.2})};Object.values(models).forEach(n=>scene.add(n));
  const pellets=new T.InstancedMesh(new T.SphereGeometry(.045,6,4),new T.MeshLambertMaterial({color:'#debc76'}),12);scene.add(pellets);const dummy=new T.Object3D();

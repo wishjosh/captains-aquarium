@@ -12,3 +12,12 @@ Names shortened locally; original meshes, embedded atlas and animation clips ret
 CC0 declaration: https://quaternius.com/packs/piratekit.html
 Fixed public distribution, hashes and original-byte limitation: campus-sources.json.
 Captain Weapon_Cutlass is hidden at runtime; original model/rig preserved.
+
+2026-10-17 crew roles: Characters_Anne.gltf (management), Characters_Mako.gltf
+(exhibition), Characters_Henry.gltf (transport assistant). These files are from the
+same attributed, fixed Pirate Kit mirror used for the campus models.
+See crew-sources.json for original filenames, URLs, byte counts and SHA256.
+Creator-download byte identity has not been compared. Source meshes, embedded
+textures, rigs and animation clips are retained; Weapon_* props are hidden on
+runtime instances. Crew display labels and the transport tank are game-authored.
+Pier ladder geometry is authored in expedition.js; no external ladder asset.

@@ -8,6 +8,9 @@ Game asset: clownfish-native.glb. SHA256: c1ca37d17b6f0158ce411c178bf7dba214adaf
 Exported from the unchanged source by official Blender 4.5.14 LTS / glTF I/O v4.5.51.
 Original geometry, materials, skin weights and six source actions exported.
 Unsupported source interpolation is baked into animation samples by the exporter.
-No per-eye processing, painted reflection image, color override or new geometry.
-The game uses Three.js standard RoomEnvironment for scene lighting.
+Previous display B used a private Eyes copy with roughness 0.16.
+Current approved white-eye design uses a private Eyes material with procedural sclera, large black pupils and small highlights.
+Eye surface style is an added game design, not part of the unmodified Quaternius source.
+Native GLB materials, geometry, body colours, skeleton and animations remain unmodified. No new geometry or raster eye texture is added.
+The game uses B scene-wide reflection cards, hemisphere/directional lighting and exposure 1.2.
 The creator's promotional render setup has not been reproduced or verified.

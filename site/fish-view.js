@@ -1,8 +1,8 @@
-import {aquariumLighting,lightingState} from './lighting.js?v=2026-10-17-clownfish-lighting-c-1';
-import * as THREE from './vendor/three.module.js?v=2026-10-17-clownfish-lighting-c-1';
-import {loadFish,createFish} from './fish.js?v=2026-10-17-clownfish-lighting-c-1';
-import {savedDecorations,DECOR_KINDS} from './progress.js?v=2026-10-17-clownfish-lighting-c-1';
-import {paintDecorations,clearDecorations} from './decorations.js?v=2026-10-17-clownfish-lighting-c-1';
+import {aquariumLighting,lightingState} from './lighting.js?v=2026-10-17-expedition-crew-1';
+import * as THREE from './vendor/three.module.js?v=2026-10-17-expedition-crew-1';
+import {loadFish,createFish} from './fish.js?v=2026-10-17-expedition-crew-1';
+import {savedDecorations,DECOR_KINDS} from './progress.js?v=2026-10-17-expedition-crew-1';
+import {paintDecorations,clearDecorations} from './decorations.js?v=2026-10-17-expedition-crew-1';
 const $=id=>document.getElementById(id),canvas=$('fish-canvas'),tank=canvas.parentElement;
 const species='clownfish';
 const controls=[$('pause'),$('zoom'),$('speed')];controls.forEach(n=>n.disabled=true);
@@ -20,7 +20,7 @@ canvas.addEventListener('pointermove',e=>{if(gesture?.id!==e.pointerId)return;st
 function release(){gesture=null;}canvas.addEventListener('pointerup',release);canvas.addEventListener('pointercancel',release);canvas.addEventListener('lostpointercapture',release);window.addEventListener('blur',release);document.addEventListener('visibilitychange',()=>{last=0;release();});
 try{
  renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'low-power'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;
- scene=new THREE.Scene();aquariumLighting(scene);camera=new THREE.PerspectiveCamera(48,1,.1,40);
+ scene=new THREE.Scene();aquariumLighting(scene,{renderer});camera=new THREE.PerspectiveCamera(48,1,.1,40);
  const asset=await loadFish();if(disposed)throw new Error('Viewer closed');fish=createFish(asset,{length:1.65});scene.add(fish);
  const sand=new THREE.Mesh(new THREE.SphereGeometry(1,28,12),new THREE.MeshLambertMaterial({color:'#e6d5a5'}));sand.scale.set(3,.16,3);sand.position.y=-1.2;scene.add(sand);
  decorRoot=new THREE.Group();decorRoot.position.y=-1.04;scene.add(decorRoot);const query=new URLSearchParams(location.search).get('decor'),parts=query?.split(',');const items=species!=='clownfish'?[null,null,null]:parts?.length===3&&parts.every(k=>k===''||DECOR_KINDS.includes(k))?parts.map(k=>k||null):savedDecorations();paintDecorations(decorRoot,items);

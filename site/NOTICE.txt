@@ -6,3 +6,5 @@ Kenney Nature Kit: CC0; see assets/nature/LICENSE.txt.
 Public Aquarium and Marine Centre: provider declares CC0; see assets/aquarium/LICENSE.txt.
 No other marine animal model is used in this build.
 No blanket license has been selected for the game's original code.
+
+Crew: Pirate Kit Anne, Henry and Mako; see assets/pirate/crew-sources.json. Weapons hidden on runtime instances. Transport tank and pier ladder: game-authored.

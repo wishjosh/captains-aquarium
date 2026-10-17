@@ -1,5 +1,5 @@
-import {defaultExhibition,SLOT_NAMES,slotFor} from './exhibition.js?v=2026-10-17-clownfish-lighting-c-1';
-import {SAVE_KEY,SAVE_VERSION,emptyProgress,parseSave,hasStarterDecor,writeSave} from './progress.js?v=2026-10-17-clownfish-lighting-c-1';
+import {defaultExhibition,SLOT_NAMES,slotFor} from './exhibition.js?v=2026-10-17-expedition-crew-1';
+import {SAVE_KEY,SAVE_VERSION,emptyProgress,parseSave,hasStarterDecor,writeSave} from './progress.js?v=2026-10-17-expedition-crew-1';
 
 export const BACKUP_KEY=SAVE_KEY+'-before-import';
 export const MAX_SAVE_BYTES=65536;
