@@ -1,5 +1,5 @@
-import * as THREE from './vendor/three.module.js';
-import { GLTFLoader } from './vendor/GLTFLoader.js';
+import * as THREE from './vendor/three.module.js?v=2026-10-17-clownfish-lighting-c-1';
+import { GLTFLoader } from './vendor/GLTFLoader.js?v=2026-10-17-clownfish-lighting-c-1';
 
 const loader = new GLTFLoader();
 const names = ['captain','dock','house','palm','rock','anchor','barrel','chest'];

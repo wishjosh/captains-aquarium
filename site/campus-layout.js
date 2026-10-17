@@ -1,10 +1,10 @@
-import {blocked as legacyBlocked,SPOTS as legacySpots} from './layout.js';
+import {blocked as legacyBlocked,SPOTS as legacySpots} from './layout.js?v=2026-10-17-clownfish-lighting-c-1';
 export const CAMPUS_START={area:'harbor',x:0,z:5.5};
 export const DOORS={management:{x:-8,z:1.15,to:'management',label:'관리동 문'},exhibition:{x:7.3,z:-3.35,to:'exhibition',label:'전시관 문'}};
 export const EXITS={management:{x:-10.6,z:11.65,to:'harbor',label:'광장으로',dx:0,dz:1},exhibition:{x:0,z:-2.75,to:'harbor',label:'광장으로',dx:0,dz:1}};
 export const SPAWNS={management:{x:-10.6,z:10.4},exhibition:{x:0,z:-3.6}};
-import {MANAGEMENT,managementBlocked,managementClear,MANAGEMENT_POINTS} from './management-layout.js';
-export {MANAGEMENT} from './management-layout.js';
+import {MANAGEMENT,managementBlocked,managementClear,MANAGEMENT_POINTS} from './management-layout.js?v=2026-10-17-clownfish-lighting-c-1';
+export {MANAGEMENT} from './management-layout.js?v=2026-10-17-clownfish-lighting-c-1';
 export const COAST={sea:{x:12,z:14.3},'chromis-sea':{x:-11,z:8},'jelly-sea':{x:16,z:6.1}};
 export function spotsFor(area){return area==='harbor'?{sea:COAST.sea}:area==='management'?{management:MANAGEMENT.intake}:{fish:legacySpots.fish,chromis:legacySpots.chromis,jelly:legacySpots.jelly};}
 export function blocked(area,x,z,exhibition){

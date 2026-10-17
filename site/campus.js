@@ -1,5 +1,5 @@
-import * as T from './vendor/three.module.js';
-import {GLTFLoader} from './vendor/GLTFLoader.js';
+import * as T from './vendor/three.module.js?v=2026-10-17-clownfish-lighting-c-1';
+import {GLTFLoader} from './vendor/GLTFLoader.js?v=2026-10-17-clownfish-lighting-c-1';
 export async function loadCampus(){const l=new GLTFLoader();const paths={large:'assets/pirate/house1.gltf',small:'assets/pirate/house3.gltf',rock:'assets/nature/rock_largeA.glb',rockB:'assets/nature/rock_largeC.glb'};return Object.fromEntries(await Promise.all(Object.entries(paths).map(async([k,p])=>[k,await l.loadAsync(p)])));}
 export function createCampus(kit,assets){const scene=new T.Group(),a={...kit,...assets};
 const mat=(c,extra={})=>new T.MeshStandardMaterial({color:c,roughness:.88,...extra});

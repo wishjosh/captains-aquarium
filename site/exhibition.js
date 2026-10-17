@@ -1,9 +1,9 @@
-export const SPECIES=['fish','chromis','jelly'];
-export const SLOT_IDS=[...SPECIES];
+export const SPECIES=['fish'];
+export const SLOT_IDS=['fish','chromis','jelly'];
 export const SLOT_NAMES={fish:'1번',chromis:'2번',jelly:'3번'};
 export const SHAPES={rectangle:'벽면형',cylinder:'기둥형'};
 export const stateFor=(p,kind)=>kind==='fish'?p:p[kind];
-export const defaultExhibition=p=>Object.fromEntries(SLOT_IDS.map(id=>[id,{shape:id==='jelly'?'cylinder':'rectangle',kind:p&&stateFor(p,id).placed?id:null}]));
+export const defaultExhibition=p=>Object.fromEntries(SLOT_IDS.map(id=>[id,{shape:id==='jelly'?'cylinder':'rectangle',kind:p&&SPECIES.includes(id)&&stateFor(p,id).placed?id:null}]));
 export const slotFor=(p,kind)=>SLOT_IDS.find(id=>p.exhibition[id].kind===kind)||null;
 export const placementTarget=(p,kind)=>slotFor(p,kind)||(p.exhibition[kind].kind===null?kind:SLOT_IDS.find(id=>!p.exhibition[id].kind));
 export function validExhibition(p,exhibition){

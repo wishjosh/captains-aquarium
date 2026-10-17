@@ -1,53 +1,13 @@
-Quaternius — Animated Cute Fish Pack (February 2020)
-Original author: Quaternius, https://quaternius.com/
-Original pack/license declaration: https://quaternius.com/packs/cutefish.html
-CC0 1.0 Universal: https://creativecommons.org/publicdomain/zero/1.0/
-
-Model: ButterflyFish; the original FBX is distributed in the author's public folder.
-The author's FBX downloads returned a Google Drive quota-exceeded page on 2026-10-13.
-This local study uses a glTF conversion attributed to Quaternius by the following public project:
-https://github.com/Nihdao/three-aquarium-challenge
-Exact converted file:
-https://github.com/Nihdao/three-aquarium-challenge/blob/b8537cefe29c707971e0fa5621394ba8af3f86a3/public/assets/ButterflyFish.glb
-Conversion generator in file: FBX2glTF v0.9.7
-Retrieved: 2026-10-13
-SHA256: D43E7F55AE3FFF23DD48C09661382836B1498F773C561F486D9A0277D0590853
-Only the fish model is reused; no project code or custom aquarium assets are reused.
-The converted file contains one source skin and six source animation clips.
-Byte-for-byte identity with the author's FBX has not been verified.
-
-Local derivative, revised 2026-10-13 after silhouette feedback:
-dist/stripey-geometry.js rebuilds the body, eyes and fins as code-generated geometry.
-dist/fish.js reuses a clone of the source skeleton and Swimming_Normal animation,
-and assigns new normalized skin weights to the new geometry. The source GLB,
-its original skin weights and all six source clips remain untouched.
-The first variant only shortened the snout and changed thickness, eyes and stripes;
-that silhouette was rejected by the user and is superseded by the rebuilt surface.
-Shape references viewed (not copied or embedded as game assets):
-https://fishdb.sinica.edu.tw/taxon/381916-fishdb
-https://minna-museum.jp/data/1757
-The revised silhouette is still a stylized visual study pending user review,
-not a finished species-accurate model.
-
-Cute detail revision, 2026-10-13: the user approved the rebuilt silhouette and
-requested larger eyes and continued Cute Fish Pack styling. The body and fin
-outline are unchanged; code-generated eye lenses, golden rims, highlights,
-subtle faceted shading and a few tail fin rays restore the cute detail language.
-
-2026-10-13: Chromis notata uses an independently authored simplified surface in chromis-geometry.js, retaining the same CC0 source skeleton and swimming clip. No external reference photographs or illustrations are embedded.
-
-CURRENT USAGE — 2026-10-16 source-geometry policy supersedes the custom-surface revisions above.
-The live runtime preserves original model geometry, skin weights, bones, eyes, fins and swimming clips.
-ButterflyFish approximates stripey; ClownFish approximates Chromis notata.
-Only instance materials (colour and procedural markings) are changed; uniform scale sets display size.
-No stripey-geometry.js or chromis-geometry.js is loaded by the current runtime.
-These are stylized source-model approximations, not species-accurate reconstructions.
-
-Additional original converted model: ClownFish.glb
-https://github.com/Nihdao/three-aquarium-challenge/blob/b8537cefe29c707971e0fa5621394ba8af3f86a3/public/assets/ClownFish.glb
-Local filename: clown-source.glb
-Retrieved: 2026-10-16
-SHA256: 9607de8de8a0ac2d857f271272e70e6d8d3fd19852d979c2cfbe9eafe1e4fcc5
-One source skin (three material primitives), original Armature|Swim clip.
-The author's official Cute Fish Pack CC0 declaration was rechecked on 2026-10-16.
-Byte identity with the author's original FBX remains unverified for converted files.
+Quaternius — Animated Cute Fish Pack
+Official source: Clownfish.blend, CC0.
+Author: Quaternius. https://quaternius.com/packs/cutefish.html
+Official folder: https://drive.google.com/drive/folders/1QK5NCgIxUZ1cYGzVwaNfcfEiQhvczqUB
+Download: https://drive.google.com/uc?export=download&id=1nLwQKej4fZKFQ2-jGXtiKM6-RMXH6XG9
+Retrieved 2026-10-16. Source SHA256: 8aa829c8a3538b469edab5d5a68391aadc30258865075e4f15c0ff174a96ddce
+Game asset: clownfish-native.glb. SHA256: c1ca37d17b6f0158ce411c178bf7dba214adaff447a92ff6d5c31d0733dd29f5
+Exported from the unchanged source by official Blender 4.5.14 LTS / glTF I/O v4.5.51.
+Original geometry, materials, skin weights and six source actions exported.
+Unsupported source interpolation is baked into animation samples by the exporter.
+No per-eye processing, painted reflection image, color override or new geometry.
+The game uses Three.js standard RoomEnvironment for scene lighting.
+The creator's promotional render setup has not been reproduced or verified.

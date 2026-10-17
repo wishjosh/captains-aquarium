@@ -1,6 +1,6 @@
-import {exportSave,importSave,progressForStage,commitSave,readBackup,describeProgress,MAX_SAVE_BYTES,BACKUP_KEY} from './save-transfer.js';
+import {exportSave,importSave,progressForStage,commitSave,readBackup,describeProgress,MAX_SAVE_BYTES,BACKUP_KEY} from './save-transfer.js?v=2026-10-17-clownfish-lighting-c-1';
 
-import {MIGRATION_KEY,EDITOR_MIGRATION_KEY,CAMPUS_BACKUP_KEY,DIVE_BACKUP_KEY} from './progress.js';
+import {MIGRATION_KEY,EDITOR_MIGRATION_KEY,CAMPUS_BACKUP_KEY,DIVE_BACKUP_KEY,ORIGINAL_COLLECTION_KEY} from './progress.js?v=2026-10-17-clownfish-lighting-c-1';
 
 export function setupTransfer({snapshot,normalise,onCommit,pause,onClose}){
   const $=id=>document.getElementById(id),dialog=$('transfer-dialog'),status=$('transfer-status'),preview=$('transfer-preview'),apply=$('apply-transfer');
@@ -18,6 +18,7 @@ export function setupTransfer({snapshot,normalise,onCommit,pause,onClose}){
     try{$('export-before-dive').disabled=!localStorage.getItem(DIVE_BACKUP_KEY);$('export-before-campus').disabled=!localStorage.getItem(CAMPUS_BACKUP_KEY);$('export-before-exhibition').disabled=!localStorage.getItem(EDITOR_MIGRATION_KEY);$('restore-backup').disabled=!localStorage.getItem(BACKUP_KEY);$('export-previous-map').disabled=!localStorage.getItem(MIGRATION_KEY);}catch{$('export-before-dive').disabled=true;$('export-before-campus').disabled=true;$('export-before-exhibition').disabled=true;$('restore-backup').disabled=true;$('export-previous-map').disabled=true;}
     dialog.showModal();
   }
+  const previous=document.createElement('button');previous.id='export-original-collection';previous.className='secondary';previous.textContent='개편 전 생물 기록 내보내기';dialog.append(previous);previous.onclick=()=>{try{const raw=localStorage.getItem(ORIGINAL_COLLECTION_KEY)||JSON.stringify(snapshot().legacyProgress);if(!raw||raw==='null')throw Error('No previous collection');download(raw,'captains-aquarium-before-clownfish.json');message('개편 전 원본 생물 기록을 내보냈어요.');}catch{message('보관된 이전 생물 기록이 없어요.');}};
   $('open-transfer').addEventListener('click',open);
   $('close-transfer').addEventListener('click',()=>dialog.close());
   dialog.addEventListener('close',()=>{ticket++;clear();onClose();});

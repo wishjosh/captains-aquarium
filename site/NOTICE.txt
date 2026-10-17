@@ -1,34 +1,8 @@
-Captain's Aquarium — review build
-Runtime preparation: 2026-10-14
-This directory is a static browser game prepared for review, not a published release.
-
-Third-party components and assets:
-- Three.js: MIT; see vendor/THREE-LICENSE.txt.
-- Quaternius Pirate Kit: CC0; see assets/pirate/LICENSE.txt and campus-sources.json.
-- Kenney Nature Kit: CC0; see assets/nature/LICENSE.txt and campus-sources.json.
-- Quaternius Animated Cute Fish Pack source skeleton/model/animation:
-  see assets/fish/LICENSE.txt for CC0 declaration, conversion provenance,
-  exact source commit/hash and the unverified FBX byte identity.
-- Public Aquarium and Marine Centre by 3DAssets.dev: provider declares CC0;
-  see assets/aquarium/LICENSE.txt for original asset URLs and hashes.
-- Generated PNG illustrations: see assets/IMAGE-SOURCES.txt.
-
-The third-party licenses apply to their respective materials only.
-No blanket open-source or CC0 license has been selected for the game's
-original code, generated illustrations or authored derivative geometry.
-
-Underwater review update:
-- Reuses the above Cute Fish Pack source model for six ambient fish.
-- Reuses the above Kenney Nature Kit rocks with instance material adjustments.
-- Seabed, seaweed ribbons, particles, surface and return marker are authored
-  game geometry. No Coral Reef Kit files are distributed in this build.
-
-Moon jelly update (2026-10-16):
-- Jellyfish by Poly by Google, CC BY 3.0.
-  https://poly.pizza/m/5PxIqPamrag
-  https://creativecommons.org/licenses/by/3.0/
-  Modified into a stylized moon jelly: domed and deforming source bell,
-  short rim tentacles, four ruffled oral arms, inward-opening horseshoe
-  markings, translucent materials and contraction/relaxation/coasting animation.
-  Original and adapted asset terms: assets/jelly/LICENSE.txt.
-  Attribution is also available in game Help and the 3D observation viewer.
+Captain's Aquarium — native clownfish local review build, 2026-10-17
+Three.js r180, GLTFLoader, SkeletonUtils, RoomEnvironment: MIT; see vendor/THREE-LICENSE.txt.
+Quaternius Pirate Kit: CC0; see assets/pirate/LICENSE.txt.
+Quaternius Animated Cute Fish Pack: official Clownfish.blend export, CC0; see assets/fish/LICENSE.txt.
+Kenney Nature Kit: CC0; see assets/nature/LICENSE.txt.
+Public Aquarium and Marine Centre: provider declares CC0; see assets/aquarium/LICENSE.txt.
+No other marine animal model is used in this build.
+No blanket license has been selected for the game's original code.

@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#192d46">
-  <meta name="description" content="손가락으로 탐험하고 범돔을 수집해 나만의 제주 수족관에 데려와요.">
+  <meta name="description" content="손가락으로 탐험하고 흰동가리를 수집해 나만의 제주 수족관에 데려와요.">
   <title>선장의 아쿠아리움 · 제주</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="game.css">
-  <link rel="stylesheet" href="transfer.css">
+  <link rel="stylesheet" href="game.css?v=2026-10-17-clownfish-lighting-c-1">
+  <link rel="stylesheet" href="transfer.css?v=2026-10-17-clownfish-lighting-c-1">
 </head>
 <body>
   <main class="game-shell">
@@ -20,42 +20,41 @@
       <canvas id="world" tabindex="0" aria-label="화면 왼쪽을 누른 채 끌어서 이동하고 오른쪽 행동 버튼을 누르세요. 컴퓨터에서는 방향키로 이동할 수 있습니다."></canvas>
       <div class="mission-card">
         <div class="mission-top"><span id="chapter">첫 번째 임무</span><span id="mission-count">0 / 4</span></div>
-        <p id="mission-title">바다에서 범돔을 만나자!</p>
+        <p id="mission-title">바다에서 흰동가리를 만나자!</p>
         <p id="mission-detail">아래쪽 바다 탐사 구역으로 가 보세요.</p>
         <div class="mission-dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
       </div>
-      <div class="bag"><img src="assets/stripey-flat.png" alt=""><span id="bag-count">가방 0</span></div>
+      <div class="bag"><span aria-hidden="true">🐠</span><span id="bag-count">가방 0</span></div>
       <div id="waypoint" class="waypoint" aria-hidden="true">↓ 바다 탐사</div>
       <p class="rotate-hint">휴대폰을 가로로 돌리면 더 넓게 볼 수 있어요</p>
       <p class="move-hint" aria-hidden="true">왼쪽을 끌어 이동</p>
       <div id="drag-guide" class="drag-guide" hidden><span></span></div>
       <p id="toast" class="toast" role="status" aria-live="polite" hidden></p>
       <div id="loading" class="scene-message" role="status"><span class="wave-icon">≈</span>선장님과 제주 항구를 준비하고 있어요…</div>
-      <div id="game-error" class="scene-message" role="alert" hidden><p>3D 수족관을 열지 못했어요.<br>Chrome에서 다시 열어 주세요.</p><button type="button" id="retry">다시 열기</button><a href="view.html">생물 감상 화면 열기</a></div>
+      <div id="game-error" class="scene-message" role="alert" hidden><p>3D 수족관을 열지 못했어요.<br>Chrome에서 다시 열어 주세요.</p><button type="button" id="retry">다시 열기</button><a href="fish-view.html?v=2026-10-17-clownfish-lighting-c-1">생물 감상 화면 열기</a></div>
       <div class="bottom-hud">
         <div class="nearby"><span id="nearby-title">왼쪽을 누르고 끌어 보세요</span><span id="nearby-detail">손을 떼면 멈춰요</span></div>
-        <div class="exhibition-actions"><button id="observe" class="observe" type="button" hidden>범돔 가까이 보기</button><button id="edit-exhibition" class="observe" type="button" hidden>전시 편집</button></div>
-        <button id="interact" class="interact" type="button" hidden>범돔 수집하기</button>
+        <div class="exhibition-actions"><button id="observe" class="observe" type="button" hidden>흰동가리 가까이 보기</button><button id="edit-exhibition" class="observe" type="button" hidden>전시 편집</button></div>
+        <button id="interact" class="interact" type="button" hidden>흰동가리 수집하기</button>
       </div>
     </section>
-    <footer class="game-footer"><span id="save-status">이 기기에 저장돼요</span><span id="collection-count">수조 친구 0 / 3종</span></footer>
+    <footer class="game-footer"><span id="save-status">이 기기에 저장돼요</span><span id="collection-count">수조 친구 0 / 1종</span></footer>
   </main>
   <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
     <p>물속: 왼쪽 조이스틱으로 헤엄치고 오른쪽 화면을 끌어 둘러봐요. 위아래를 보며 전진하면 수심이 바뀌어요. 입구의 붉은 고리와 줄로 돌아오면 귀환할 수 있어요.</p><h2 id="help-title">선장님, 첫 탐험을 시작해요</h2>
-    <ol><li>휴대폰을 가로로 놓고 왼쪽 조이스틱으로 이동해요.</li><li>부두에서 잠수하고 바다 속 친구를 찾아 가까이 가요.</li><li>상황별 행동 버튼으로 한 마리를 수집해요.</li><li>붉은 고리와 줄로 돌아가 귀환한 뒤 왼쪽 관리동에 입수해요.</li><li>상태를 확인하고 먹이 반응을 보면 다음 친구 수집이 열려요.</li><li>전시관 배치·관찰·꾸미기는 원하는 때 별도로 즐겨요.</li></ol>
+    <ol><li>휴대폰을 가로로 놓고 왼쪽 조이스틱으로 이동해요.</li><li>부두에서 잠수하고 바다 속 친구를 찾아 가까이 가요.</li><li>상황별 행동 버튼으로 한 마리를 수집해요.</li><li>붉은 고리와 줄로 돌아가 귀환한 뒤 왼쪽 관리동에 입수해요.</li><li>상태를 확인하고 먹이 반응을 살펴봐요.</li><li>전시관 배치·관찰·꾸미기는 원하는 때 별도로 즐겨요.</li></ol>
     <p>문을 향해 1초간 계속 걸으면 출입해요. 가까이에서 ‘문 열기’를 눌러도 돼요. 구릉과 오솔길은 지금은 배경이에요. 전시된 수조는 가까이에서 짧게 눌러 관찰할 수도 있어요. 수집·입수·배치는 오른쪽 버튼으로 해요. 컴퓨터에서는 방향키 또는 WASD로 걸을 수 있어요.</p>
     <p class="storage-note">진행은 이 기기의 브라우저에 저장돼요. 다른 기기와는 연동되지 않으며, 브라우저의 사이트 데이터를 지우면 기록도 지워져요.</p>
-    <p>검토 버전: 2026-10-16 · 관리동 데크·보름달물해파리</p>
-    <p class="asset-credit">해파리 원본: <a href="https://poly.pizza/m/5PxIqPamrag" target="_blank" rel="noopener">Jellyfish · Poly by Google</a> · <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC BY 3.0</a>. 보름달물해파리에 맞춰 형태·색상·움직임을 수정했어요.</p>
+    <p>검토 버전: 2026-10-17-clownfish-lighting-c-1 · 흰동가리 · C 조명</p>
     <button id="open-transfer" type="button">저장 기록 옮기기</button>
     <button id="close-help" type="button">알겠어요</button>
   </dialog>
   <dialog id="viewer-dialog" class="viewer-dialog" aria-label="수조 가까이 보기">
-    <div class="viewer-bar"><button id="close-viewer" type="button">← 수족관으로</button><span id="viewer-title">범돔 수조</span></div>
+    <div class="viewer-bar"><button id="close-viewer" type="button">← 수족관으로</button><span id="viewer-title">흰동가리 수조</span></div>
     <iframe id="viewer-frame" title="움직이는 해양생물 감상" src="about:blank"></iframe>
   </dialog>
   <dialog id="decorate-dialog" class="decorate-dialog" aria-labelledby="decor-title">
-    <header class="decor-heading"><div><span>제주 · 첫 꾸미기</span><h2 id="decor-title">범돔의 집을 꾸며요</h2></div><button id="cancel-decor" type="button">취소</button></header>
+    <header class="decor-heading"><div><span>제주 · 첫 꾸미기</span><h2 id="decor-title">흰동가리의 집을 꾸며요</h2></div><button id="cancel-decor" type="button">취소</button></header>
     <div class="decor-preview"><canvas id="decor-canvas" aria-label="장식을 놓을 세 자리. 아래 자리 버튼으로도 놓을 수 있어요."></canvas><p>장식을 고르고 동그란 자리를 눌러요</p><p id="decor-error" role="alert" hidden>미리보기를 열지 못했어요. 취소한 뒤 다시 열어 주세요.</p></div>
     <section class="decor-tools" aria-label="수조 장식 고르기">
       <div class="decor-choices"><button data-decor-kind="rock" aria-pressed="true"><span aria-hidden="true">🪨</span>제주 돌</button><button data-decor-kind="seaweed" aria-pressed="false"><span aria-hidden="true">🌿</span>바다풀</button><button data-decor-kind="erase" aria-pressed="false"><span aria-hidden="true">↶</span>치우기</button></div>
@@ -77,11 +76,9 @@
     <p id="management-summary" role="status"></p>
     <p>해안에서 만난 친구는 여기서 입수해요. 보관 중인 친구는 전시관의 빈 수조에 배치하거나 전시 편집에서 자리를 고를 수 있어요.</p>
     <ul class="management-list">
-      <li><strong>범돔</strong><span id="management-fish"></span><button id="care-fish" class="secondary" type="button">돌보기</button></li>
-      <li><strong>자리돔</strong><span id="management-chromis"></span><button id="care-chromis" class="secondary" type="button">돌보기</button></li>
-      <li><strong>해파리</strong><span id="management-jelly"></span><button id="care-jelly" class="secondary" type="button">돌보기</button></li>
+      <li><strong>흰동가리</strong><span id="management-fish"></span><button id="care-fish" class="secondary" type="button">돌보기</button></li>
     </ul>
-    <p>전시 중인 친구는 전시관에서 관찰해요. 범돔의 수조 꾸미기도 그대로 할 수 있어요. 관리동으로 돌아온 친구의 관찰·꾸미기 달성 기록은 남아요.</p>
+    <p>전시 중인 친구는 전시관에서 관찰해요. 흰동가리의 수조 꾸미기도 그대로 할 수 있어요. 관리동으로 돌아온 친구의 관찰·꾸미기 달성 기록은 남아요.</p>
     <button id="close-management" type="button">관리동으로 돌아가기</button>
   </dialog>
   <dialog id="transfer-dialog" class="help-dialog transfer-dialog" aria-labelledby="transfer-title">
@@ -101,8 +98,7 @@
         <p>예전 사이트에서 파일을 꺼낼 수 없을 때 사용해요. 원본을 읽는 기능이 아니라, 직접 고른 달성 상태를 복원해요. 예전 버전에서 수조에 넣은 친구는 전시관 배치 완료로 고르세요.</p>
         <form id="manual-restore">
           <label for="restore-stage">마지막으로 마친 단계<select id="restore-stage">
-            <option value="0">아직 수집 전</option><option value="1">범돔 운반 중</option><option value="11">범돔 관리동 보관 · 전시 전</option><option value="2">범돔 전시관 배치 완료</option><option value="3">범돔 관찰 완료</option><option value="4">범돔 꾸미기 완료</option><option value="5">자리돔 운반 중</option><option value="12">자리돔 관리동 보관 · 전시 전</option><option value="6">자리돔 전시관 배치 완료</option><option value="7">자리돔 관찰 완료</option><option value="8">해파리 운반 중</option><option value="13">해파리 관리동 보관 · 전시 전</option><option value="9">해파리 전시관 배치 완료</option><option value="10">제주 3종 관찰 완료</option>
-          </select></label>
+            <option value="0">아직 수집 전</option><option value="1">흰동가리 운반 중</option><option value="11">흰동가리 관리동 보관</option><option value="2">흰동가리 전시 배치</option><option value="3">흰동가리 관찰 완료</option><option value="4">흰동가리 꾸미기 완료</option></select></label>
           <p>장식은 현재 배치를 고르세요. 꾸미기 달성 뒤 장식을 치웠어도 달성 기록은 유지돼요. 위치는 안전한 시작점으로 옮겨요.</p>
           <label for="restore-slot-0">왼쪽 장식<select id="restore-slot-0"><option value="">빈 자리</option><option value="rock">제주 돌</option><option value="seaweed">바다풀</option></select></label>
           <label for="restore-slot-1">뒤쪽 장식<select id="restore-slot-1"><option value="">빈 자리</option><option value="rock">제주 돌</option><option value="seaweed">바다풀</option></select></label>
@@ -116,6 +112,6 @@
     <button id="apply-transfer" type="button" disabled>이 기록으로 바꾸기</button>
     <button id="close-transfer" class="secondary" type="button">게임으로 돌아가기</button>
   </dialog>
-  <script type="module" src="game.js"></script>
+  <script type="module" src="game.js?v=2026-10-17-clownfish-lighting-c-1"></script>
 </body>
 </html>
