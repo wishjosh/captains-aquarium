@@ -1,10 +1,17 @@
-Captain's Aquarium — native clownfish local review build, 2026-10-17
+Captain's Aquarium — underwater scenery and four marine friends review build, 2026-10-18
 Three.js r180, GLTFLoader, SkeletonUtils, RoomEnvironment: MIT; see vendor/THREE-LICENSE.txt.
 Quaternius Pirate Kit: CC0; see assets/pirate/LICENSE.txt.
 Quaternius Animated Cute Fish Pack: official Clownfish.blend export, CC0; see assets/fish/LICENSE.txt.
 Kenney Nature Kit: CC0; see assets/nature/LICENSE.txt.
 Public Aquarium and Marine Centre: provider declares CC0; see assets/aquarium/LICENSE.txt.
-No other marine animal model is used in this build.
+Quaternius Puffer, MoorishIdol and Cowfish: CC0; native source exports with approved display material variations. See assets/fish/jeju-four-sources.json.
 No blanket license has been selected for the game's original code.
 
 Crew: Pirate Kit Anne, Henry and Mako; see assets/pirate/crew-sources.json. Weapons hidden on runtime instances. Transport tank and pier ladder: game-authored.
+
+Underwater scenery (2026-10-18):
+Seaweed by Mohabins: https://poly.pizza/m/oYxUdpyc4u (CC0 1.0).
+Kelp by Poly by Google: https://poly.pizza/m/4cFllH6Iazk (CC BY 3.0).
+License: https://creativecommons.org/licenses/by/3.0/
+Runtime placement, uniform scaling and slow current bending added. Original GLBs retained.
+Credits and provenance: assets/underwater/LICENSE.txt and sources.json.

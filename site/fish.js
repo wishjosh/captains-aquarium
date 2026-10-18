@@ -1,7 +1,16 @@
-import * as T from './vendor/three.module.js?v=2026-10-17-expedition-crew-1';
-import {GLTFLoader} from './vendor/GLTFLoader.js?v=2026-10-17-expedition-crew-1';
-import {clone} from './vendor/SkeletonUtils.js?v=2026-10-17-expedition-crew-1';
-export const loadFish=()=>new GLTFLoader().loadAsync('assets/fish/clownfish-native.glb');
+import * as T from './vendor/three.module.js?v=2026-10-18-underwater-four-fish-1';
+import {GLTFLoader} from './vendor/GLTFLoader.js?v=2026-10-18-underwater-four-fish-1';
+import {clone} from './vendor/SkeletonUtils.js?v=2026-10-18-underwater-four-fish-1';
+import {SPECIES,SPECIES_INFO} from './species.js?v=2026-10-18-underwater-four-fish-1';
+import {prepareSpeciesAsset,createSpeciesFish} from './species-fish.js?v=2026-10-18-underwater-four-fish-1';
+const fishCache=new Map();
+async function loadOne(kind){
+ if(!SPECIES.includes(kind))throw Error('Unknown fish kind');
+ if(!fishCache.has(kind))fishCache.set(kind,(async()=>{const path=kind==='fish'?'clownfish-native.glb':SPECIES_INFO[kind].model+'.glb',url=new URL('./assets/fish/'+path,import.meta.url);const response=await fetch(url);if(!response.ok)throw Error('Fish asset unavailable: '+kind);const bytes=await response.arrayBuffer(),asset=await new GLTFLoader().parseAsync(bytes,'');return prepareSpeciesAsset(asset,bytes,kind);})().catch(e=>{fishCache.delete(kind);throw e;}));
+ return fishCache.get(kind);
+}
+export async function loadFish({kind='fish',collection=false}={}){if(!collection)return loadOne(kind);const all=await Promise.all(SPECIES.map(loadOne)),base=all[0];base.speciesAssets=Object.fromEntries(SPECIES.map((k,i)=>[k,all[i]]));return base;}
+
 // Source geometry, colours, skin weights and clips stay shared and unmodified.
 // Approved white-eye design affects only private eye materials; native and B remain available for comparisons.
 const WHITE_EYE_STYLE=Object.freeze({pupilAngle:1.02,forward:2.0,sparkleAngle:.075});
@@ -28,7 +37,8 @@ shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#includ
 `);};
  return material;
 }
-export function createFish(asset,{length=1.6,appearance='white-eye'}={}){
+export function createFish(asset,{length=1.6,appearance='white-eye',kind=asset.fishKind||'fish'}={}){
+ if(kind!=='fish')return createSpeciesFish(asset.speciesAssets?.[kind]||asset,{kind,length,appearance});
  const model=clone(asset.scene),mixer=new T.AnimationMixer(model),ownedMaterials=new Set();
  const clip=asset.animations.find(c=>c.name.endsWith('Swimming_Normal'));
  if(!clip)throw Error('Official swimming clip missing');
@@ -41,6 +51,6 @@ export function createFish(asset,{length=1.6,appearance='white-eye'}={}){
  });
  pivot.userData.update=dt=>mixer.update(dt);
  pivot.userData.dispose=()=>{mixer.stopAllAction();mixer.uncacheRoot(model);const skeletons=new Set();model.traverse(n=>{if(n.isSkinnedMesh)skeletons.add(n.skeleton);});skeletons.forEach(s=>s.dispose());ownedMaterials.forEach(m=>m.dispose());};
- pivot.userData.inspect=()=>({species:'clownfish',source:'Quaternius official Clownfish.blend / unmodified Blender glTF export',geometryChanged:false,recoloured:false,vertices,triangles,clip:clip.name,clipTime:action.time,appearance,materialOverrides:appearance==='B'||appearance==='white-eye',bodyRecoloured:false,sourceRecoloured:false,eyeSurfaceDesign:appearance==='white-eye'?'sclera-large-pupil-small-highlight':null,displayEyeRoughness:appearance==='white-eye'?.22:appearance==='B'?.16:.5,eyeReflection:appearance==='white-eye'?'display-only sclera, large pupils and small highlights; original geometry and material preserved':appearance==='B'?'B scene environment; private eye roughness .16; no painted pupil or reflection':'native material; no eye-specific processing',pose:model.getObjectByProperty('isSkinnedMesh',true).skeleton.bones.flatMap(b=>b.quaternion.toArray())});
+ pivot.userData.inspect=()=>({species:'clownfish',source:'Quaternius official Clownfish.blend / unmodified Blender glTF export',geometryChanged:false,recoloured:false,vertices,triangles,clip:clip.name,clipTime:action.time,appearance,materialOverrides:appearance==='B'||appearance==='white-eye',bodyRecoloured:false,sourceRecoloured:false,eyeSurfaceDesign:appearance==='white-eye'?'sclera-large-pupil-small-highlight':null,displayEyeRoughness:appearance==='white-eye'?.22:appearance==='B'?.16:.5,eyeReflection:appearance==='white-eye'?'display-only sclera, large pupils and small highlights; original geometry and material preserved':appearance==='B'?'B scene environment; private eye roughness .16; no painted pupil or reflection':'native material; no eye-specific processing',length,referenceCm:8,pose:model.getObjectByProperty('isSkinnedMesh',true).skeleton.bones.flatMap(b=>b.quaternion.toArray())});
  return pivot;
 }

@@ -1,5 +1,6 @@
-import {defaultExhibition,SLOT_NAMES,slotFor} from './exhibition.js?v=2026-10-17-expedition-crew-1';
-import {SAVE_KEY,SAVE_VERSION,emptyProgress,parseSave,hasStarterDecor,writeSave} from './progress.js?v=2026-10-17-expedition-crew-1';
+import {SPECIES_NAMES,stateFor} from './species.js?v=2026-10-18-underwater-four-fish-1';
+import {defaultExhibition,SLOT_NAMES,slotFor} from './exhibition.js?v=2026-10-18-underwater-four-fish-1';
+import {SAVE_KEY,SAVE_VERSION,emptyProgress,parseSave,hasStarterDecor,writeSave} from './progress.js?v=2026-10-18-underwater-four-fish-1';
 
 export const BACKUP_KEY=SAVE_KEY+'-before-import';
 export const MAX_SAVE_BYTES=65536;
@@ -31,4 +32,4 @@ export function readBackup(storage){
   if(data?.game!==GAME||data.format!==1)throw new Error('불러올 교체 전 기록이 없어요.');
   return clean(data.progress);
 }
-export function describeProgress(p){const at=slotFor(p,'fish');return '흰동가리: '+(at?SLOT_NAMES[at]+' 수조 전시 중':p.admitted?'관리동 보관':p.bag?'운반 중':'미수집')+'\n첫 돌봄: '+p.care.fish+'/2'+(p.legacyProgress?'\n이전 생물 기록은 별도 보존되어 함께 내보내집니다.':'');}
+export function describeProgress(p){return Object.entries(SPECIES_NAMES).map(([k,name])=>{const at=slotFor(p,k),s=stateFor(p,k);return name+': '+(at?SLOT_NAMES[at]+' 수조 전시 중':s.admitted?'관리동 보관':s.bag?'운반 중':'미수집')+' · 첫 돌봄 '+p.care[k]+'/2';}).join('\n')+(p.legacyProgress?'\n이전 생물 기록은 별도 보존되어 함께 내보내집니다.':'');}

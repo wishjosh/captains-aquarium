@@ -14,3 +14,8 @@ Eye surface style is an added game design, not part of the unmodified Quaternius
 Native GLB materials, geometry, body colours, skeleton and animations remain unmodified. No new geometry or raster eye texture is added.
 The game uses B scene-wide reflection cards, hemisphere/directional lighting and exposure 1.2.
 The creator's promotional render setup has not been reproduced or verified.
+
+Added 2026-10-18: Quaternius Puffer (official .blend), MoorishIdol and Cowfish (creator FBX distributed by Poly Pizza), all CC0.
+Source links, SHA256, triangle counts and six source action names: jeju-four-sources.json.
+Original GLBs are preserved. Runtime clones use the approved colour/pattern/eye materials.
+MoorishIdol joint weight sets 0 and 1 are both retained in skinning. No new animal geometry or authored animation.

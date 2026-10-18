@@ -1,10 +1,12 @@
-import {aquariumLighting,lightingState} from './lighting.js?v=2026-10-17-expedition-crew-1';
-import * as THREE from './vendor/three.module.js?v=2026-10-17-expedition-crew-1';
-import {loadFish,createFish} from './fish.js?v=2026-10-17-expedition-crew-1';
-import {savedDecorations,DECOR_KINDS} from './progress.js?v=2026-10-17-expedition-crew-1';
-import {paintDecorations,clearDecorations} from './decorations.js?v=2026-10-17-expedition-crew-1';
+import {SPECIES,SPECIES_INFO,fishLength} from './species.js?v=2026-10-18-underwater-four-fish-1';
+import {aquariumLighting,lightingState} from './lighting.js?v=2026-10-18-underwater-four-fish-1';
+import * as THREE from './vendor/three.module.js?v=2026-10-18-underwater-four-fish-1';
+import {loadFish,createFish} from './fish.js?v=2026-10-18-underwater-four-fish-1';
+import {savedDecorations,DECOR_KINDS} from './progress.js?v=2026-10-18-underwater-four-fish-1';
+import {paintDecorations,clearDecorations} from './decorations.js?v=2026-10-18-underwater-four-fish-1';
 const $=id=>document.getElementById(id),canvas=$('fish-canvas'),tank=canvas.parentElement;
-const species='clownfish';
+const requested=new URLSearchParams(location.search).get('kind'),kind=SPECIES.includes(requested)?requested:'fish',info=SPECIES_INFO[kind],species=kind==='fish'?'clownfish':kind;
+$('species-name').textContent=info.name;$('species-description').textContent=info.description;document.title=info.name+' · 가까이 보기';tank.setAttribute('aria-label',info.name+' 가까이 관찰');canvas.setAttribute('aria-label','헤엄치는 '+info.name+'. 화면을 끌면 다른 방향에서 볼 수 있어요.');$('loading').textContent=info.name+' 친구를 만나고 있어요…';document.querySelector('.study-note').textContent='Quaternius Cute Fish Pack · 원본 형태·수영 동작 · 시안의 눈과 색 적용';
 const controls=[$('pause'),$('zoom'),$('speed')];controls.forEach(n=>n.disabled=true);
 if(window.self===window.top)$('back-game').hidden=false;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
@@ -21,7 +23,7 @@ function release(){gesture=null;}canvas.addEventListener('pointerup',release);ca
 try{
  renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'low-power'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;
  scene=new THREE.Scene();aquariumLighting(scene,{renderer});camera=new THREE.PerspectiveCamera(48,1,.1,40);
- const asset=await loadFish();if(disposed)throw new Error('Viewer closed');fish=createFish(asset,{length:1.65});scene.add(fish);
+ const asset=await loadFish({kind});if(disposed)throw new Error('Viewer closed');fish=createFish(asset,{kind,length:fishLength(kind,'viewer')});scene.add(fish);
  const sand=new THREE.Mesh(new THREE.SphereGeometry(1,28,12),new THREE.MeshLambertMaterial({color:'#e6d5a5'}));sand.scale.set(3,.16,3);sand.position.y=-1.2;scene.add(sand);
  decorRoot=new THREE.Group();decorRoot.position.y=-1.04;scene.add(decorRoot);const query=new URLSearchParams(location.search).get('decor'),parts=query?.split(',');const items=species!=='clownfish'?[null,null,null]:parts?.length===3&&parts.every(k=>k===''||DECOR_KINDS.includes(k))?parts.map(k=>k||null):savedDecorations();paintDecorations(decorRoot,items);
  state.ready=true;$('loading').hidden=true;controls.forEach(n=>n.disabled=false);buttons();resize();new ResizeObserver(resize).observe(tank);

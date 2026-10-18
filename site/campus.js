@@ -1,6 +1,7 @@
-import * as T from './vendor/three.module.js?v=2026-10-17-expedition-crew-1';
-import {GLTFLoader} from './vendor/GLTFLoader.js?v=2026-10-17-expedition-crew-1';
-export async function loadCampus(){const l=new GLTFLoader();const paths={large:'assets/pirate/house1.gltf',small:'assets/pirate/house3.gltf',rock:'assets/nature/rock_largeA.glb',rockB:'assets/nature/rock_largeC.glb'};return Object.fromEntries(await Promise.all(Object.entries(paths).map(async([k,p])=>[k,await l.loadAsync(p)])));}
+import * as T from './vendor/three.module.js?v=2026-10-18-underwater-four-fish-1';
+import {GLTFLoader} from './vendor/GLTFLoader.js?v=2026-10-18-underwater-four-fish-1';
+import {PIER} from './campus-layout.js?v=2026-10-18-underwater-four-fish-1';
+export async function loadCampus(){const l=new GLTFLoader();const paths={large:'assets/pirate/house1.gltf',small:'assets/pirate/house3.gltf',rock:'assets/nature/rock_largeA.glb',rockB:'assets/nature/rock_largeC.glb',seaweed:'assets/underwater/mohabins-seaweed.glb',kelp:'assets/underwater/google-kelp.glb'};return Object.fromEntries(await Promise.all(Object.entries(paths).map(async([k,p])=>[k,await l.loadAsync(p)])));}
 export function createCampus(kit,assets){const scene=new T.Group(),a={...kit,...assets};
 const mat=(c,extra={})=>new T.MeshStandardMaterial({color:c,roughness:.88,...extra});
 const materials={wood:mat('#80513a'),plank:mat('#b28153'),navy:mat('#263c59'),sand:mat('#ddc899'),stone:mat('#d7cbb2'),grass:mat('#7f9b48'),glass:mat('#57afc6',{metalness:.22,roughness:.15,transparent:true,opacity:.72})};
@@ -26,9 +27,9 @@ function place(asset,size,x,z,y=1,axis='y',angle=0){const n=fit(asset,size,axis)
  const large=place(a.large,17,6,-7,1.06,'x',0);large.name='Quaternius House1 / proposed exhibition';
  // Quaternius dock remains the separate departure point.
  // Align plank tops (original y=.488), not the bottom of the submerged posts.
- const dockBounds=new T.Box3().setFromObject(a.dock.scene),dockScale=4/(dockBounds.max.z-dockBounds.min.z);
- const dockY=1.06-(.488-dockBounds.min.y)*dockScale;
- for(let i=0;i<6;i++)place(a.dock,4,12,8+i*1.65,dockY,'z',0);
+ const dockBounds=new T.Box3().setFromObject(a.dock.scene),dockScale=PIER.sectionLength/(dockBounds.max.z-dockBounds.min.z);
+ const dockY=PIER.deck-(.488-dockBounds.min.y)*dockScale;
+ for(let i=0;i<PIER.sections;i++){const section=place(a.dock,PIER.sectionLength,PIER.x,PIER.firstZ+i*PIER.spacing,dockY,'z',0);section.name='Departure pier section '+i;}
  place(a.barrel,1.3,10.2,6.7);place(a.chest,.8,-13,1.5);
  for(const [x,z,h] of [[-17,-1,5],[-15,7,4.5],[-2,-9,4.8],[18,-6,5],[18,4,4.8],[-20,-14,5.5]])place(a.palm,h,x,z,1,'y',x*.7);
  for(const [x,z,size] of [[-25,-10,5],[-22,-9,4],[-25,-5,4],[24,-9,4],[23,-3,3],[20,2,3]])place(a.rockB,size,x,z,.7,'x',x*.1);

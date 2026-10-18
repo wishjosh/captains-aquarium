@@ -64,8 +64,8 @@ import {
 	VectorKeyframeTrack,
 	SRGBColorSpace,
 	InstancedBufferAttribute
-} from './three.module.js?v=2026-10-17-expedition-crew-1';
-import { toTrianglesDrawMode } from './BufferGeometryUtils.js?v=2026-10-17-expedition-crew-1';
+} from './three.module.js?v=2026-10-18-underwater-four-fish-1';
+import { toTrianglesDrawMode } from './BufferGeometryUtils.js?v=2026-10-18-underwater-four-fish-1';
 
 /**
  * A loader for the glTF 2.0 format.
@@ -115,7 +115,7 @@ import { toTrianglesDrawMode } from './BufferGeometryUtils.js?v=2026-10-17-exped
  * ```
  *
  * @augments Loader
- * @three_import import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js?v=2026-10-17-expedition-crew-1';
+ * @three_import import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js?v=2026-10-18-underwater-four-fish-1';
  */
 class GLTFLoader extends Loader {
 

@@ -9,11 +9,11 @@ import {
 	TriangleStripDrawMode,
 	TrianglesDrawMode,
 	Vector3,
-} from './three.module.js?v=2026-10-17-expedition-crew-1';
+} from './three.module.js?v=2026-10-18-underwater-four-fish-1';
 
 /**
  * @module BufferGeometryUtils
- * @three_import import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js?v=2026-10-17-expedition-crew-1';
+ * @three_import import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js?v=2026-10-18-underwater-four-fish-1';
  */
 
 /**

@@ -8,7 +8,7 @@ import {
  	PointLight,
  	Scene,
  	Object3D,
-} from './three.module.js?v=2026-10-17-expedition-crew-1';
+} from './three.module.js?v=2026-10-18-underwater-four-fish-1';
 
 /**
  * This class represents a scene with a basic room setup that can be used as
@@ -28,7 +28,7 @@ import {
  * ```
  *
  * @augments Scene
- * @three_import import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js?v=2026-10-17-expedition-crew-1';
+ * @three_import import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js?v=2026-10-18-underwater-four-fish-1';
  */
 class RoomEnvironment extends Scene {
 

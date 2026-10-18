@@ -1,0 +1,89 @@
+{
+  "retrieved": "2026-10-18",
+  "scope": "Game background adopted 2026-10-18. General seaweed; exact Ecklonia/Sargassum models deferred.",
+  "models": [
+    {
+      "file": "mohabins-seaweed.glb",
+      "page": "https://poly.pizza/m/oYxUdpyc4u",
+      "download": "https://static.poly.pizza/4286d87e-1ebd-45d5-9863-cc39d845799a.glb",
+      "title": "Seaweed",
+      "creator": "Mohabins",
+      "licence": "CC0 1.0",
+      "sha256": "67a4907bb8103f6f6d3c9574369e67ac1479d1c816dd83f933dc59db48c4acf8",
+      "bytes": 62140,
+      "triangles": 282,
+      "animated": false,
+      "originalUploadType": "FBX",
+      "geometryModified": false,
+      "materials": [
+        {
+          "doubleSided": true,
+          "name": "Palette",
+          "pbrMetallicRoughness": {
+            "baseColorTexture": {
+              "index": 0
+            },
+            "metallicFactor": 0,
+            "roughnessFactor": 0.5
+          }
+        }
+      ],
+      "runtimeModification": "Uniform placement/scale, GPU current bending; original GLB and material palette retained."
+    },
+    {
+      "file": "google-kelp.glb",
+      "page": "https://poly.pizza/m/4cFllH6Iazk",
+      "download": "https://static.poly.pizza/8c51572a-1938-4c61-b971-63c3b69f3ea7.glb",
+      "title": "Kelp",
+      "creator": "Poly by Google",
+      "licence": "CC-BY 3.0",
+      "sha256": "3d8e3071c69e6f701a7061ab820293f63e96023ced132c559cc0cdb12542c7c6",
+      "bytes": 267024,
+      "triangles": 784,
+      "animated": false,
+      "originalUploadType": "obj",
+      "geometryModified": false,
+      "materials": [
+        {
+          "name": "None",
+          "pbrMetallicRoughness": {
+            "baseColorTexture": {
+              "index": 0
+            },
+            "baseColorFactor": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 1
+          },
+          "emissiveFactor": [
+            0,
+            0,
+            0
+          ],
+          "alphaMode": "OPAQUE",
+          "doubleSided": false
+        }
+      ],
+      "runtimeModification": "Uniform placement/scale, GPU current bending; original GLB and material palette retained."
+    }
+  ],
+  "rocks": {
+    "source": "Kenney Nature Kit",
+    "licence": "CC0",
+    "files": [
+      "../../dist/assets/nature/rock_largeA.glb",
+      "../../dist/assets/nature/rock_largeC.glb"
+    ],
+    "sourceRecord": "../../dist/assets/nature/campus-sources.json"
+  },
+  "fish": {
+    "source": "Current approved native clownfish with white-eye display and B lighting",
+    "model": "../../dist/assets/fish/clownfish-native.glb",
+    "code": "../../dist/fish.js",
+    "lighting": "../../dist/lighting.js"
+  }
+}

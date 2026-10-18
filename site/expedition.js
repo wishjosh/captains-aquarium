@@ -1,6 +1,7 @@
-import * as T from './vendor/three.module.js?v=2026-10-17-expedition-crew-1';
-export const WATER_ORIGIN={x:12,y:-7.65,z:7.1};
-export const LADDER={x:12,z:16.1,deck:1.06,waterX:0,waterZ:9,hold:.3,duration:2.6};
+import * as T from './vendor/three.module.js?v=2026-10-18-underwater-four-fish-1';
+import {PIER} from './campus-layout.js?v=2026-10-18-underwater-four-fish-1';
+export const LADDER={x:PIER.x,z:PIER.ladderZ,deck:PIER.deck,waterX:0,waterZ:9,hold:.3,duration:2.6,landingZ:PIER.endZ-.65,bodyZ:PIER.ladderZ+.4};
+export const WATER_ORIGIN={x:LADDER.x,y:-7.65,z:LADDER.z-LADDER.waterZ};
 export const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 export function waterWorld(p){return new T.Vector3(p.x+WATER_ORIGIN.x,p.y+WATER_ORIGIN.y,p.z+WATER_ORIGIN.z);}
 export function zoomValue(value){return clamp(value,.8,1.65);}

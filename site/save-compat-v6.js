@@ -1,5 +1,5 @@
-import {START} from './layout.js?v=2026-10-17-expedition-crew-1';
-import {defaultExhibition,validExhibition,placementTarget} from './exhibition-v6.js?v=2026-10-17-expedition-crew-1';
+import {START} from './layout.js?v=2026-10-18-underwater-four-fish-1';
+import {defaultExhibition,validExhibition,placementTarget} from './exhibition-v6.js?v=2026-10-18-underwater-four-fish-1';
 export const SAVE_KEY='seojin-jeju-aquarium-v1';
 export const MIGRATION_KEY=SAVE_KEY+'-before-layout-v4';
 export const EDITOR_MIGRATION_KEY=SAVE_KEY+'-before-exhibition-v5';

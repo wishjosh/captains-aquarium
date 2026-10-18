@@ -1,17 +1,19 @@
-import {blocked as legacyBlocked,SPOTS as legacySpots} from './layout.js?v=2026-10-17-expedition-crew-1';
+import {blocked as legacyBlocked,SPOTS as legacySpots} from './layout.js?v=2026-10-18-underwater-four-fish-1';
+// The rendered dock and its walking/ladder coordinates share one layout.
+export const PIER={x:12,firstZ:8,sections:6,spacing:1.65,sectionLength:4,deck:1.06,endZ:18.25,ladderZ:18.4};
 export const CAMPUS_START={area:'harbor',x:0,z:5.5};
 export const DOORS={management:{x:-8,z:1.15,to:'management',label:'관리동 문'},exhibition:{x:7.3,z:-3.35,to:'exhibition',label:'전시관 문'}};
 export const EXITS={management:{x:-10.6,z:11.65,to:'harbor',label:'광장으로',dx:0,dz:1},exhibition:{x:0,z:-2.75,to:'harbor',label:'광장으로',dx:0,dz:1}};
 export const SPAWNS={management:{x:-10.6,z:10.4},exhibition:{x:0,z:-3.6}};
-import {MANAGEMENT,managementBlocked,managementClear,MANAGEMENT_POINTS} from './management-layout.js?v=2026-10-17-expedition-crew-1';
-export {MANAGEMENT} from './management-layout.js?v=2026-10-17-expedition-crew-1';
-export const COAST={sea:{x:12,z:14.3},'chromis-sea':{x:-11,z:8},'jelly-sea':{x:16,z:6.1}};
+import {MANAGEMENT,managementBlocked,managementClear,MANAGEMENT_POINTS} from './management-layout.js?v=2026-10-18-underwater-four-fish-1';
+export {MANAGEMENT} from './management-layout.js?v=2026-10-18-underwater-four-fish-1';
+export const COAST={sea:{x:PIER.x,z:PIER.endZ-.8},'chromis-sea':{x:-11,z:8},'jelly-sea':{x:16,z:6.1}};
 export function spotsFor(area){return area==='harbor'?{sea:COAST.sea}:area==='management'?{management:MANAGEMENT.intake}:{fish:legacySpots.fish,chromis:legacySpots.chromis,jelly:legacySpots.jelly};}
 export function blocked(area,x,z,exhibition){
  if(!Number.isFinite(x)||!Number.isFinite(z))return true;
  if(area==='management')return managementBlocked(x,z);
  if(area==='exhibition')return x < -5.8||x >5.8||z < -13.3||z > -2.65||legacyBlocked(x,z,exhibition);
- if(x < -18||x >18||z < -12||z >16.3)return true;
+ if(x < -18||x >18||z < -12||z >PIER.endZ+.05)return true;
  // Only the departure pier extends over the water.
  if(z>8.8 && !(x>10.9&&x<13.1))return true;
  return (Math.abs(x+8)<5.3&&z> -4.1&&z<.35)||(x> -1.7&&x<14.8&&z> -9.9&&z< -4.05);

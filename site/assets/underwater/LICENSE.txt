@@ -1,0 +1,13 @@
+Seaweed by Mohabins — CC0 1.0
+Source: https://poly.pizza/m/oYxUdpyc4u
+License: https://creativecommons.org/publicdomain/zero/1.0/
+
+Kelp by Poly by Google — CC BY 3.0
+Source: https://poly.pizza/m/4cFllH6Iazk
+License: https://creativecommons.org/licenses/by/3.0/
+
+Distributed source GLBs retained unchanged. Runtime changes: placement,
+uniform scale, and slow water-current bending using a vertex shader.
+These are general seaweed scenery, not botanically exact Ecklonia cava
+or Sargassum models. See sources.json for hashes and provenance.
+Kenney rocks: see ../nature/LICENSE.txt.

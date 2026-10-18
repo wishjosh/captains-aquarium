@@ -1,5 +1,5 @@
-import * as THREE from './vendor/three.module.js?v=2026-10-17-expedition-crew-1';
-import {GLTFLoader} from './vendor/GLTFLoader.js?v=2026-10-17-expedition-crew-1';
+import * as THREE from './vendor/three.module.js?v=2026-10-18-underwater-four-fish-1';
+import {GLTFLoader} from './vendor/GLTFLoader.js?v=2026-10-18-underwater-four-fish-1';
 const FILES=['wall-tank','column-tank','care-tank','sign','floor'];
 export async function loadAquariumKit(){
  const loader=new GLTFLoader(),models=await Promise.all(FILES.map(n=>loader.loadAsync('assets/aquarium/'+n+'.glb')));

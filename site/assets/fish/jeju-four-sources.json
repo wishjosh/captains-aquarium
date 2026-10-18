@@ -1,0 +1,184 @@
+{
+  "creator": "Quaternius",
+  "pack": "Animated Cute Fish Pack",
+  "packPage": "https://quaternius.com/packs/cutefish.html",
+  "license": "CC0",
+  "sources": [
+    {
+      "model": "Puffer",
+      "sourceHash": "99e110720837618f232cda4e8229db484187d2882cc19e6dad388f5885731815",
+      "page": "https://quaternius.com/packs/cutefish.html",
+      "license": "CC0",
+      "geometryTriangles": 2142,
+      "sourceActions": [
+        {
+          "name": "Attack",
+          "frames": [
+            0.0,
+            15.0
+          ]
+        },
+        {
+          "name": "Death",
+          "frames": [
+            0.0,
+            72.0
+          ]
+        },
+        {
+          "name": "Out_Of_Water",
+          "frames": [
+            0.0,
+            36.0
+          ]
+        },
+        {
+          "name": "Swimming_Fast",
+          "frames": [
+            0.0,
+            25.0
+          ]
+        },
+        {
+          "name": "Swimming_Impulse",
+          "frames": [
+            0.0,
+            28.0
+          ]
+        },
+        {
+          "name": "Swimming_Normal",
+          "frames": [
+            0.0,
+            55.0
+          ]
+        }
+      ],
+      "runtimeFile": "Puffer.glb",
+      "runtimeSha256": "29ca2dcdb3620fb79129cd788da7ba29b54495b5790fa24d0a3da3d48196e3b6"
+    },
+    {
+      "model": "Cowfish",
+      "sourceHash": "e6898505d56d8057c975b6376f123876dd957347282413cf3fb825754841b989",
+      "page": "https://poly.pizza/m/VMJluStc59",
+      "license": "CC0",
+      "geometryTriangles": 1390,
+      "sourceActions": [
+        {
+          "name": "Fish_Armature|Fish_Armature|Attack",
+          "frames": [
+            1.0,
+            16.0
+          ]
+        },
+        {
+          "name": "Fish_Armature|Fish_Armature|Death",
+          "frames": [
+            1.0,
+            73.0
+          ]
+        },
+        {
+          "name": "Fish_Armature|Fish_Armature|Out_Of_Water",
+          "frames": [
+            1.0,
+            37.0
+          ]
+        },
+        {
+          "name": "Fish_Armature|Fish_Armature|Swimming_Fast",
+          "frames": [
+            1.0,
+            26.0
+          ]
+        },
+        {
+          "name": "Fish_Armature|Fish_Armature|Swimming_Impulse",
+          "frames": [
+            1.0,
+            29.0
+          ]
+        },
+        {
+          "name": "Fish_Armature|Fish_Armature|Swimming_Normal",
+          "frames": [
+            1.0,
+            56.0
+          ]
+        }
+      ],
+      "runtimeFile": "Cowfish.glb",
+      "runtimeSha256": "10464725f9db8568dbca48f44f221962355969337522be858ab00988044ee51b"
+    },
+    {
+      "model": "MoorishIdol",
+      "sourceHash": "442ef9c32d49f99a13cd945fcffa4836981c68e4f92d1f953ff4a5a123440f71",
+      "page": "https://poly.pizza/m/M0UX3rVvNX",
+      "license": "CC0",
+      "geometryTriangles": 1428,
+      "sourceActions": [
+        {
+          "name": "Fish_Armature|Fish_Armature|Attack",
+          "frames": [
+            1.0,
+            16.0
+          ]
+        },
+        {
+          "name": "Fish_Armature|Fish_Armature|Death",
+          "frames": [
+            1.0,
+            73.0
+          ]
+        },
+        {
+          "name": "Fish_Armature|Fish_Armature|Out_Of_Water",
+          "frames": [
+            1.0,
+            37.0
+          ]
+        },
+        {
+          "name": "Fish_Armature|Fish_Armature|Swimming_Fast",
+          "frames": [
+            1.0,
+            26.0
+          ]
+        },
+        {
+          "name": "Fish_Armature|Fish_Armature|Swimming_Impulse",
+          "frames": [
+            1.0,
+            29.0
+          ]
+        },
+        {
+          "name": "Fish_Armature|Fish_Armature|Swimming_Normal",
+          "frames": [
+            1.0,
+            56.0
+          ]
+        }
+      ],
+      "runtimeFile": "MoorishIdol.glb",
+      "runtimeSha256": "64503c073a57d928363b00758a70798a94f927afd5d689c23a9f11642cd86484"
+    }
+  ],
+  "geometryChanged": false,
+  "animationReauthored": false,
+  "appearanceChanges": [
+    "Puffer body colours, dark blotches and dots",
+    "Cowfish yellow body and pale cyan spots",
+    "MoorishIdol ivory/yellow balance; original stripe regions preserved",
+    "Separate eye materials derived from approved white-eye design"
+  ],
+  "sizeProposalCm": {
+    "Clownfish": 8,
+    "Puffer": 25,
+    "MoorishIdol": 20,
+    "Cowfish": 30
+  },
+  "sizeProposalStatus": "illustrative individual sizes, not species averages or maxima; clownfish exact taxon unconfirmed",
+  "eightJointInfluencesPreservedInMoorishIdol": true,
+  "FBXImportAlphaCorrectedFromSourceDiffuseAlpha": 1
+}
