@@ -1,25 +1,25 @@
-import {equipCaptainTelescope} from './captain-telescope.js?v=2026-10-20-captain-telescope-1';
-import {SPECIES_INFO,SPECIES_NAMES,fishLength} from './species.js?v=2026-10-20-captain-telescope-1';
-import {WATER_ORIGIN,LADDER,waterWorld,zoomValue,autoLook,ladderIntent,createLadder,clamp} from './expedition.js?v=2026-10-20-captain-telescope-1';
-import {createCrew} from './crew.js?v=2026-10-20-captain-telescope-1';
-import {aquariumLighting,lightingState} from './lighting.js?v=2026-10-20-captain-telescope-1';
-import {createManagement} from './management.js?v=2026-10-20-captain-telescope-1';
-import {managementSurface,managementCanStep} from './management-layout.js?v=2026-10-20-captain-telescope-1';
-import {DIVE_START,createUnderwater,swimStep} from './underwater.js?v=2026-10-20-captain-telescope-1';
-import {setupCare} from './care.js?v=2026-10-20-captain-telescope-1';
-import * as THREE from './vendor/three.module.js?v=2026-10-20-captain-telescope-1';
-import {loadPirateKit,createCaptain,placeProp} from './pirate.js?v=2026-10-20-captain-telescope-1';
-import {loadFish,createFish} from './fish.js?v=2026-10-20-captain-telescope-1';
-import {SAVE_KEY,SAVE_VERSION,emptyProgress,parseSave,writeSave,hasStarterDecor,missionFor,canCollect} from './progress.js?v=2026-10-20-captain-telescope-1';
-import {START,TANKS,ZONE_NAMES,configureExhibition} from './layout.js?v=2026-10-20-captain-telescope-1';
-import {CAMPUS_START,DOORS,EXITS,SPAWNS,COAST,MANAGEMENT,spotsFor,blocked,normaliseCampus,nearDoor,waypoint} from './campus-layout.js?v=2026-10-20-captain-telescope-1';
-import {loadCampus,createCampus} from './campus.js?v=2026-10-20-captain-telescope-1';
-import {paintDecorations} from './decorations.js?v=2026-10-20-captain-telescope-1';
-import {setupDecorationEditor} from './decorate.js?v=2026-10-20-captain-telescope-1';
-import {setupTransfer} from './transfer-ui.js?v=2026-10-20-captain-telescope-1';
-import {SPECIES,SLOT_IDS,SLOT_NAMES,SHAPES,slotFor,editExhibition} from './exhibition.js?v=2026-10-20-captain-telescope-1';
-import {setupExhibition} from './exhibition-ui.js?v=2026-10-20-captain-telescope-1';
-import {loadAquariumKit,aquariumModule,aquariumProp,aquariumFloorGrid} from './aquarium-kit.js?v=2026-10-20-captain-telescope-1';
+import {equipCaptainTelescope} from './captain-telescope.js?v=2026-10-20-anne-bucket-1';
+import {SPECIES_INFO,SPECIES_NAMES,fishLength} from './species.js?v=2026-10-20-anne-bucket-1';
+import {WATER_ORIGIN,LADDER,waterWorld,zoomValue,autoLook,ladderIntent,createLadder,clamp} from './expedition.js?v=2026-10-20-anne-bucket-1';
+import {createCrew} from './crew.js?v=2026-10-20-anne-bucket-1';
+import {aquariumLighting,lightingState} from './lighting.js?v=2026-10-20-anne-bucket-1';
+import {createManagement} from './management.js?v=2026-10-20-anne-bucket-1';
+import {managementSurface,managementCanStep} from './management-layout.js?v=2026-10-20-anne-bucket-1';
+import {DIVE_START,createUnderwater,swimStep} from './underwater.js?v=2026-10-20-anne-bucket-1';
+import {setupCare} from './care.js?v=2026-10-20-anne-bucket-1';
+import * as THREE from './vendor/three.module.js?v=2026-10-20-anne-bucket-1';
+import {loadPirateKit,createCaptain,placeProp} from './pirate.js?v=2026-10-20-anne-bucket-1';
+import {loadFish,createFish} from './fish.js?v=2026-10-20-anne-bucket-1';
+import {SAVE_KEY,SAVE_VERSION,emptyProgress,parseSave,writeSave,hasStarterDecor,missionFor,canCollect} from './progress.js?v=2026-10-20-anne-bucket-1';
+import {START,TANKS,ZONE_NAMES,configureExhibition} from './layout.js?v=2026-10-20-anne-bucket-1';
+import {CAMPUS_START,DOORS,EXITS,SPAWNS,COAST,MANAGEMENT,spotsFor,blocked,normaliseCampus,nearDoor,waypoint} from './campus-layout.js?v=2026-10-20-anne-bucket-1';
+import {loadCampus,createCampus} from './campus.js?v=2026-10-20-anne-bucket-1';
+import {paintDecorations} from './decorations.js?v=2026-10-20-anne-bucket-1';
+import {setupDecorationEditor} from './decorate.js?v=2026-10-20-anne-bucket-1';
+import {setupTransfer} from './transfer-ui.js?v=2026-10-20-anne-bucket-1';
+import {SPECIES,SLOT_IDS,SLOT_NAMES,SHAPES,slotFor,editExhibition} from './exhibition.js?v=2026-10-20-anne-bucket-1';
+import {setupExhibition} from './exhibition-ui.js?v=2026-10-20-anne-bucket-1';
+import {loadAquariumKit,aquariumModule,aquariumProp,aquariumFloorGrid} from './aquarium-kit.js?v=2026-10-20-anne-bucket-1';
 
 const $=id=>document.getElementById(id),canvas=$('world'),viewport=document.querySelector('.world-wrap');
 const decor=$('decorate-dialog'),viewer=$('viewer-dialog'),help=$('help-dialog'),transfer=$('transfer-dialog'),inventory=$('management-dialog');
@@ -150,7 +150,7 @@ function openTank(tank){
  stop();p.observed=true;save();updateMission();
  const demo=false;
  $('viewer-title').textContent=names[tank]+' 수조'+(demo?' · 관찰용':'');
- $('viewer-frame').src='fish-view.html?v=2026-10-20-captain-telescope-1&kind='+tank+'&count=1&decor='+(tank==='fish'?progress.decorations.map(k=>k||'').join(','):',,');
+ $('viewer-frame').src='fish-view.html?v=2026-10-20-anne-bucket-1&kind='+tank+'&count=1&decor='+(tank==='fish'?progress.decorations.map(k=>k||'').join(','):',,');
  viewer.showModal();
 }
 function interact(target=nearby){

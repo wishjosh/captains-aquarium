@@ -1,5 +1,5 @@
-import * as T from './vendor/three.module.js?v=2026-10-20-captain-telescope-1';
-import {mergeGeometries} from './vendor/BufferGeometryUtils.js?v=2026-10-20-captain-telescope-1';
+import * as T from './vendor/three.module.js?v=2026-10-20-anne-bucket-1';
+import {mergeGeometries} from './vendor/BufferGeometryUtils.js?v=2026-10-20-anne-bucket-1';
 // Frozen from the approved 2026-10-19 motion study at source Idle 0.4 s.
 const SOURCE=[[-.4404163360595703,.4438000023365021,.5488030910491943,.5548785328865051],[-.08547022861882801,-.25828564166286144,.22552472346197888,.9354795218400076]];
 const HOLD=[[.3748995391963053,-.41721783618109975,-.8071030630224146,-.18429400728475162],[.0003849503163142823,-.051386169417785454,-.36056220179157294,.9313185278965173]];

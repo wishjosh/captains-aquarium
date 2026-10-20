@@ -17,3 +17,5 @@ Runtime placement, uniform scaling and slow current bending added. Original GLBs
 Credits and provenance: assets/underwater/LICENSE.txt and sources.json.
 
 Captain telescope (2026-10-20): game-authored approved eyepiece-forward/objective-aft geometry and right-arm holding overlay. Original character model, finger pose and 14 source clips retained. Other public crew unchanged.
+
+Anne feeding bucket (2026-10-20): approved game-authored stainless bucket, fixed hand grip and damped swing. Only Anne upper/lower left arm receives a holding overlay. Original character files, fingers and 14 animation clips retained. Captain, Mako, Henry and existing transport tank unchanged from the prior public build.

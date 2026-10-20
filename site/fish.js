@@ -1,8 +1,8 @@
-import * as T from './vendor/three.module.js?v=2026-10-20-captain-telescope-1';
-import {GLTFLoader} from './vendor/GLTFLoader.js?v=2026-10-20-captain-telescope-1';
-import {clone} from './vendor/SkeletonUtils.js?v=2026-10-20-captain-telescope-1';
-import {SPECIES,SPECIES_INFO} from './species.js?v=2026-10-20-captain-telescope-1';
-import {prepareSpeciesAsset,createSpeciesFish} from './species-fish.js?v=2026-10-20-captain-telescope-1';
+import * as T from './vendor/three.module.js?v=2026-10-20-anne-bucket-1';
+import {GLTFLoader} from './vendor/GLTFLoader.js?v=2026-10-20-anne-bucket-1';
+import {clone} from './vendor/SkeletonUtils.js?v=2026-10-20-anne-bucket-1';
+import {SPECIES,SPECIES_INFO} from './species.js?v=2026-10-20-anne-bucket-1';
+import {prepareSpeciesAsset,createSpeciesFish} from './species-fish.js?v=2026-10-20-anne-bucket-1';
 const fishCache=new Map();
 async function loadOne(kind){
  if(!SPECIES.includes(kind))throw Error('Unknown fish kind');

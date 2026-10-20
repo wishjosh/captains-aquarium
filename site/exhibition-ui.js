@@ -1,5 +1,5 @@
-import {SPECIES_NAMES} from './species.js?v=2026-10-20-captain-telescope-1';
-import {SPECIES,SLOT_IDS,SLOT_NAMES,SHAPES,stateFor,slotFor,editExhibition} from './exhibition.js?v=2026-10-20-captain-telescope-1';
+import {SPECIES_NAMES} from './species.js?v=2026-10-20-anne-bucket-1';
+import {SPECIES,SLOT_IDS,SLOT_NAMES,SHAPES,stateFor,slotFor,editExhibition} from './exhibition.js?v=2026-10-20-anne-bucket-1';
 export function setupExhibition({snapshot,pause,onCommit,onClose}){
  const $=id=>document.getElementById(id),dialog=$('exhibition-dialog'),place=$('exhibition-place'),shape=$('exhibition-shape'),animal=$('exhibition-species'),preview=$('exhibition-preview'),status=$('exhibition-status');
  const names=SPECIES_NAMES;

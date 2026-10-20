@@ -1,8 +1,8 @@
-import {START} from './layout.js?v=2026-10-20-captain-telescope-1';
-import {defaultExhibition,validExhibition} from './exhibition.js?v=2026-10-20-captain-telescope-1';
-import {parseSave as parseLegacy} from './save-compat-v6.js?v=2026-10-20-captain-telescope-1';
-import {SPECIES,NEW_SPECIES,SPECIES_NAMES,stateFor} from './species.js?v=2026-10-20-captain-telescope-1';
-export {MIGRATION_KEY,EDITOR_MIGRATION_KEY,CAMPUS_BACKUP_KEY,DIVE_BACKUP_KEY} from './save-compat-v6.js?v=2026-10-20-captain-telescope-1';
+import {START} from './layout.js?v=2026-10-20-anne-bucket-1';
+import {defaultExhibition,validExhibition} from './exhibition.js?v=2026-10-20-anne-bucket-1';
+import {parseSave as parseLegacy} from './save-compat-v6.js?v=2026-10-20-anne-bucket-1';
+import {SPECIES,NEW_SPECIES,SPECIES_NAMES,stateFor} from './species.js?v=2026-10-20-anne-bucket-1';
+export {MIGRATION_KEY,EDITOR_MIGRATION_KEY,CAMPUS_BACKUP_KEY,DIVE_BACKUP_KEY} from './save-compat-v6.js?v=2026-10-20-anne-bucket-1';
 export const SAVE_KEY='seojin-jeju-aquarium-v1',SAVE_VERSION=7;
 export const ORIGINAL_COLLECTION_KEY=SAVE_KEY+'-before-clownfish-v7';
 export const EXPANDED_COLLECTION_KEY=SAVE_KEY+'-before-jeju-four-fish';

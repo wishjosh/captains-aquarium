@@ -7,11 +7,11 @@ import {
 	SkeletonHelper,
 	Vector3,
 	VectorKeyframeTrack
-} from './three.module.js?v=2026-10-20-captain-telescope-1';
+} from './three.module.js?v=2026-10-20-anne-bucket-1';
 
 /**
  * @module SkeletonUtils
- * @three_import import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js?v=2026-10-20-captain-telescope-1';
+ * @three_import import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js?v=2026-10-20-anne-bucket-1';
  */
 
 function getBoneName( bone, options ) {

@@ -1,8 +1,8 @@
-import {SPECIES,SPECIES_INFO,stateFor,fishLength} from './species.js?v=2026-10-20-captain-telescope-1';
-import * as T from './vendor/three.module.js?v=2026-10-20-captain-telescope-1';
-import {mergeGeometries} from './vendor/BufferGeometryUtils.js?v=2026-10-20-captain-telescope-1';
-import {createFish} from './fish.js?v=2026-10-20-captain-telescope-1';
-import {MANAGEMENT as M} from './management-layout.js?v=2026-10-20-captain-telescope-1';
+import {SPECIES,SPECIES_INFO,stateFor,fishLength} from './species.js?v=2026-10-20-anne-bucket-1';
+import * as T from './vendor/three.module.js?v=2026-10-20-anne-bucket-1';
+import {mergeGeometries} from './vendor/BufferGeometryUtils.js?v=2026-10-20-anne-bucket-1';
+import {createFish} from './fish.js?v=2026-10-20-anne-bucket-1';
+import {MANAGEMENT as M} from './management-layout.js?v=2026-10-20-anne-bucket-1';
 export function createManagement(asset,progress){
  const group=new T.Group();group.position.set(M.floor.x,.12,M.floor.z);
  const colours={floor:'#b7b1a4',navy:'#344a60',deck:'#576776',steel:'#899597',brass:'#b89b58',tank:'#ced2cd',water:'#28647e'};

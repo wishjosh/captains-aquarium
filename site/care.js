@@ -1,7 +1,7 @@
-import {SPECIES,SPECIES_NAMES,stateFor,fishLength} from './species.js?v=2026-10-20-captain-telescope-1';
-import {aquariumLighting,lightingState} from './lighting.js?v=2026-10-20-captain-telescope-1';
-import * as T from './vendor/three.module.js?v=2026-10-20-captain-telescope-1';
-import {createFish} from './fish.js?v=2026-10-20-captain-telescope-1';
+import {SPECIES,SPECIES_NAMES,stateFor,fishLength} from './species.js?v=2026-10-20-anne-bucket-1';
+import {aquariumLighting,lightingState} from './lighting.js?v=2026-10-20-anne-bucket-1';
+import * as T from './vendor/three.module.js?v=2026-10-20-anne-bucket-1';
+import {createFish} from './fish.js?v=2026-10-20-anne-bucket-1';
 export function setupCare(asset,{progress,pause,commit}){
  const dialog=document.createElement('dialog');dialog.id='care-dialog';dialog.className='care-dialog';dialog.innerHTML='<h2 id="care-title"></h2><canvas id="care-canvas" aria-label="관리 수조의 생물과 먹이 반응"></canvas><p id="care-status" role="status"></p><div class="care-actions"><button id="care-action"></button><button id="close-care" class="secondary">관리동으로</button></div>';document.body.append(dialog);
  const $=id=>dialog.querySelector('#'+id),renderer=new T.WebGLRenderer({canvas:$('care-canvas'),antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;
