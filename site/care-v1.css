@@ -1,0 +1,35 @@
+.care-dialog{width:min(780px,95vw);max-height:94dvh;padding:14px}
+.care-content{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(210px,1fr);gap:15px;align-items:stretch}
+.care-view{position:relative;min-width:0;overflow:hidden;border-radius:12px;background:#17475d}
+.care-dialog .care-view canvas{height:clamp(160px,40dvh,300px);border-radius:0}
+.care-view-label{position:absolute;left:10px;bottom:9px;padding:4px 8px;border-radius:8px;background:#173c4de6;color:#edf4df;font-size:12px;pointer-events:none}
+.care-guidance{min-width:0;display:flex;flex-direction:column}
+.care-dialog .care-step{margin:0 0 7px;color:#516548;font-size:12px;font-weight:700}
+.care-cues{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+.care-cues li{padding:6px 8px;border-radius:8px;background:#e5d4ac;font-size:13px;line-height:1.35;color:#53605e}
+.care-cues li.is-done{background:#d5e0bd;color:#244c3e}
+.care-dialog #care-status{line-height:1.5;min-height:3em;margin:9px 0;font-size:14px}
+.care-progress-label{margin-top:auto;font-size:11px;color:#52605d}
+.care-dialog progress{display:block;width:100%;height:8px;accent-color:#2c796d}
+.care-actions{justify-content:flex-end;margin-top:12px}
+.care-actions button{min-height:44px}
+.care-actions button:focus-visible{outline:3px solid #247c8b;outline-offset:2px}
+@media(max-height:450px) and (min-width:520px){
+ .care-dialog{padding:10px;max-height:96dvh}
+ .care-dialog h2{font-size:16px;margin-bottom:7px}
+ .care-content{gap:11px;grid-template-columns:minmax(0,1.05fr) minmax(230px,1fr)}
+ .care-dialog .care-view canvas{height:clamp(150px,51dvh,220px)}
+ .care-cues{gap:3px}
+ .care-cues li{font-size:12px;padding:4px 7px}
+ .care-dialog #care-status{font-size:12px;line-height:1.4;margin:6px 0;min-height:2.8em}
+ .care-dialog .care-step{margin-bottom:4px}
+ .care-actions{margin-top:8px}
+ .care-actions button{font-size:13px;padding:7px 12px}
+}
+@media(max-width:519px){
+ .care-content{grid-template-columns:1fr;gap:10px}
+ .care-dialog .care-view canvas{height:29dvh;min-height:145px}
+ .care-cues{gap:4px}
+ .care-cues li{padding:5px 8px}
+ .care-actions button{flex:1;padding:8px;font-size:13px}
+}

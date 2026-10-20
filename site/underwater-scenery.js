@@ -1,4 +1,4 @@
-import * as T from './vendor/three.module.js?v=2026-10-20-anne-bucket-1';
+import * as T from './vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
 
 // Independent of species, care and save data. Source GLBs remain byte-identical.
 export const CURRENT_PERIOD=2*Math.PI/.35;

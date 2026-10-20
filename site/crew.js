@@ -1,9 +1,9 @@
-import {equipAnneFeedBucket} from './anne-feed-bucket.js?v=2026-10-20-anne-bucket-1';
-import {SPECIES,fishLength} from './species.js?v=2026-10-20-anne-bucket-1';
-import * as T from './vendor/three.module.js?v=2026-10-20-anne-bucket-1';
-import {clone} from './vendor/SkeletonUtils.js?v=2026-10-20-anne-bucket-1';
-import {createCaptain} from './pirate.js?v=2026-10-20-anne-bucket-1';
-import {createFish} from './fish.js?v=2026-10-20-anne-bucket-1';
+import {equipAnneFeedBucket} from './anne-feed-bucket.js?v=2026-10-20-jeju-rov-v1';
+import {SPECIES,fishLength} from './species.js?v=2026-10-20-jeju-rov-v1';
+import * as T from './vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
+import {clone} from './vendor/SkeletonUtils.js?v=2026-10-20-jeju-rov-v1';
+import {createCaptain} from './pirate.js?v=2026-10-20-jeju-rov-v1';
+import {createFish} from './fish.js?v=2026-10-20-jeju-rov-v1';
 export function createCrew(kit,fishAsset,{label,blocked,canStep,surface}){
  const actors={},names={management:'사육 담당',exhibition:'전시 담당',assistant:'운반 조수'};
  for(const [role,key] of [['management','anne'],['exhibition','mako'],['assistant','henry']]){const model=clone(kit[key].scene);model.traverse(n=>{if(n.name.startsWith('Weapon_'))n.visible=false;});const actor=createCaptain({scene:model,animations:kit[key].animations});actor.name='crew-'+role;actor.userData.role=role;actor.userData.asset=key;actors[role]=actor;if(role==='management')equipAnneFeedBucket(actor);label(names[role],0,2.7,0,'#263c59',2.1,actor);}

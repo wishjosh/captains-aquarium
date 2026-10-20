@@ -1,5 +1,5 @@
-import * as T from './vendor/three.module.js?v=2026-10-20-anne-bucket-1';
-import {mergeGeometries} from './vendor/BufferGeometryUtils.js?v=2026-10-20-anne-bucket-1';
+import * as T from './vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
+import {mergeGeometries} from './vendor/BufferGeometryUtils.js?v=2026-10-20-jeju-rov-v1';
 const V=()=>new T.Vector3(),Q=()=>new T.Quaternion(),up=new T.Vector3(0,1,0);
 // Frozen from the approved Anne bucket study at source Idle 0.4 seconds.
 const CALIBRATION={"hold":[[0.525990655663083,0.33869348228363305,0.6547975662301364,-0.42409987262603005],[0.4767163567497435,0.25019831766749057,-0.33258448275805996,0.7742930938834272]],"initialShoulder":[0.17535362289545597,1.0929671237825627,-0.5001230815710321],"gripAxis":[-0.565281513236853,0.06544737039906644,0.8222976671266671],"position":[0.0077545032214814125,0.08838067935338284,-0.052787549543202805],"quaternion":[-0.34556449724544064,-0.6669376584629201,-0.5597553873883755,-0.3499330599577879],"scale":[0.6986723308946077,0.6986723236541914,0.698672486029487]};

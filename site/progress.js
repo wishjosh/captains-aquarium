@@ -1,8 +1,8 @@
-import {START} from './layout.js?v=2026-10-20-anne-bucket-1';
-import {defaultExhibition,validExhibition} from './exhibition.js?v=2026-10-20-anne-bucket-1';
-import {parseSave as parseLegacy} from './save-compat-v6.js?v=2026-10-20-anne-bucket-1';
-import {SPECIES,NEW_SPECIES,SPECIES_NAMES,stateFor} from './species.js?v=2026-10-20-anne-bucket-1';
-export {MIGRATION_KEY,EDITOR_MIGRATION_KEY,CAMPUS_BACKUP_KEY,DIVE_BACKUP_KEY} from './save-compat-v6.js?v=2026-10-20-anne-bucket-1';
+import {START} from './layout.js?v=2026-10-20-jeju-rov-v1';
+import {defaultExhibition,validExhibition} from './exhibition.js?v=2026-10-20-jeju-rov-v1';
+import {parseSave as parseLegacy} from './save-compat-v6.js?v=2026-10-20-jeju-rov-v1';
+import {SPECIES,NEW_SPECIES,SPECIES_NAMES,stateFor} from './species.js?v=2026-10-20-jeju-rov-v1';
+export {MIGRATION_KEY,EDITOR_MIGRATION_KEY,CAMPUS_BACKUP_KEY,DIVE_BACKUP_KEY} from './save-compat-v6.js?v=2026-10-20-jeju-rov-v1';
 export const SAVE_KEY='seojin-jeju-aquarium-v1',SAVE_VERSION=7;
 export const ORIGINAL_COLLECTION_KEY=SAVE_KEY+'-before-clownfish-v7';
 export const EXPANDED_COLLECTION_KEY=SAVE_KEY+'-before-jeju-four-fish';
@@ -43,6 +43,6 @@ export function missionFor(p){
  const kind=SPECIES.find(k=>stateFor(p,k).bag)||SPECIES.find(k=>stateFor(p,k).admitted&&p.care[k]<2)||SPECIES.find(k=>!stateFor(p,k).admitted);
  if(!kind)return {kind:null,chapter:4,step:4,total:4,target:null,destination:'자유 탐사와 관찰',title:'네 친구의 첫 돌봄 완료!',detail:'바다를 둘러보고 관리동과 전시관에서 친구를 가까이 관찰해요.'};
  const s=stateFor(p,kind),name=SPECIES_NAMES[kind],obj=name+(kind==='fish'?'를':'을'),step=s.admitted?(p.care[kind]===1?3:2):s.bag?1:0;
- return {kind,chapter:SPECIES.indexOf(kind)+1,step,total:4,target:step===0?'sea':'management',destination:step===0?'부두 · 잠수':'관리동 · 첫 돌봄',title:[obj+' 바다에서 찾아보자!',name+(kind==='fish'?'와':'과')+' 함께 돌아가자!',name+'의 상태를 살펴보자!',name+'에게 첫 먹이를 주자!'][step],detail:['부두에서 잠수해 움직이는 친구에게 가까이 가요.','사다리로 돌아와 관리동에 입수해요.','관리동에서 움직임을 살펴봐요.','먹이를 주고 반응을 확인해요.'][step]};
+ return {kind,chapter:SPECIES.indexOf(kind)+1,step,total:4,target:step===0?'sea':'management',destination:step===0?'부두 · 탐사선':'관리동 · 첫 돌봄',title:[obj+' 바다에서 찾아보자!',name+(kind==='fish'?'와':'과')+' 함께 돌아가자!',name+'의 상태를 살펴보자!',name+'에게 첫 먹이를 주자!'][step],detail:['탐사선에 탑승해 무인탐사정으로 친구를 찾아요.','탐사정을 회수한 뒤 관리동의 Anne에게 인계해요.','관리동에서 움직임을 살펴봐요.','먹이를 주고 반응을 확인해요.'][step]};
 }
 export function savedDecorations(){try{const raw=localStorage.getItem(SAVE_KEY);return raw?parseSave(raw).decorations:emptyDecorations();}catch{return emptyDecorations();}}

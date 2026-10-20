@@ -1,7 +1,7 @@
-import * as T from './vendor/three.module.js?v=2026-10-20-anne-bucket-1';
-import {clone} from './vendor/SkeletonUtils.js?v=2026-10-20-anne-bucket-1';
-import {SPECIES_INFO} from './species.js?v=2026-10-20-anne-bucket-1';
-import {speciesMaterial} from './species-appearance.js?v=2026-10-20-anne-bucket-1';
+import * as T from './vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
+import {clone} from './vendor/SkeletonUtils.js?v=2026-10-20-jeju-rov-v1';
+import {SPECIES_INFO} from './species.js?v=2026-10-20-jeju-rov-v1';
+import {speciesMaterial} from './species-appearance.js?v=2026-10-20-jeju-rov-v1';
 export function prepareSpeciesAsset(asset,bytes,kind){
  asset.fishKind=kind;const dv=new DataView(bytes),jl=dv.getUint32(12,true),json=JSON.parse(new TextDecoder().decode(new Uint8Array(bytes,20,jl))),bin=28+jl;
  // Preserve the source's additional joint weights; normalizeSkinWeights in GLTFLoader otherwise normalizes only set zero.

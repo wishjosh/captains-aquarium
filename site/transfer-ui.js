@@ -1,6 +1,6 @@
-import {exportSave,importSave,progressForStage,commitSave,readBackup,describeProgress,MAX_SAVE_BYTES,BACKUP_KEY} from './save-transfer.js?v=2026-10-20-anne-bucket-1';
+import {exportSave,importSave,progressForStage,commitSave,readBackup,describeProgress,MAX_SAVE_BYTES,BACKUP_KEY} from './save-transfer.js?v=2026-10-20-jeju-rov-v1';
 
-import {MIGRATION_KEY,EDITOR_MIGRATION_KEY,CAMPUS_BACKUP_KEY,DIVE_BACKUP_KEY,ORIGINAL_COLLECTION_KEY} from './progress.js?v=2026-10-20-anne-bucket-1';
+import {MIGRATION_KEY,EDITOR_MIGRATION_KEY,CAMPUS_BACKUP_KEY,DIVE_BACKUP_KEY,ORIGINAL_COLLECTION_KEY} from './progress.js?v=2026-10-20-jeju-rov-v1';
 
 export function setupTransfer({snapshot,normalise,onCommit,pause,onClose}){
   const $=id=>document.getElementById(id),dialog=$('transfer-dialog'),status=$('transfer-status'),preview=$('transfer-preview'),apply=$('apply-transfer');

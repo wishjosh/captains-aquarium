@@ -7,9 +7,9 @@
   <meta name="description" content="손가락으로 탐험하고 흰동가리를 수집해 나만의 제주 수족관에 데려와요.">
   <title>선장의 아쿠아리움 · 제주</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="game.css?v=2026-10-20-anne-bucket-1">
-  <link rel="stylesheet" href="transfer.css?v=2026-10-20-anne-bucket-1">
-</head>
+  <link rel="stylesheet" href="game.css?v=2026-10-20-jeju-rov-v1">
+  <link rel="stylesheet" href="transfer.css?v=2026-10-20-jeju-rov-v1">
+<link rel="stylesheet" href="rov.css?v=2026-10-20-jeju-rov-v1"><link rel="stylesheet" href="care-v1.css?v=2026-10-20-jeju-rov-v1"></head>
 <body>
   <main class="game-shell">
     <header class="topbar">
@@ -25,6 +25,7 @@
         <div class="mission-dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
       </div>
       <div class="bag"><span aria-hidden="true">🐠</span><span id="bag-count">가방 0</span></div>
+      <div class="voyage-shortcuts"><button id="start-rov" disabled>탐사선 탑승</button><button id="go-management" disabled>관리동 바로 가기</button></div>
       <div id="waypoint" class="waypoint" aria-hidden="true">↓ 바다 탐사</div>
       <p class="rotate-hint">휴대폰을 가로로 돌리면 더 넓게 볼 수 있어요</p>
       <p class="move-hint" aria-hidden="true">왼쪽을 끌어 이동</p>
@@ -33,7 +34,7 @@
       <div id="drag-guide" class="drag-guide" hidden><span></span></div>
       <p id="toast" class="toast" role="status" aria-live="polite" hidden></p>
       <div id="loading" class="scene-message" role="status"><span class="wave-icon">≈</span>선장님과 제주 항구를 준비하고 있어요…</div>
-      <div id="game-error" class="scene-message" role="alert" hidden><p>3D 수족관을 열지 못했어요.<br>Chrome에서 다시 열어 주세요.</p><button type="button" id="retry">다시 열기</button><a href="fish-view.html?v=2026-10-20-anne-bucket-1">생물 감상 화면 열기</a></div>
+      <div id="game-error" class="scene-message" role="alert" hidden><p>3D 수족관을 열지 못했어요.<br>Chrome에서 다시 열어 주세요.</p><button type="button" id="retry">다시 열기</button><a href="fish-view.html?v=2026-10-20-jeju-rov-v1">생물 감상 화면 열기</a></div>
       <div class="bottom-hud">
         <div class="nearby"><span id="nearby-title">왼쪽을 누르고 끌어 보세요</span><span id="nearby-detail">손을 떼면 멈춰요</span></div>
         <div class="exhibition-actions"><button id="observe" class="observe" type="button" hidden>흰동가리 가까이 보기</button><button id="edit-exhibition" class="observe" type="button" hidden>전시 편집</button></div>
@@ -43,11 +44,12 @@
     <footer class="game-footer"><span id="save-status">이 기기에 저장돼요</span><span id="collection-count">수조 친구 0 / 4종</span></footer>
   </main>
   <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
-    <p>물속: 왼쪽은 수평 이동, 오른쪽 세로 조작부는 상승·하강이에요. 생물에 가까이 가서 직접 누르면 수집해요. 두 손가락 또는 휠로 확대·축소해요. 컴퓨터는 Q 상승·E 하강, +/- 확대·축소, 0 기본 배율이에요.</p><h2 id="help-title">선장님, 첫 탐험을 시작해요</h2>
-    <ol><li>휴대폰을 가로로 놓고 왼쪽 조이스틱으로 이동해요.</li><li>부두 끝 사다리를 향해 걸어 내려가 바다 친구를 찾아요.</li><li>생물 가까이에서 직접 눌러 한 마리를 수집해요.</li><li>사다리에 접근해 상승하면 부두로 돌아와요. 조수와 관리동 담당자에게 가서 입수해요.</li><li>상태를 확인하고 먹이 반응을 살펴봐요.</li><li>전시관 배치·관찰·꾸미기는 원하는 때 별도로 즐겨요.</li></ol>
-    <p>문을 향해 1초간 계속 걸으면 출입해요. 가까이에서 ‘문 열기’를 눌러도 돼요. 구릉과 오솔길은 지금은 배경이에요. 전시된 수조는 가까이에서 짧게 눌러 관찰할 수도 있어요. 수집은 생물을 직접 누르고, 입수·배치는 담당자나 행동 버튼으로 해요. 컴퓨터에서는 방향키 또는 WASD로 걸을 수 있어요.</p>
+    <h2 id="help-title">선장님, 제주 탐사를 시작해요</h2>
+    <ol><li>‘탐사선 탑승’으로 큰 배에 올라 제주 연안으로 출항해요.</li><li>무인탐사정을 내리고 왼쪽 끌기·방향키로 이동해요. 오른쪽 상승·하강이나 Q/E로 수심을 조절해요.</li><li>친구를 직접 누르거나 이름을 골라 가까이 가세요. 관찰만으로 발견 기록을 남길 수 있어요.</li><li>이동 수조로 안내하면 친구가 헤엄쳐 들어와요. 유도 중에는 취소할 수 있어요.</li><li>배로 회수해 귀항한 뒤 관리동의 Anne에게 인계해요. 상태 확인과 먹이 반응을 지켜보면 첫 돌봄이 완료돼요.</li><li>다음 탐사는 전시 없이 시작할 수 있어요. 전시와 꾸미기는 원하는 때 즐겨요.</li></ol>
+    <p>해안·관리동에서는 기존처럼 걸어서 이동할 수 있어요. ‘관리동 바로 가기’는 Anne 곁으로 이동하는 편의 기능이에요. 예전 수중 위치로 저장된 기록은 사다리로 돌아올 수 있어요.</p>
+    <p>제주 연안의 암반·모래·해조숲에서 영감을 받은 가상 해역입니다. 표시 생물은 승인된 모델과 외형을 사용하며 제주 자생종 판정을 뜻하지 않아요. 수심과 돌봄 과정은 게임 표현입니다.</p>
     <p class="storage-note">진행은 이 기기의 브라우저에 저장돼요. 다른 기기와는 연동되지 않으며, 브라우저의 사이트 데이터를 지우면 기록도 지워져요.</p>
-    <p>검토 버전: 2026-10-20-anne-bucket-1 · Anne 양동이·승인한 걷기 자세·기존 선장과 네 생물</p>
+    <p>검토 버전: 2026-10-20-jeju-rov-v1 · 큰 배·무인탐사정·유도 수집·관리까지 이어지는 첫 버전</p>
     <button id="open-transfer" type="button">저장 기록 옮기기</button>
     <button id="close-help" type="button">알겠어요</button>
   </dialog>
@@ -117,6 +119,6 @@
     <button id="apply-transfer" type="button" disabled>이 기록으로 바꾸기</button>
     <button id="close-transfer" class="secondary" type="button">게임으로 돌아가기</button>
   </dialog>
-  <script type="module" src="game.js?v=2026-10-20-anne-bucket-1"></script>
+  <script type="module" src="game.js?v=2026-10-20-jeju-rov-v1"></script>
 </body>
 </html>

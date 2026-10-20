@@ -1,7 +1,7 @@
-import * as T from './vendor/three.module.js?v=2026-10-20-anne-bucket-1';
-import {GLTFLoader} from './vendor/GLTFLoader.js?v=2026-10-20-anne-bucket-1';
-import {PIER} from './campus-layout.js?v=2026-10-20-anne-bucket-1';
-export async function loadCampus(){const l=new GLTFLoader();const paths={large:'assets/pirate/house1.gltf',small:'assets/pirate/house3.gltf',rock:'assets/nature/rock_largeA.glb',rockB:'assets/nature/rock_largeC.glb',seaweed:'assets/underwater/mohabins-seaweed.glb',kelp:'assets/underwater/google-kelp.glb'};return Object.fromEntries(await Promise.all(Object.entries(paths).map(async([k,p])=>[k,await l.loadAsync(p)])));}
+import * as T from './vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
+import {GLTFLoader} from './vendor/GLTFLoader.js?v=2026-10-20-jeju-rov-v1';
+import {PIER} from './campus-layout.js?v=2026-10-20-jeju-rov-v1';
+export async function loadCampus(){const l=new GLTFLoader();const paths={ship:'assets/pirate/ship-large.gltf',large:'assets/pirate/house1.gltf',small:'assets/pirate/house3.gltf',rock:'assets/nature/rock_largeA.glb',rockB:'assets/nature/rock_largeC.glb',seaweed:'assets/underwater/mohabins-seaweed.glb',kelp:'assets/underwater/google-kelp.glb'};return Object.fromEntries(await Promise.all(Object.entries(paths).map(async([k,p])=>[k,await l.loadAsync(p)])));}
 export function createCampus(kit,assets){const scene=new T.Group(),a={...kit,...assets};
 const mat=(c,extra={})=>new T.MeshStandardMaterial({color:c,roughness:.88,...extra});
 const materials={wood:mat('#80513a'),plank:mat('#b28153'),navy:mat('#263c59'),sand:mat('#ddc899'),stone:mat('#d7cbb2'),grass:mat('#7f9b48'),glass:mat('#57afc6',{metalness:.22,roughness:.15,transparent:true,opacity:.72})};
@@ -25,6 +25,7 @@ function place(asset,size,x,z,y=1,axis='y',angle=0){const n=fit(asset,size,axis)
  // User-selected complete building units: retain original doors, roofs and stairs.
  const small=place(a.small,10,-8,-1.5,1.06,'x',0);small.name='Quaternius House3 / proposed management';
  const large=place(a.large,17,6,-7,1.06,'x',0);large.name='Quaternius House1 / proposed exhibition';
+ const motherShip=place(a.ship,12,18,17.5,-1.2,'x',0);motherShip.name='Jeju expedition mother ship';
  // Quaternius dock remains the separate departure point.
  // Align plank tops (original y=.488), not the bottom of the submerged posts.
  const dockBounds=new T.Box3().setFromObject(a.dock.scene),dockScale=PIER.sectionLength/(dockBounds.max.z-dockBounds.min.z);

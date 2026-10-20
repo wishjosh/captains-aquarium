@@ -1,33 +1,34 @@
-import {equipCaptainTelescope} from './captain-telescope.js?v=2026-10-20-anne-bucket-1';
-import {SPECIES_INFO,SPECIES_NAMES,fishLength} from './species.js?v=2026-10-20-anne-bucket-1';
-import {WATER_ORIGIN,LADDER,waterWorld,zoomValue,autoLook,ladderIntent,createLadder,clamp} from './expedition.js?v=2026-10-20-anne-bucket-1';
-import {createCrew} from './crew.js?v=2026-10-20-anne-bucket-1';
-import {aquariumLighting,lightingState} from './lighting.js?v=2026-10-20-anne-bucket-1';
-import {createManagement} from './management.js?v=2026-10-20-anne-bucket-1';
-import {managementSurface,managementCanStep} from './management-layout.js?v=2026-10-20-anne-bucket-1';
-import {DIVE_START,createUnderwater,swimStep} from './underwater.js?v=2026-10-20-anne-bucket-1';
-import {setupCare} from './care.js?v=2026-10-20-anne-bucket-1';
-import * as THREE from './vendor/three.module.js?v=2026-10-20-anne-bucket-1';
-import {loadPirateKit,createCaptain,placeProp} from './pirate.js?v=2026-10-20-anne-bucket-1';
-import {loadFish,createFish} from './fish.js?v=2026-10-20-anne-bucket-1';
-import {SAVE_KEY,SAVE_VERSION,emptyProgress,parseSave,writeSave,hasStarterDecor,missionFor,canCollect} from './progress.js?v=2026-10-20-anne-bucket-1';
-import {START,TANKS,ZONE_NAMES,configureExhibition} from './layout.js?v=2026-10-20-anne-bucket-1';
-import {CAMPUS_START,DOORS,EXITS,SPAWNS,COAST,MANAGEMENT,spotsFor,blocked,normaliseCampus,nearDoor,waypoint} from './campus-layout.js?v=2026-10-20-anne-bucket-1';
-import {loadCampus,createCampus} from './campus.js?v=2026-10-20-anne-bucket-1';
-import {paintDecorations} from './decorations.js?v=2026-10-20-anne-bucket-1';
-import {setupDecorationEditor} from './decorate.js?v=2026-10-20-anne-bucket-1';
-import {setupTransfer} from './transfer-ui.js?v=2026-10-20-anne-bucket-1';
-import {SPECIES,SLOT_IDS,SLOT_NAMES,SHAPES,slotFor,editExhibition} from './exhibition.js?v=2026-10-20-anne-bucket-1';
-import {setupExhibition} from './exhibition-ui.js?v=2026-10-20-anne-bucket-1';
-import {loadAquariumKit,aquariumModule,aquariumProp,aquariumFloorGrid} from './aquarium-kit.js?v=2026-10-20-anne-bucket-1';
+import {setupROV} from './rov-expedition.js?v=2026-10-20-jeju-rov-v1';
+import {equipCaptainTelescope} from './captain-telescope.js?v=2026-10-20-jeju-rov-v1';
+import {SPECIES_INFO,SPECIES_NAMES,fishLength} from './species.js?v=2026-10-20-jeju-rov-v1';
+import {WATER_ORIGIN,LADDER,waterWorld,zoomValue,autoLook,ladderIntent,createLadder,clamp} from './expedition.js?v=2026-10-20-jeju-rov-v1';
+import {createCrew} from './crew.js?v=2026-10-20-jeju-rov-v1';
+import {aquariumLighting,lightingState} from './lighting.js?v=2026-10-20-jeju-rov-v1';
+import {createManagement} from './management.js?v=2026-10-20-jeju-rov-v1';
+import {managementSurface,managementCanStep} from './management-layout.js?v=2026-10-20-jeju-rov-v1';
+import {DIVE_START,createUnderwater,swimStep} from './underwater.js?v=2026-10-20-jeju-rov-v1';
+import {setupCare} from './care.js?v=2026-10-20-jeju-rov-v1';
+import * as THREE from './vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
+import {loadPirateKit,createCaptain,placeProp} from './pirate.js?v=2026-10-20-jeju-rov-v1';
+import {loadFish,createFish} from './fish.js?v=2026-10-20-jeju-rov-v1';
+import {SAVE_KEY,SAVE_VERSION,emptyProgress,parseSave,writeSave,hasStarterDecor,missionFor,canCollect} from './progress.js?v=2026-10-20-jeju-rov-v1';
+import {START,TANKS,ZONE_NAMES,configureExhibition} from './layout.js?v=2026-10-20-jeju-rov-v1';
+import {CAMPUS_START,DOORS,EXITS,SPAWNS,COAST,MANAGEMENT,spotsFor,blocked,normaliseCampus,nearDoor,waypoint} from './campus-layout.js?v=2026-10-20-jeju-rov-v1';
+import {loadCampus,createCampus} from './campus.js?v=2026-10-20-jeju-rov-v1';
+import {paintDecorations} from './decorations.js?v=2026-10-20-jeju-rov-v1';
+import {setupDecorationEditor} from './decorate.js?v=2026-10-20-jeju-rov-v1';
+import {setupTransfer} from './transfer-ui.js?v=2026-10-20-jeju-rov-v1';
+import {SPECIES,SLOT_IDS,SLOT_NAMES,SHAPES,slotFor,editExhibition} from './exhibition.js?v=2026-10-20-jeju-rov-v1';
+import {setupExhibition} from './exhibition-ui.js?v=2026-10-20-jeju-rov-v1';
+import {loadAquariumKit,aquariumModule,aquariumProp,aquariumFloorGrid} from './aquarium-kit.js?v=2026-10-20-jeju-rov-v1';
 
 const $=id=>document.getElementById(id),canvas=$('world'),viewport=document.querySelector('.world-wrap');
 const decor=$('decorate-dialog'),viewer=$('viewer-dialog'),help=$('help-dialog'),transfer=$('transfer-dialog'),inventory=$('management-dialog');
 const exhibitionDialog=$('exhibition-dialog');
-let underwater,careUI,lookGesture=null,managementFacility,crew,ladderModel;
+let rov,underwater,careUI,lookGesture=null,managementFacility,crew,ladderModel;
 const view={zoom:1,selected:null,focusX:0,focusZ:0,accessBlend:0,accessZoom:1},worldPointers=new Map();let pinch=null,depthGesture=null,ladder=null,ladderHold=0,ladderCooldown=0,doorApproach=null;
 const dive={...DIVE_START};
-const modalOpen=()=>careUI?.dialog.open||viewer.open||help.open||decor.open||transfer.open||inventory.open||exhibitionDialog.open;
+const modalOpen=()=>rov?.dialog.open||careUI?.dialog.open||viewer.open||help.open||decor.open||transfer.open||inventory.open||exhibitionDialog.open;
 const player={x:CAMPUS_START.x,z:CAMPUS_START.z,angle:.38},progress=emptyProgress();
 let area='harbor',campusGroup,managementGroup,galleryGroup,doorHold=0,doorId=null,doorCooldown=0;
 const currentSpots=()=>spotsFor(area);
@@ -90,13 +91,15 @@ function updateMission(){
  $('mission-title').textContent=m.title;$('mission-detail').textContent=m.detail;
  $('mission-count').textContent=m.step+' / '+m.total;$('chapter').textContent=m.target?'제주 · '+m.chapter+'번째 임무':'제주 · 수집 완료';
  document.querySelectorAll('.mission-dots i').forEach((dot,i)=>{dot.hidden=i>=m.total;dot.classList.toggle('done',i<m.step);});
- const held=heldKind();$('bag-count').textContent=held?'가방 · '+names[held]+' 1':'가방 0';
- $('collection-count').textContent='전시 친구 '+Object.keys(names).filter(k=>speciesState(k).placed).length+' / 4종';
+ const held=heldKind();$('bag-count').textContent=held?'이동 수조 · '+names[held]+' 1':'이동 수조 · 비어 있음';
+ $('collection-count').textContent='첫 돌봄 '+Object.keys(names).filter(k=>progress.care[k]===2).length+' / 4종';
  for(const [kind,model] of Object.entries(fishModels))model.visible=speciesState(kind).placed;
  if(tankDecor)tankDecor.visible=progress.placed;
  refreshInventory();updateNearby(true);
 }
 function updateNearby(force=false){
+ if($('start-rov')){$('start-rov').hidden=area!=='harbor';$('start-rov').disabled=!ready||!!heldKind();$('go-management').hidden=area==='underwater';$('go-management').textContent=area==='management'?'부두 바로 가기':'관리동 바로 가기';$('go-management').disabled=!ready;}
+
  if(area==='underwater'){
   const target=underwater?.target(dive);nearby=target?'dive-'+target:null;
   $('area-name').textContent='얕은 바다 · 수중 탐사';$('mission-detail').textContent=heldKind()?'사다리에 접근해 상승하면 부두로 돌아가요.':'생물에 가까이 가서 직접 눌러 수집해요.';$('edit-exhibition').hidden=true;$('observe').hidden=true;$('interact').hidden=true;
@@ -131,7 +134,7 @@ function updateNearby(force=false){
   secondary.hidden=!kind;secondary.textContent='보유 생물 보기';
  }else if(target==='staff-exhibition'){title='전시 담당';detail='입수한 친구의 전시 위치와 수조를 골라요';label='전시 준비하기';
  }else if(target==='sea'){
-  title='부두 · 바다 사다리';detail='부두 끝 사다리 쪽으로 계속 걸어 내려가요';button.hidden=true;
+  title='부두 · 제주 탐사선';detail='큰 배에서 무인탐사정을 내려 친구를 만나러 가요';label='탐사선 탑승';button.hidden=false;
  }else if(SLOT_IDS.includes(target)){
   const kind=occupant(target),pending=pendingKind(target);
   title='전시관 · '+SLOT_NAMES[target]+' '+SHAPES[progress.exhibition[target].shape]+' 수조';
@@ -150,7 +153,7 @@ function openTank(tank){
  stop();p.observed=true;save();updateMission();
  const demo=false;
  $('viewer-title').textContent=names[tank]+' 수조'+(demo?' · 관찰용':'');
- $('viewer-frame').src='fish-view.html?v=2026-10-20-anne-bucket-1&kind='+tank+'&count=1&decor='+(tank==='fish'?progress.decorations.map(k=>k||'').join(','):',,');
+ $('viewer-frame').src='fish-view.html?v=2026-10-20-jeju-rov-v1&kind='+tank+'&count=1&decor='+(tank==='fish'?progress.decorations.map(k=>k||'').join(','):',,');
  viewer.showModal();
 }
 function interact(target=nearby){
@@ -164,7 +167,7 @@ function interact(target=nearby){
   stop();const p=speciesState(kind);p.bag=false;p.admitted=true;save();updateMission();canvas.focus({preventScroll:true});avatar.userData.controller.celebrate('Yes');
   toast(names[kind]+' 입수 완료! 관리동에서 첫 돌봄을 시작해요.');careUI.open(kind);return;
  }
- if(target==='sea'){toast('부두 끝의 사다리를 향해 계속 걸어가 보세요.');return;}
+ if(target==='sea'){rov.open();return;}
  if(target==='staff-exhibition'){stop();exhibitionEditor.open('fish');return;}
  if(SLOT_IDS.includes(target)){
   const kind=occupant(target),pending=pendingKind(target);
@@ -302,6 +305,8 @@ function updateLadder(dt){
  if(t===1){$('ladder-message').hidden=true;settleLadder(a.enter);}return true;
 }
 function updateLadderIntent(dt){
+ if(area==='harbor')return; // ROV departure is the primary route; old underwater saves can still return.
+
  ladderCooldown=Math.max(0,ladderCooldown-dt);const vertical=input.vertical+(keys.has('q')?1:0)-(keys.has('e')?1:0);
  if(!ladderCooldown&&ladderIntent(area,player,dive,direction,vertical)){ladderHold+=dt;if(ladderHold>=LADDER.hold)beginLadder(area==='harbor');}else ladderHold=0;
 }
@@ -348,10 +353,11 @@ function buildScene(textures,kit,fishAsset,facilityKit,campusAssets){
  const {key:sun}=aquariumLighting(scene,{renderer,keyPosition:[-18,40,25]});sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-38,right:38,top:38,bottom:-38,near:1,far:110});sun.shadow.bias=-.0002;sun.shadow.normalBias=.035;scene.add(sun);
  campusGroup=createCampus(kit,campusAssets);scene.add(campusGroup);buildFacilities(fishAsset);
  underwater=createUnderwater(fishAsset,campusAssets);underwater.group.position.set(WATER_ORIGIN.x,WATER_ORIGIN.y,WATER_ORIGIN.z);scene.add(underwater.group);ladderModel=createLadder();scene.add(ladderModel);
+ rov=setupROV({asset:fishAsset,assets:campusAssets,progress,pause:stop,commit:()=>{save();updateMission();},onReturn:()=>{area='harbor';player.x=12;player.z=16.4;applyArea();save();updateMission();toast(heldKind()?'귀항했어요. 조수와 관리동으로 가서 Anne에게 인계해요.':'귀항했어요. 다음 탐사를 준비할 수 있어요.');}});
  careUI=setupCare(fishAsset,{progress,pause:stop,commit:()=>{save();updateMission();refreshInventory();}});
  fishSprite=createTank(TANKS.fish.x,TANKS.fish.z,'fish',fishAsset);createTank(TANKS.jelly.x,TANKS.jelly.z,'jelly',fishAsset);createTank(TANKS.chromis.x,TANKS.chromis.z,'chromis',fishAsset);
  for(const kind of SPECIES.filter(k=>k!=='fish')){const model=createFish(fishAsset,{kind,length:fishLength(kind)});model.visible=false;fishModels[kind]=model;galleryGroup.add(model);}
- label('바다 사다리',LADDER.x,2.1,LADDER.z,'#294a67',3,campusGroup);
+ label('제주 탐사선',LADDER.x,2.1,LADDER.z,'#294a67',3,campusGroup);
  for(const spot of Object.values(COAST)){const ring=groundRing(spot.x,spot.z,'#c89e43',.65,campusGroup);ring.position.y=1.1;}
  avatar=createCaptain(kit.captain);equipCaptainTelescope(avatar);scene.add(avatar);crew=createCrew(kit,fishAsset,{label,blocked,canStep:managementCanStep,surface:managementSurface});scene.add(crew.group);
  marker=new THREE.Mesh(new THREE.ConeGeometry(.17,.32,5),new THREE.MeshBasicMaterial({color:'#efbb4e'}));marker.rotation.x=Math.PI;scene.add(marker);
@@ -500,6 +506,8 @@ inventory.addEventListener('close',()=>{stop();last=0;canvas.focus({preventScrol
 $('close-viewer').addEventListener('click',()=>viewer.close());
 viewer.addEventListener('close',()=>{stop();$('viewer-frame').src='about:blank';last=0;canvas.focus({preventScroll:true});});
 help.addEventListener('close',()=>{stop();last=0;canvas.focus({preventScroll:true});});
+$('start-rov').addEventListener('click',()=>{if(ready&&!modalOpen()&&area==='harbor'&&!heldKind())rov.open();});
+$('go-management').addEventListener('click',()=>{if(!ready||modalOpen())return;stop();if(area==='management'){area='harbor';player.x=12;player.z=16.4;player.angle=Math.PI;applyArea();save();updateMission();toast('부두에 왔어요. 다음 탐사를 시작해요.');}else{area='management';player.x=-7.7;player.z=9.6;player.angle=-Math.PI/2;applyArea();save();updateMission();toast('Anne 곁으로 왔어요. 입수 또는 관리 현황을 눌러 주세요.');}});
 $('retry').addEventListener('click',()=>location.reload());
 canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();stop();ready=false;$('game-error').hidden=false;});
 
@@ -523,11 +531,11 @@ try {
   renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'low-power'});
   renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;
   const [kit,fishAsset,facilityKit,campusAssets]=await Promise.all([loadPirateKit(),loadFish({collection:true}),loadAquariumKit(),loadCampus()]);
-  buildScene({},kit,fishAsset,facilityKit,campusAssets);ready=true;$('loading').hidden=true;resize();
+  buildScene({},kit,fishAsset,facilityKit,campusAssets);ready=true;$('loading').hidden=true;updateNearby(true);resize();
   new ResizeObserver(resize).observe(viewport);
   if(!saveOkay)toast('저장 기록을 읽지 못해 새 탐험으로 열었어요.');else if(migrated)toast('이전 생물 기록을 보관했어요. 흰동가리의 새 탐험을 시작해요.');
   // Read-only state and projection let browser checks exercise real input and rendering.
-  window.jejuGame={getState:()=>({ready,doorApproach:doorApproach?{progress:doorApproach.elapsed/.65}:null,view:{...view},crew:crew.inspect(),ladder:ladder?{enter:ladder.enter,progress:ladder.elapsed/LADDER.duration}:null,ladderHold,depthInput:input.vertical,camera:{position:camera.position.toArray(),zoom:camera.zoom,direction:camera.getWorldDirection(new THREE.Vector3()).toArray()},lighting:lightingState(scene),managementRoom:MANAGEMENT,managementFacility:managementFacility.inspect(),surface:managementSurface(player.x,player.z),dive:{...dive},underwater:underwater.inspect(),careView:careUI.inspect(),zone:area,doorHold,guide,doors:area==='harbor'?DOORS:EXITS,location:snapshot().location,drawCalls:renderer.info.render.calls,tankShapes:Object.fromEntries(Object.entries(progress.exhibition).map(([k,t])=>[k,t.shape])),aquariumKit:{source:'Public Aquarium and Marine Centre',slots:Object.keys(tanks),care:1,managementProps:MANAGEMENT.props.map(p=>p.name),managementFloorTiles:managementGroup.userData.floorTileCount},decorationSlot:slotFor(progress,'fish'),decorationWorld:tankDecor.getWorldPosition(new THREE.Vector3()),renderedSpecies:Object.fromEntries(Object.entries(fishModels).map(([kind,model])=>[kind,{visible:model.visible,position:model.getWorldPosition(new THREE.Vector3()),model:model.userData.inspect()}])),...progress,decorations:[...progress.decorations],placedDecorations:tankDecor.children.map(n=>n.name),player:{...player},moving,nearby,stage:stage(),saveOkay,dragging:!!gesture,looking:!!lookGesture,controls:{side:gesture?(gesture.move?"move":"tap"):null,input:{...input}},captain:avatar.userData.controller.inspect(),captainEquipment:avatar.userData.roleEquipment.inspect(),fish:fishSprite.userData.inspect(),mission:missionFor(progress),exhibits:Object.fromEntries(SPECIES.map(k=>[k,speciesState(k).placed?1:0]))}),screenPoint:(name)=>{
+  window.jejuGame={rov,getState:()=>({ready,rov:rov.inspect(),doorApproach:doorApproach?{progress:doorApproach.elapsed/.65}:null,view:{...view},crew:crew.inspect(),ladder:ladder?{enter:ladder.enter,progress:ladder.elapsed/LADDER.duration}:null,ladderHold,depthInput:input.vertical,camera:{position:camera.position.toArray(),zoom:camera.zoom,direction:camera.getWorldDirection(new THREE.Vector3()).toArray()},lighting:lightingState(scene),managementRoom:MANAGEMENT,managementFacility:managementFacility.inspect(),surface:managementSurface(player.x,player.z),dive:{...dive},underwater:underwater.inspect(),careView:careUI.inspect(),zone:area,doorHold,guide,doors:area==='harbor'?DOORS:EXITS,location:snapshot().location,drawCalls:renderer.info.render.calls,tankShapes:Object.fromEntries(Object.entries(progress.exhibition).map(([k,t])=>[k,t.shape])),aquariumKit:{source:'Public Aquarium and Marine Centre',slots:Object.keys(tanks),care:1,managementProps:MANAGEMENT.props.map(p=>p.name),managementFloorTiles:managementGroup.userData.floorTileCount},decorationSlot:slotFor(progress,'fish'),decorationWorld:tankDecor.getWorldPosition(new THREE.Vector3()),renderedSpecies:Object.fromEntries(Object.entries(fishModels).map(([kind,model])=>[kind,{visible:model.visible,position:model.getWorldPosition(new THREE.Vector3()),model:model.userData.inspect()}])),...progress,decorations:[...progress.decorations],placedDecorations:tankDecor.children.map(n=>n.name),player:{...player},moving,nearby,stage:stage(),saveOkay,dragging:!!gesture,looking:!!lookGesture,controls:{side:gesture?(gesture.move?"move":"tap"):null,input:{...input}},captain:avatar.userData.controller.inspect(),captainEquipment:avatar.userData.roleEquipment.inspect(),fish:fishSprite.userData.inspect(),mission:missionFor(progress),exhibits:Object.fromEntries(SPECIES.map(k=>[k,speciesState(k).placed?1:0]))}),screenPoint:(name)=>{
     const kind=name.endsWith('-tank')?name.slice(0,-5):null;const creature=name.startsWith('dive-')?underwater.creatures[name.slice(5)]:null;const staff=name==='staff-management'?crew.actors.management:name==='staff-exhibition'?crew.actors.exhibition:null;const point=creature?creature.getWorldPosition(new THREE.Vector3()):staff?staff.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0,1.2,0)):name==='player'?new THREE.Vector3(player.x,.5,player.z):kind?new THREE.Vector3(TANKS[kind].x,1.2,TANKS[kind].z):new THREE.Vector3((currentSpots()[name]||DOORS[name]).x,area==='harbor'?1.1:.2,(currentSpots()[name]||DOORS[name]).z);
     const rect=canvas.getBoundingClientRect();point.project(camera);return {x:rect.left+(point.x+1)*rect.width/2,y:rect.top+(1-point.y)*rect.height/2};
   }};
