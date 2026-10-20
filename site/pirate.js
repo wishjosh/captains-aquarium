@@ -1,5 +1,5 @@
-import * as THREE from './vendor/three.module.js?v=2026-10-18-underwater-four-fish-1';
-import { GLTFLoader } from './vendor/GLTFLoader.js?v=2026-10-18-underwater-four-fish-1';
+import * as THREE from './vendor/three.module.js?v=2026-10-20-captain-telescope-1';
+import { GLTFLoader } from './vendor/GLTFLoader.js?v=2026-10-20-captain-telescope-1';
 
 const loader = new GLTFLoader();
 const names = ['captain','anne','henry','mako','dock','house','palm','rock','anchor','barrel','chest'];

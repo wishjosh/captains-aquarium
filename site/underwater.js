@@ -1,7 +1,7 @@
-import {createUnderwaterScenery} from './underwater-scenery.js?v=2026-10-18-underwater-four-fish-1';
-import {SPECIES,stateFor,fishLength} from './species.js?v=2026-10-18-underwater-four-fish-1';
-import * as T from './vendor/three.module.js?v=2026-10-18-underwater-four-fish-1';
-import {createFish} from './fish.js?v=2026-10-18-underwater-four-fish-1';
+import {createUnderwaterScenery} from './underwater-scenery.js?v=2026-10-20-captain-telescope-1';
+import {SPECIES,stateFor,fishLength} from './species.js?v=2026-10-20-captain-telescope-1';
+import * as T from './vendor/three.module.js?v=2026-10-20-captain-telescope-1';
+import {createFish} from './fish.js?v=2026-10-20-captain-telescope-1';
 export const DIVE_START={x:0,y:2.8,z:8,yaw:0,pitch:0};
 export const REEF_ROCKS=[[-6,2,1.7],[6,0,2.1],[-8,-7,2],[3,-9,1.7],[9,-11,1.8],[-3,-15,2.1],[-10,8,2],[10,8,1.8]];
 export function swimBlocked(x,y,z){return ![x,y,z].every(Number.isFinite)||Math.abs(x)>13||z < -19||z>11||y<.85||y>6.3||REEF_ROCKS.some(([rx,rz,r])=>y<r+0.5&&Math.hypot(x-rx,z-rz)<r+.35);}

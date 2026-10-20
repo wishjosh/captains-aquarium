@@ -1,4 +1,4 @@
-import * as T from './vendor/three.module.js?v=2026-10-18-underwater-four-fish-1';
+import * as T from './vendor/three.module.js?v=2026-10-20-captain-telescope-1';
 function addEightSkin(shader){
  shader.vertexShader=shader.vertexShader.replace('#include <skinning_pars_vertex>','#include <skinning_pars_vertex>\nattribute vec4 joints_1; attribute vec4 weights_1;');
  const extra='getBoneMatrix(joints_1.x)*weights_1.x+getBoneMatrix(joints_1.y)*weights_1.y+getBoneMatrix(joints_1.z)*weights_1.z+getBoneMatrix(joints_1.w)*weights_1.w';

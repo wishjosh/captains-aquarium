@@ -1,8 +1,8 @@
-import {aquariumLighting,lightingState} from './lighting.js?v=2026-10-18-underwater-four-fish-1';
-import * as T from './vendor/three.module.js?v=2026-10-18-underwater-four-fish-1';
-import {createFish} from './fish.js?v=2026-10-18-underwater-four-fish-1';
-import {DECOR_SLOTS,DECOR_NAMES,paintDecorations} from './decorations.js?v=2026-10-18-underwater-four-fish-1';
-import {hasStarterDecor} from './progress.js?v=2026-10-18-underwater-four-fish-1';
+import {aquariumLighting,lightingState} from './lighting.js?v=2026-10-20-captain-telescope-1';
+import * as T from './vendor/three.module.js?v=2026-10-20-captain-telescope-1';
+import {createFish} from './fish.js?v=2026-10-20-captain-telescope-1';
+import {DECOR_SLOTS,DECOR_NAMES,paintDecorations} from './decorations.js?v=2026-10-20-captain-telescope-1';
+import {hasStarterDecor} from './progress.js?v=2026-10-20-captain-telescope-1';
 export function setupDecorationEditor(asset,{getItems,onCommit}){
  const $=id=>document.getElementById(id),dialog=$('decorate-dialog'),canvas=$('decor-canvas');
  let renderer,scene,camera,fish,root,ready=false,draft=[],selected='rock',pointer=null,last=0;

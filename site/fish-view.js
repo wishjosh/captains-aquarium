@@ -1,9 +1,9 @@
-import {SPECIES,SPECIES_INFO,fishLength} from './species.js?v=2026-10-18-underwater-four-fish-1';
-import {aquariumLighting,lightingState} from './lighting.js?v=2026-10-18-underwater-four-fish-1';
-import * as THREE from './vendor/three.module.js?v=2026-10-18-underwater-four-fish-1';
-import {loadFish,createFish} from './fish.js?v=2026-10-18-underwater-four-fish-1';
-import {savedDecorations,DECOR_KINDS} from './progress.js?v=2026-10-18-underwater-four-fish-1';
-import {paintDecorations,clearDecorations} from './decorations.js?v=2026-10-18-underwater-four-fish-1';
+import {SPECIES,SPECIES_INFO,fishLength} from './species.js?v=2026-10-20-captain-telescope-1';
+import {aquariumLighting,lightingState} from './lighting.js?v=2026-10-20-captain-telescope-1';
+import * as THREE from './vendor/three.module.js?v=2026-10-20-captain-telescope-1';
+import {loadFish,createFish} from './fish.js?v=2026-10-20-captain-telescope-1';
+import {savedDecorations,DECOR_KINDS} from './progress.js?v=2026-10-20-captain-telescope-1';
+import {paintDecorations,clearDecorations} from './decorations.js?v=2026-10-20-captain-telescope-1';
 const $=id=>document.getElementById(id),canvas=$('fish-canvas'),tank=canvas.parentElement;
 const requested=new URLSearchParams(location.search).get('kind'),kind=SPECIES.includes(requested)?requested:'fish',info=SPECIES_INFO[kind],species=kind==='fish'?'clownfish':kind;
 $('species-name').textContent=info.name;$('species-description').textContent=info.description;document.title=info.name+' · 가까이 보기';tank.setAttribute('aria-label',info.name+' 가까이 관찰');canvas.setAttribute('aria-label','헤엄치는 '+info.name+'. 화면을 끌면 다른 방향에서 볼 수 있어요.');$('loading').textContent=info.name+' 친구를 만나고 있어요…';document.querySelector('.study-note').textContent='Quaternius Cute Fish Pack · 원본 형태·수영 동작 · 시안의 눈과 색 적용';

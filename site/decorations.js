@@ -1,4 +1,4 @@
-import * as T from './vendor/three.module.js?v=2026-10-18-underwater-four-fish-1';
+import * as T from './vendor/three.module.js?v=2026-10-20-captain-telescope-1';
 export const DECOR_SLOTS=[{label:'왼쪽',x:-.1,z:.95},{label:'뒤쪽',x:-.9,z:0},{label:'오른쪽',x:-.1,z:-.95}];
 export const DECOR_NAMES={rock:'제주 돌',seaweed:'바다풀'};
 function rock(){const group=new T.Group();for(const [x,z,s]of[[0,0,.26],[.16,.06,.17],[-.12,-.08,.13]]){const mesh=new T.Mesh(new T.DodecahedronGeometry(s,0),new T.MeshStandardMaterial({color:'#566c69',roughness:1,flatShading:true}));mesh.scale.set(1,.75,.9);mesh.position.set(x,s*.6,z);mesh.castShadow=true;mesh.receiveShadow=true;group.add(mesh);}return group;}

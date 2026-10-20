@@ -1,6 +1,6 @@
-import {SPECIES_NAMES,stateFor} from './species.js?v=2026-10-18-underwater-four-fish-1';
-import {defaultExhibition,SLOT_NAMES,slotFor} from './exhibition.js?v=2026-10-18-underwater-four-fish-1';
-import {SAVE_KEY,SAVE_VERSION,emptyProgress,parseSave,hasStarterDecor,writeSave} from './progress.js?v=2026-10-18-underwater-four-fish-1';
+import {SPECIES_NAMES,stateFor} from './species.js?v=2026-10-20-captain-telescope-1';
+import {defaultExhibition,SLOT_NAMES,slotFor} from './exhibition.js?v=2026-10-20-captain-telescope-1';
+import {SAVE_KEY,SAVE_VERSION,emptyProgress,parseSave,hasStarterDecor,writeSave} from './progress.js?v=2026-10-20-captain-telescope-1';
 
 export const BACKUP_KEY=SAVE_KEY+'-before-import';
 export const MAX_SAVE_BYTES=65536;

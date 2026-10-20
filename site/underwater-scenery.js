@@ -1,4 +1,4 @@
-import * as T from './vendor/three.module.js?v=2026-10-18-underwater-four-fish-1';
+import * as T from './vendor/three.module.js?v=2026-10-20-captain-telescope-1';
 
 // Independent of species, care and save data. Source GLBs remain byte-identical.
 export const CURRENT_PERIOD=2*Math.PI/.35;

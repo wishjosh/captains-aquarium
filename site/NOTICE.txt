@@ -15,3 +15,5 @@ Kelp by Poly by Google: https://poly.pizza/m/4cFllH6Iazk (CC BY 3.0).
 License: https://creativecommons.org/licenses/by/3.0/
 Runtime placement, uniform scaling and slow current bending added. Original GLBs retained.
 Credits and provenance: assets/underwater/LICENSE.txt and sources.json.
+
+Captain telescope (2026-10-20): game-authored approved eyepiece-forward/objective-aft geometry and right-arm holding overlay. Original character model, finger pose and 14 source clips retained. Other public crew unchanged.

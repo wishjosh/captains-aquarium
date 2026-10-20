@@ -1,4 +1,4 @@
-import {SPECIES,SPECIES_INFO,stateFor} from './species.js?v=2026-10-18-underwater-four-fish-1';
+import {SPECIES,SPECIES_INFO,stateFor} from './species.js?v=2026-10-20-captain-telescope-1';
 export {SPECIES,stateFor};
 export const SLOT_IDS=['fish','chromis','jelly'];
 export const SLOT_NAMES={fish:'1번',chromis:'2번',jelly:'3번'};

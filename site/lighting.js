@@ -1,5 +1,5 @@
-import {HemisphereLight,DirectionalLight,PMREMGenerator,Scene,Color,Mesh,PlaneGeometry,MeshBasicMaterial,DoubleSide} from './vendor/three.module.js?v=2026-10-18-underwater-four-fish-1';
-import {RoomEnvironment} from './vendor/RoomEnvironment.js?v=2026-10-18-underwater-four-fish-1';
+import {HemisphereLight,DirectionalLight,PMREMGenerator,Scene,Color,Mesh,PlaneGeometry,MeshBasicMaterial,DoubleSide} from './vendor/three.module.js?v=2026-10-20-captain-telescope-1';
+import {RoomEnvironment} from './vendor/RoomEnvironment.js?v=2026-10-20-captain-telescope-1';
 export function studioEnvironment(scene,renderer){const room=new RoomEnvironment(),generator=new PMREMGenerator(renderer),target=generator.fromScene(room,.04);scene.environment=target.texture;room.dispose();generator.dispose();return target;}
 // Retain C solely for historical/source comparison pages.
 export function aquariumLightingC(scene,{keyPosition=[3,6,4]}={}){scene.environment=null;const fill=new HemisphereLight('#ffffff','#a7bdc9',7),key=new DirectionalLight('#ffffff',1);fill.name='aquarium-c-fill';key.name='aquarium-c-key';key.position.set(...keyPosition);scene.add(fill,key);return{fill,key};}
