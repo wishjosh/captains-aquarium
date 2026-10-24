@@ -1,5 +1,7 @@
 # 선장의 아쿠아리움
 
+[흰동가리 물방울 수집 별도 시안](https://wishjosh.github.io/captains-aquarium/studies/bubble-capture/?v=2026-10-24-bubble-1) — 2026-10-24 스마트폰 검토용 페이지입니다. 직접 헤엄치며 조준·발사·확보를 시험합니다. 기존 게임과 저장에 연결하지 않으며 실제 게임 적용은 검토 전입니다.
+
 바다를 사랑하는 선장이 보물을 팔아 수족관을 짓고, 선원들과 바다의 소중함을 알리는 스마트폰 게임 시제품입니다. 제주는 첫 배경이며 다른 지역은 구현 전입니다.
 
 [현재 공개 게임 열기](https://wishjosh.github.io/captains-aquarium/?v=2026-10-20-jeju-rov-v1)

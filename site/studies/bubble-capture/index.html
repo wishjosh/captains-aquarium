@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="icon" href="data:,"><title>선장의 아쿠아리움 · 물방울 수집 시안</title><link rel="stylesheet" href="./study.css?v=2026-10-24-bubble-1"></head>
+<body><main id="game" aria-label="흰동가리 물방울 수집 시안">
+<canvas id="sea" tabindex="0" aria-label="기존 흰동가리와 해조숲이 있는 수중 탐사 화면"></canvas>
+<div id="lookZone" aria-label="끌어 조준하고 손을 떼어 발사"></div>
+<header><div class="brand"><span class="eyebrow">선장의 아쿠아리움 <b>별도 시안</b></span><strong>물방울로 만나는 바다</strong></div><div class="tools"><span id="counter">발사 0</span><button id="sound" aria-pressed="false" aria-label="효과음 켜기">소리 꺼짐</button><button id="pause" aria-label="일시정지" disabled>멈춤</button><button id="reset" aria-label="처음부터 다시 시작" disabled>다시</button></div></header>
+<div id="target" class="fish-tag">흰동가리</div><div id="direction" hidden></div>
+<div id="reticle" aria-hidden="true"><i></i><span></span></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="joystick" aria-label="헤엄치기 조작부"><div id="stickBase"><div id="stickKnob"></div></div><span>헤엄치기</span></div>
+<div id="depth"><button id="rise" aria-label="수면 방향으로 상승">↑</button><button id="sink" aria-label="바닥 방향으로 하강">↓</button></div>
+<button id="fire" aria-label="물방울 한 발 발사" disabled><span>◉</span>발사</button>
+<aside id="caught" hidden><span class="eyebrow">물방울 수집 성공</span><strong>함께 헤엄칠 준비 완료!</strong><p>안에서도 흰동가리가 헤엄쳐요.</p><button id="release">물방울 풀어 주기</button></aside>
+<footer><span id="instruction">왼쪽 이동 · 오른쪽 끌어 조준, 놓아 발사</span><span class="desktop">WASD 이동 · Q/E 하강/상승 · Space 발사</span><a href="../../NOTICE.txt" target="_blank" rel="noopener" style="pointer-events:auto;color:inherit">출처</a></footer>
+<div id="curtain"><section><span class="eyebrow">작은 생물 수집 · 조작 시안</span><h1>한 발의 물방울,<br>새로운 만남.</h1><p>흰동가리의 움직임을 보고 물방울을 쏘세요.<br>빗나가면 위치와 방향을 바꿔 다시 도전하세요.</p><div class="lesson"><span><b>왼손</b> 이동 · 옆의 ↑↓로 수심 조절</span><span><b>오른손</b> 끌어 조준 → 놓아 발사</span></div><p class="note">PC에서는 마우스로 오른쪽 화면을 끌어 조준하고<br>Space 또는 발사 버튼으로도 쏠 수 있어요.</p><button id="start" class="primary" disabled>바다 준비 중…</button><p id="loading" class="note">기존 생물과 바닷속을 불러오고 있어요.</p></section></div>
+<div id="rotate">가로로 돌리면 바다가 더 넓게 보여요.</div><div id="error" role="alert" hidden></div>
+</main><script type="module" src="./study.js?v=2026-10-24-bubble-1"></script></body></html>
