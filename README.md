@@ -1,5 +1,7 @@
 # 선장의 아쿠아리움
 
+2026-10-25 수집 조작감 시안을 스마트폰용 별도 페이지로 추가했습니다. [B 항해일지와 수집·회수](https://wishjosh.github.io/captains-aquarium/studies/journal-feel/?v=2026-10-25-focus-look-1)에서 왼손 이동·오른손 시선, 충전·발사·탄성 물막·직접 회수·안착 후 카드 등록을 확인합니다. 프레임 초점 변경의 반복 일시정지를 보정했습니다. 기존 게임·앞선 공개 시안·저장은 유지하며 새 시안 기록은 페이지 메모리 전용입니다. 실제 Android 조작감·성능과 본게임 적용은 사용자 검토 전입니다.
+
 [B 항해일지 홈·도감 시안](https://wishjosh.github.io/captains-aquarium/studies/journal-home/?v=2026-10-25-journal-home-1) — 2026-10-25 스마트폰 검토용 별도 페이지입니다. 홈·미발견 도감·카드 상세와 기존 물방울 수집 결과를 연결하며 기록은 페이지 메모리에만 남습니다. 기존 게임과 저장은 그대로입니다.
 
 [흰동가리 물방울 수집 별도 시안](https://wishjosh.github.io/captains-aquarium/studies/bubble-capture/?v=2026-10-24-bubble-1) — 2026-10-24 스마트폰 검토용 페이지입니다. 직접 헤엄치며 조준·발사·확보를 시험합니다. 기존 게임과 저장에 연결하지 않으며 실제 게임 적용은 검토 전입니다.
