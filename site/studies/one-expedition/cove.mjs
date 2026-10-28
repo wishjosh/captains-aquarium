@@ -1,5 +1,5 @@
 import {clamp,damp,wrap} from './core.mjs';
-import {ANEMONE,REEF_ROCKS,residentRoute,residentIntent} from './habitat.mjs?v=2026-10-29-habitat-1';
+import {ANEMONE,REEF_ROCKS,residentRoute,residentIntent} from './habitat.mjs?v=2026-10-29-habitat-2';
 
 export const COVE_HOME=[0,2.5,5.7];
 export const COVE_FISH=Object.freeze([

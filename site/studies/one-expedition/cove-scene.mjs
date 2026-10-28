@@ -1,7 +1,7 @@
 import * as T from './runtime/vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
-import {COVE_ROCKS,coveFloor,coveObstacles} from './cove.mjs?v=2026-10-29-habitat-1';
+import {COVE_ROCKS,coveFloor,coveObstacles} from './cove.mjs?v=2026-10-29-habitat-2';
 
-import {createHabitat} from './habitat-scene.mjs?v=2026-10-29-habitat-1';
+import {createHabitat} from './habitat-scene.mjs?v=2026-10-29-habitat-2';
 
 export function createCoveScene(assets){
  const group=new T.Group();group.name='Small cove: sand path, rock ledge, kelp edge';

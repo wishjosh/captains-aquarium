@@ -2,10 +2,10 @@ import * as T from './runtime/vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
 import {GLTFLoader} from './runtime/vendor/GLTFLoader.js?v=2026-10-20-jeju-rov-v1';
 import {loadFish,createFish} from './runtime/fish.js';
 import {aquariumLighting} from './runtime/lighting.js';
-import {ViewZoom,InspectionZoom,zoomFieldOfView} from './view-zoom.mjs?v=2026-10-29-habitat-1';
-import {HabitatApproach} from './habitat.mjs?v=2026-10-29-habitat-1';
-import {createCoveScene} from './cove-scene.mjs?v=2026-10-29-habitat-1';
-import {COVE_HOME,COVE_FISH,CoveLife,CoveDiscovery,coveObstacles,coveRegion,coveHint} from './cove.mjs?v=2026-10-29-habitat-1';
+import {ViewZoom,InspectionZoom,zoomFieldOfView} from './view-zoom.mjs?v=2026-10-29-habitat-2';
+import {HabitatApproach} from './habitat.mjs?v=2026-10-29-habitat-2';
+import {createCoveScene} from './cove-scene.mjs?v=2026-10-29-habitat-2';
+import {COVE_HOME,COVE_FISH,CoveLife,CoveDiscovery,coveObstacles,coveRegion,coveHint} from './cove.mjs?v=2026-10-29-habitat-2';
 import {SwimWorld,clamp,damp,wrap} from './core.mjs?v=2026-10-28-pace-1';import {Swimmer} from './actor.mjs';import {SwimInput} from './input.mjs';
 import {Approach} from './approach.mjs';import {School} from './school.mjs';import {attachMagicGlow} from './magic-glow.mjs';
 import {Expedition,readRecord,emptyRecord,SAVE_KEY} from './expedition.mjs';import {SWIM_PACE,AUTO_APPROACH_SPEED} from './pace.mjs';import {ScreenSteering} from './steering.mjs';import {CaptureAudio} from './audio.mjs';
@@ -99,7 +99,7 @@ function updateEncounterUI(){
  fish=animals[selected]||animals[0];const p=project(fish.position.toArray()),above=project(fish.position.clone().add(new T.Vector3(0,.4,0)).toArray()),onScreen=p[2]>-1&&p[2]<1&&p[0]>0&&p[0]<innerWidth&&p[1]>90&&p[1]<innerHeight-90;
  $('choiceName').textContent=COVE_FISH[selected].place+' · 흰동가리';$('choices').hidden=trip.stage!=='exploring'||encounter.phase!=='choice'||!onScreen;$('again').hidden=trip.stage!=='exploring'||encounter.phase!=='observing'||!onScreen;
  for(const id of ['choices','again']){$(id).style.left=clamp(above[0],115,innerWidth-115)+'px';$(id).style.top=clamp(above[1],175,innerHeight-145)+'px';}
- for(let i=0;i<3;i++){const label=targetLabels[i],f=school.members[i],touch=fishButtons[i],distance=Math.hypot(...f.position.map((v,j)=>v-world.position[j])),available=trip.stage==='exploring'&&f.state==='wild'&&visibleFish(i);label.hidden=!available||!discovery.label(i,distance)||encounter.phase==='choice';touch.hidden=!available||distance>8.5||encounter.phase==='choice';if(!label.hidden||!touch.hidden){const point=project(f.position);touch.style.left=point[0]+'px';touch.style.top=point[1]+'px';label.textContent=COVE_FISH[i].place+' · 흰동가리';label.style.left=clamp(point[0],72,innerWidth-72)+'px';label.style.top=(point[1]-22)+'px';}}
+ for(let i=0;i<3;i++){const label=targetLabels[i],f=school.members[i],touch=fishButtons[i],distance=Math.hypot(...f.position.map((v,j)=>v-world.position[j])),available=trip.stage==='exploring'&&f.state==='wild'&&visibleFish(i);label.hidden=!available||!discovery.label(i,distance)||encounter.phase==='choice'||(i===selected&&encounter.phase==='observing');touch.hidden=!available||distance>8.5||encounter.phase==='choice';if(!label.hidden||!touch.hidden){const point=project(f.position);touch.style.left=point[0]+'px';touch.style.top=point[1]+'px';label.textContent=COVE_FISH[i].place+' · 흰동가리';label.style.left=clamp(point[0],72,innerWidth-72)+'px';label.style.top=(point[1]-22)+'px';}}
 }
 const project=p=>{const v=new T.Vector3().fromArray(p).project(camera);return[(v.x*.5+.5)*innerWidth,(-v.y*.5+.5)*innerHeight,v.z];};
 function report(){return{ready,paused,started,...world.report(),camera:{yaw:cameraYaw,pitch:cameraPitch,radius:cameraRadius,collision:collisionActive,position:camera.position.toArray()},actor:actor?.report(),encounter:encounter.report(),screen:{captain:project(world.position),fish:fish?project(fish.position.toArray()):null},input:input.read()};}
