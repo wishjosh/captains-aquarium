@@ -5,3 +5,5 @@
 #game::after{content:"";position:absolute;inset:0;background:#397e8b;opacity:var(--scene-fade,0);pointer-events:none;transition:opacity .35s;z-index:4}#curtain,#dexPanel{z-index:5}
 
 #areaNote{position:absolute;left:max(20px,env(safe-area-inset-left));top:79px;padding:6px 10px;background:#163f47b8;color:#e5e6c8;border:1px solid #b9caab55;border-radius:10px;font-size:11px;pointer-events:none;z-index:2}.fishLabel{font-size:10px;background:#193f44b8;border:1px solid #c6dab344}@media(max-width:550px){#areaNote{left:12px;top:82px;font-size:10px}}
+
+#viewReset{position:absolute;right:max(20px,env(safe-area-inset-right));top:79px;z-index:3;font-size:11px;padding:6px 10px;background:#173f47dc}.lookLabel{max-width:250px}@media(max-width:550px){#viewReset{right:12px;top:80px;font-size:10px}.lookLabel{max-width:205px;right:9px;font-size:9px}}

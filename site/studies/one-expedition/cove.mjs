@@ -36,11 +36,11 @@ const length=v=>Math.hypot(...v),copy=p=>p.slice();
 export class CoveLife{
  constructor(){this.reset();}
  reset(){this.time=0;this.agents=COVE_FISH.map(({id})=>({id,position:wildPath(id,0),velocity:[0,0,0],yaw:Math.PI/2,anchor:null,mode:'roaming',modeAge:0}));}
- step(dt,members,{selected=-1,phase='free'}={}){
+ step(dt,members,{selected=-1,phase='free',captain=null}={}){
   dt=clamp(dt,0,.05);this.time+=dt;
   for(const f of members){if(f.state!=='wild')continue;const a=this.agents[f.id];
    const mode=f.id===selected&&['approaching','choice','observing'].includes(phase)?phase:'roaming';
-   if(mode!==a.mode){if(mode!=='roaming'&&a.mode==='roaming')a.anchor=copy(a.position);if(mode==='roaming')a.anchor=null;a.mode=mode;a.modeAge=0;}
+   if(mode!==a.mode){if(mode!=='roaming'&&a.mode==='roaming'){a.anchor=copy(a.position);a.velocity=a.velocity.map(v=>v*.35);}if(mode==='roaming')a.anchor=null;a.mode=mode;a.modeAge=0;}
    a.modeAge+=dt;let target;
    if(a.anchor){const u=a.modeAge*(mode==='observing'?.8:.6),p=a.anchor;
     if(mode!=='observing')target=[p[0]+Math.sin(u)*.035,p[1]+Math.sin(u*.8)*.025,p[2]];
@@ -49,14 +49,33 @@ export class CoveLife{
     else target=[p[0]+Math.sin(u*.65)*.18,p[1]+Math.sin(u)*.28,p[2]+(Math.cos(u*.65)-1)*.10];
    }
    else target=wildPath(f.id,this.time);
-   const desired=target.map((v,i)=>(v-a.position[i])*4.0),speed=length(desired),maximum=mode==='roaming'?.68:mode==='observing'?.48:.12;
+   const desired=target.map((v,i)=>(v-a.position[i])*4.0);let maximum=mode==='roaming'?.68:mode==='observing'?.48:.12;a.response=mode==='roaming'?'natural':'calm';
+   if(captain&&mode==='roaming'){
+    const delta=a.position.map((v,i)=>v-captain.position[i]),d=length(delta),predicted=delta.map((v,i)=>v-(captain.velocity?.[i]||0)*.18),pd=length(predicted);
+    if(Math.min(d,pd)<2.2){
+     const away=pd<d&&pd>.3?predicted:delta,n=length(away),fallback=[Math.cos(captain.heading||0),.16,Math.sin(captain.heading||0)];
+     const unit=n>.001?away.map(v=>v/n):fallback,weight=clamp((2.2-Math.min(d,pd))/1.3,0,1),side=f.id%2?1:-1;
+     const escape=[unit[0]*2.75-unit[2]*side*.85,unit[1]*2.2+.12,unit[2]*2.75+unit[0]*side*.85];
+     for(let i=0;i<3;i++)desired[i]=desired[i]*(1-weight)+escape[i]*weight;
+     maximum=2.95;a.response='avoiding';
+    }
+   }
+   const speed=length(desired);
    if(speed>maximum)for(let i=0;i<3;i++)desired[i]*=maximum/speed;
    a.velocity=a.velocity.map((v,i)=>damp(v,desired[i],5,dt));a.position=a.position.map((v,i)=>v+a.velocity[i]*dt);
+   if(captain&&mode==='roaming'){
+    const away=a.position.map((v,i)=>v-captain.position[i]),d=length(away),minimum=1.05;
+    if(d<minimum){const unit=d>.001?away.map(v=>v/d):[Math.cos(captain.heading||0),0,Math.sin(captain.heading||0)];a.position=captain.position.map((v,i)=>v+unit[i]*minimum);a.response='avoiding';}
+    a.position[1]=clamp(a.position[1],1.2,5.7);
+    const vertical=a.position[1]-captain.position[1],dx=a.position[0]-captain.position[0],dz=a.position[2]-captain.position[2],flat=Math.hypot(dx,dz),required=Math.sqrt(Math.max(0,minimum*minimum-vertical*vertical));
+    if(flat<required){const ux=flat>.001?dx/flat:Math.cos(captain.heading||0),uz=flat>.001?dz/flat:Math.sin(captain.heading||0);a.position[0]=captain.position[0]+ux*required;a.position[2]=captain.position[2]+uz*required;}
+
+   }
    if(Math.hypot(a.velocity[0],a.velocity[2])>.018){const yaw=Math.atan2(a.velocity[0],a.velocity[2]);a.yaw+=wrap(yaw-a.yaw)*(1-Math.exp(-dt*4));}
    f.position=copy(a.position);f.velocity=copy(a.velocity);f.yaw=a.yaw;
   }
  }
- report(){return this.agents.map(a=>({id:a.id,place:COVE_FISH[a.id].place,mode:a.mode,position:copy(a.position),velocity:copy(a.velocity)}));}
+ report(){return this.agents.map(a=>({id:a.id,place:COVE_FISH[a.id].place,mode:a.mode,response:a.response||'natural',position:copy(a.position),velocity:copy(a.velocity)}));}
 }
 export class CoveDiscovery{
  constructor(){this.reset();}
