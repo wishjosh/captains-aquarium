@@ -2,9 +2,11 @@
 
 수집 게임의 준비 → 탐사 → 관찰·마법 수집 → 동행 → 귀환 → 결과·도감 → 다음 탐사를 잇는 별도 시안입니다.
 
-[시안 실행](https://wishjosh.github.io/captains-aquarium/studies/one-expedition/?v=2026-10-28-pace-1)
+[시안 실행](https://wishjosh.github.io/captains-aquarium/studies/one-expedition/?v=2026-10-28-cove-2)
 
-멈춰서 오른쪽을 드래그해 시점을 바꾸면 왼쪽 조이스틱의 상하좌우도 새 화면을 기준으로 이동 방향을 고릅니다. 생물을 터치하면 자동 접근하며 도착한 뒤 관찰 또는 수집을 선택합니다. 이동 입력은 자동 접근과 귀환을 취소합니다. 키보드는 W/S 화면 안쪽·앞쪽, A/D 화면 좌·우, E/Q 높이 조절을 지원합니다.
+모래 여울에서 바위턱과 해초가로 이어지는 작은 물길을 둘러봅니다. 같은 흰동가리 세 마리가 모래길 왕복, 바위 가장자리 순환, 해초 옆 높이 변화로 움직입니다. 가까운 시야 안의 생물을 발견하면 기록하고, 이름표는 더 가까이에서 표시합니다. 이는 탐사 경험을 검토하는 행동 시안이며 실제 생태 설명은 아닙니다.
+
+멈춰서 오른쪽을 드래그해 시점을 바꾸면 왼쪽 조이스틱의 상하좌우도 새 화면을 기준으로 이동 방향을 고릅니다. 생물을 터치하면 자동 접근하며 도착한 뒤 관찰 또는 수집을 선택합니다. 접근 중에는 대상이 작은 범위에 머무르고, 관찰 중에는 가까운 곳에서 움직입니다. 카메라가 자동으로 확대되거나 돌아가지는 않습니다. 이동 입력은 자동 접근과 귀환을 취소합니다. 키보드는 W/S 화면 안쪽·앞쪽, A/D 화면 좌·우, E/Q 높이 조절을 지원합니다.
 
 수동 잠영 속도는 앞선 시안보다 약 35% 높였습니다. 멈출 때 밀리는 거리는 이전 수준으로 맞췄고, 자동 접근과 귀환은 기존 속도로 유지합니다.
 
@@ -12,10 +14,10 @@
 
 흰동가리 한 종의 세 마리로 전체 흐름을 검토하는 시안입니다. 실제 스마트폰의 동시 터치·성능·소리와 반복할 때의 재미는 사용자 검토가 필요합니다. 기존 게임과 분리된 저장 키를 사용하며 귀환 완료 때만 누적 기록을 남깁니다. 진행 중 탐사는 새로고침 이후 복원하지 않습니다.
 
-저장소 루트를 기준으로 다음 명령으로 27개 조향·속도·기록·흐름 검사를 실행할 수 있습니다.
+저장소 루트를 기준으로 다음 명령으로 38개 탐사·조향·속도·기록·흐름 검사를 실행할 수 있습니다.
 
 ```sh
-node --test site/studies/one-expedition/expedition.test.mjs site/studies/one-expedition/steering.test.mjs site/studies/one-expedition/pace.test.mjs
+node --test site/studies/one-expedition/expedition.test.mjs site/studies/one-expedition/steering.test.mjs site/studies/one-expedition/pace.test.mjs site/studies/one-expedition/cove.test.mjs
 ```
 
 원본 선장·생물·배·수중 자산과 라이브러리의 출처는 [NOTICE](runtime/NOTICE.txt)를 따릅니다.
