@@ -2,7 +2,7 @@ export const clamp=(v,a=-1,b=1)=>Math.max(a,Math.min(b,v));
 export const damp=(a,b,k,dt)=>a+(b-a)*(1-Math.exp(-k*dt));
 export const wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
 export class SwimWorld {
- constructor(){this.reset();}
+ constructor({maxForward=1.7,coastRate=3.5,brakeRate=4.4}={}){this.tuning={maxForward,coastRate,brakeRate};this.reset();}
  reset(){this.position=[0,2.5,4];this.velocity=[0,0,0];this.heading=0;this.turnRate=0;this.time=0;this.forwardSpeed=0;this.effort=0;this.cruise=0;this.state='float';this.input={x:0,z:0,y:0};this.obstacles=[[-4,-2,1.1],[4,-5,1.1],[-4,-10,1.2],[5,-12,1.4]];}
  step(dt,input={}){
   dt=clamp(dt,0,.05);this.time+=dt;
@@ -10,8 +10,9 @@ export class SwimWorld {
   const priorForward=this.velocity[0]*Math.sin(this.heading)-this.velocity[2]*Math.cos(this.heading);
   const turning=x*(1.65-.65*clamp(Math.abs(priorForward)/1.7,0,1));
   this.turnRate=damp(this.turnRate,turning,8,dt);this.heading=wrap(this.heading+this.turnRate*dt);
-  const targetSpeed=z>=0?z*1.7:z*.52;
-  const rate=z<0&&priorForward>.06?4.4:Math.abs(z)<.025?3.5:2.8;
+  const limit=Math.min(this.tuning.maxForward,Math.max(0,input.speedLimit??this.tuning.maxForward));
+  const targetSpeed=z>=0?z*limit:z*.52;
+  const rate=z<0&&priorForward>.06?this.tuning.brakeRate:Math.abs(z)<.025?this.tuning.coastRate:2.8;
   const speed=damp(priorForward,targetSpeed,rate,dt);
   // Propulsion follows the captain, never a camera transform. Lateral drift decays.
   const forward=[Math.sin(this.heading),0,-Math.cos(this.heading)],right=[Math.cos(this.heading),0,Math.sin(this.heading)];
