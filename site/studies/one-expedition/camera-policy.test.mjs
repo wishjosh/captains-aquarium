@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {SwimWorld} from './core.mjs';import {ViewApproach,SoftGate,arrivalOffset,framingTarget} from './camera-policy.mjs';
+import {ReefSwimWorld as SwimWorld} from './reef-terrain.mjs';import {ViewApproach,SoftGate,arrivalOffset,framingTarget} from './camera-policy.mjs';
 const target=[1.35,1.8,.15];
 for(const yaw of [0,.45,1.9,3.2])test('side arrival settles and faces fish at view '+yaw,()=>{const w=new SwimWorld();w.obstacles=[];const a=new ViewApproach();a.selectView(yaw,w,target);for(let i=0;i<1500&&a.phase==='approaching';i++)w.step(1/60,{...a.control(1/60,{},w,target),speedLimit:1.7});assert.equal(a.phase,'choice');const d=Math.hypot(w.position[0]-target[0],w.position[2]-target[2]);assert.ok(d>1.5&&d<2.4);const right=[Math.cos(yaw),-Math.sin(yaw)];assert.ok(Math.abs((w.position[0]-target[0])*right[0]+(w.position[2]-target[2])*right[1])>1);});
 test('manual motion cancels arrival immediately',()=>{const a=new ViewApproach(),w=new SwimWorld();a.selectView(.45,w,target);assert.equal(a.control(.05,{z:1},w,target).z,1);assert.equal(a.phase,'free');});

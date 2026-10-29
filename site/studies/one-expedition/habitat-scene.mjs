@@ -1,6 +1,6 @@
 import * as T from './runtime/vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
 import {ANEMONE,REEF_ROCKS} from './habitat.mjs?v=2026-10-29-habitat-2';
-import {stone,rockMaterial} from './reef-art.mjs?v=2026-10-29-reef-1';
+import {stone,rockMaterial} from './reef-art.mjs?v=2026-10-29-reef-2';
 // Authored low-poly rock profiles and swept organic tentacles share the existing scene style.
 export function createHabitat(floor){
  const group=new T.Group(),solids=[],occluders=[],time={value:0};group.name='Anemone crevice encounter';

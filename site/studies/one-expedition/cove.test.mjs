@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {SwimWorld} from './core.mjs';
+import {ReefSwimWorld as SwimWorld} from './reef-terrain.mjs';
 import {Approach} from './approach.mjs';
 import {School} from './school.mjs';
 import {CoveLife,CoveDiscovery,COVE_FISH,coveObstacles,coveFloor,wildPath} from './cove.mjs';

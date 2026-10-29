@@ -1,3 +1,4 @@
+import {reefFloor} from './reef-terrain.mjs?v=2026-10-29-reef-2';
 import {clamp,damp,wrap} from './core.mjs';
 import {ANEMONE,REEF_ROCKS,residentRoute,residentIntent} from './habitat.mjs?v=2026-10-29-habitat-2';
 
@@ -23,8 +24,8 @@ export const COVE_ROCKS=Object.freeze([
  {x:-.7,z:-21.2,r:3.3,kind:1,angle:-.6},
  {x:6.2,z:-20.6,r:3.2,kind:0,angle:.5}
 ]);
-export const coveFloor=(x,z)=>-.22+.08*Math.sin(x*.48+z*.22)+.055*Math.cos(z*.55-x*.25);
-export function coveObstacles(){return COVE_ROCKS.filter(r=>r.solid).map(r=>[r.x,r.z,r.r,coveFloor(r.x,r.z)+r.r*2*(r.kind ? .301679 : .25582)]).concat(REEF_ROCKS.map(r=>[r.x,r.z,r.r,coveFloor(r.x,r.z)+r.height]));}
+export const coveFloor=reefFloor;
+export function coveObstacles(){return COVE_ROCKS.filter(r=>r.solid).map(r=>[r.x,r.z,r.r,coveFloor(r.x,r.z)+r.r*2*(r.kind ? .301679 : .25582)*.85]).concat(REEF_ROCKS.map(r=>[r.x,r.z,r.r,coveFloor(r.x,r.z)+r.height]));}
 export function coveRegion(p){if(p[2]>-2.8)return '말미잘 바위틈';if(p[0]<-1.4)return '바위턱';if(p[0]>1.6)return '해초가';return '작은 물길';}
 export function coveHint(p,found){const region=coveRegion(p);return region==='바위턱'?'바위 가장자리를 돌아오는 움직임을 살펴보세요':region==='해초가'?'해초 옆에서 위아래로 헤엄치는 움직임을 찾아보세요':region==='말미잘 바위틈'?'말미잘 가장자리의 작은 움직임을 살펴보세요':'바위턱과 해초가로 이어지는 물길을 둘러보세요';}
 export function wildPath(id,t){
