@@ -6,7 +6,7 @@ import {ViewZoom,InspectionZoom,zoomFieldOfView} from './view-zoom.mjs?v=2026-10
 import {HabitatApproach} from './habitat.mjs?v=2026-10-29-habitat-2';
 import {createCoveScene} from './cove-scene.mjs?v=2026-10-29-habitat-2';
 import {COVE_HOME,COVE_FISH,CoveLife,CoveDiscovery,coveObstacles,coveRegion,coveHint} from './cove.mjs?v=2026-10-29-habitat-2';
-import {SwimWorld,clamp,damp,wrap} from './core.mjs?v=2026-10-28-pace-1';import {Swimmer} from './captain-swim.mjs?v=2026-10-29-captain-1';import {SwimInput} from './input.mjs';
+import {SwimWorld,clamp,damp,wrap} from './core.mjs?v=2026-10-28-pace-1';import {Swimmer} from './captain-swim.mjs?v=2026-10-29-captain-wood-1';import {SwimInput} from './input.mjs';
 import {Approach} from './approach.mjs';import {School} from './school.mjs';import {attachMagicGlow} from './magic-glow.mjs';
 import {Expedition,readRecord,emptyRecord,SAVE_KEY} from './expedition.mjs';import {SWIM_PACE,AUTO_APPROACH_SPEED} from './pace.mjs';import {ScreenSteering} from './steering.mjs';import {CaptureAudio} from './audio.mjs';
 let initialRecord=emptyRecord(),storageWritable=true;try{initialRecord=readRecord(localStorage.getItem(SAVE_KEY));}catch{storageWritable=false;}const trip=new Expedition(initialRecord),audio=new CaptureAudio(),returnPilot=new Approach();const HOME=COVE_HOME;let savedRecord=trip.record,dexOpen=false,statusNote='',noteUntil=0,surfaceScene,surfaceCamera,boat,portraitScene,portraitCamera,portraitRenderer,portraitFish;
