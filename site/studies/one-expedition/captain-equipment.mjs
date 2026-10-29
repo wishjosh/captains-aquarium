@@ -19,9 +19,19 @@ export function fitCaptainEquipment(swimmer){
  const motor=new T.Group();motor.name='Right peg-leg auxiliary propeller';tilt.add(motor);motor.position.copy(tilt.worldToLocal(foot.getWorldPosition(V())));
  const spindle=wooden(new T.CylinderGeometry(.035,.03,.065,7));spindle.position.y=-.025;motor.add(spindle);
  const rotor=new T.Group();rotor.position.y=-.065;rotor.rotation.y=.45;motor.add(rotor);
- const shape=new T.Shape();shape.moveTo(.017,-.014);shape.bezierCurveTo(.065,-.032,.14,-.04,.158,-.018);shape.quadraticCurveTo(.175,.009,.146,.028);shape.quadraticCurveTo(.09,.046,.017,.014);shape.closePath();const bladeGeo=new T.ExtrudeGeometry(shape,{depth:.014,bevelEnabled:true,bevelSegments:1,steps:1,bevelSize:.004,bevelThickness:.004,curveSegments:4});bladeGeo.rotateX(Math.PI/2);
- for(let i=0;i<2;i++){const blade=wooden(bladeGeo);blade.rotation.y=i*Math.PI;rotor.add(blade);}
+ // Three swept blades: a real spanwise twist and shallow cup, with rounded tips.
+ const radial=12,across=8,stride=across+1,layer=(radial+1)*stride,positions=[],texcoords=[],triangles=[];
+ for(let face=0;face<2;face++)for(let i=0;i<=radial;i++)for(let j=0;j<=across;j++){
+  const u=i/radial,v=j/across*2-1,r=.025+.137*u,width=.010*(1-u)+.044*Math.pow(Math.sin(Math.PI*u),.65),t=v*width,pitch=.67-.31*u,sweep=.042*u*u;
+  const cup=.010*Math.sin(Math.PI*u)*(1-v*v),thickness=.006*(.7+.3*Math.sin(Math.PI*u))*(face===0?1:-1);
+  positions.push(r,t*Math.sin(pitch)+cup+thickness,t*Math.cos(pitch)+sweep);texcoords.push(0,0);
+ }
+ for(let face=0;face<2;face++)for(let i=0;i<radial;i++)for(let j=0;j<across;j++){const a=face*layer+i*stride+j,b=a+stride;if(face===0)triangles.push(a,a+1,b,a+1,b+1,b);else triangles.push(a,b,a+1,a+1,b,b+1);}
+ const edge=[];for(let j=0;j<=across;j++)edge.push(j);for(let i=1;i<=radial;i++)edge.push(i*stride+across);for(let j=across-1;j>=0;j--)edge.push(radial*stride+j);for(let i=radial-1;i>0;i--)edge.push(i*stride);
+ for(let i=0;i<edge.length;i++){const a=edge[i],b=edge[(i+1)%edge.length];triangles.push(a,a+layer,b,b,a+layer,b+layer);}
+ const bladeGeo=new T.BufferGeometry();bladeGeo.setAttribute('position',new T.Float32BufferAttribute(positions,3));bladeGeo.setAttribute('uv',new T.Float32BufferAttribute(texcoords,2));bladeGeo.setIndex(triangles);bladeGeo.computeVertexNormals();bladeGeo.computeBoundingSphere();
+ for(let i=0;i<3;i++){const blade=wooden(bladeGeo);blade.rotation.y=i*Math.PI*2/3;rotor.add(blade);}
  const hub=wooden(new T.CylinderGeometry(.037,.032,.032,8));rotor.add(hub);foot.attach(motor);
  let speed=0;const objects=[parrot,...motor.children];
- return{perch,motor,objects,update(dt,w){const target=w.forwardSpeed>.04?2.4*clamp(w.forwardSpeed/2.3,0,1):0;speed=damp(speed,target,5,dt);if(speed<.025&&target===0)speed=0;rotor.rotation.y=(rotor.rotation.y+speed*dt)%(Math.PI*2);perch.quaternion.copy(perchBase);swimmer.root.updateMatrixWorld(true);},report(){return{parrot:'original mesh, scaled 0.64, feet on central crown',prosthetic:'right',parrotPosition:perch.getWorldPosition(V()).toArray(),propellerPosition:motor.getWorldPosition(V()).toArray(),propellerRadiansPerSecond:speed,guardDiameter:0,bladeCount:2,woodPaletteUV:woodUV.toArray(),maxTurnsPerSecond:2.4/(Math.PI*2)};}};
+ return{perch,motor,objects,update(dt,w){const target=w.forwardSpeed>.04?2.4*clamp(w.forwardSpeed/2.3,0,1):0;speed=damp(speed,target,5,dt);if(speed<.025&&target===0)speed=0;rotor.rotation.y=(rotor.rotation.y+speed*dt)%(Math.PI*2);perch.quaternion.copy(perchBase);swimmer.root.updateMatrixWorld(true);},report(){return{parrot:'original mesh, scaled 0.64, feet on central crown',prosthetic:'right',parrotPosition:perch.getWorldPosition(V()).toArray(),propellerPosition:motor.getWorldPosition(V()).toArray(),propellerRadiansPerSecond:speed,guardDiameter:0,bladeCount:3,bladeShape:"swept, twisted, rounded tip",bladeRadius:.168,woodPaletteUV:woodUV.toArray(),maxTurnsPerSecond:2.4/(Math.PI*2)};}};
 }

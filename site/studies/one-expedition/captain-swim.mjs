@@ -1,7 +1,7 @@
 import * as T from './runtime/vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
 import {createCaptain} from './runtime/pirate.js';
 import {damp,clamp} from './core.mjs';
-import {fitCaptainEquipment} from './captain-equipment.mjs?v=2026-10-29-captain-wood-1';
+import {fitCaptainEquipment} from './captain-equipment.mjs?v=2026-10-29-captain-screw-1';
 const V=(x=0,y=0,z=0)=>new T.Vector3(x,y,z);
 export class Swimmer{
  constructor(asset,scene){
