@@ -1,17 +1,11 @@
 import * as T from './runtime/vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
 import {ANEMONE,REEF_ROCKS} from './habitat.mjs?v=2026-10-29-habitat-2';
+import {stone,rockMaterial} from './reef-art.mjs?v=2026-10-29-reef-1';
 // Authored low-poly rock profiles and swept organic tentacles share the existing scene style.
 export function createHabitat(floor){
  const group=new T.Group(),solids=[],occluders=[],time={value:0};group.name='Anemone crevice encounter';
- const rockMaterial=new T.MeshStandardMaterial({vertexColors:true,roughness:1});
- for(const r of REEF_ROCKS){
-  const positions=[],colors=[],N=9,rings=[];
-  for(let j=0;j<4;j++){const scale=(r.seed===11?[1,.98,.89,.75]:[1,.94,.74,.38])[j],h=[0,.27,.77,1][j];rings.push(Array.from({length:N},(_,i)=>{const a=i/N*Math.PI*2,noise=1+(r.seed>=11?.2:.09)*Math.sin(i*7.1+r.seed+j*.7);return[Math.cos(a)*r.r*scale*noise+.13*r.r*j/3,r.height*(h+(j?Math.sin(i*3.1+r.seed)*.045:0)),Math.sin(a)*r.r*scale*noise];}));}
-  const face=(a,b,c,tint)=>{positions.push(...a,...c,...b);const co=new T.Color(tint);for(let k=0;k<3;k++)colors.push(co.r,co.g,co.b);};
-  for(let j=0;j<3;j++)for(let i=0;i<N;i++){const n=(i+1)%N,c=new T.Color(j===2?'#557b70':'#3b6466').multiplyScalar(.84+.2*(.5+.5*Math.sin(i*3+r.seed)));face(rings[j][i],rings[j+1][n],rings[j+1][i],c);face(rings[j][i],rings[j][n],rings[j+1][n],c);}
-  for(let i=0;i<N;i++)face(rings[3][i],rings[3][(i+1)%N],[.13*r.r,r.height*1.03,0],'#658779');
-  const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(positions,3));geo.setAttribute('color',new T.Float32BufferAttribute(colors,3));geo.computeVertexNormals();const mesh=new T.Mesh(geo,rockMaterial);mesh.position.set(r.x,floor(r.x,r.z),r.z);mesh.castShadow=mesh.receiveShadow=true;group.add(mesh);solids.push(mesh);occluders.push(mesh);
- }
+ const rockMat=rockMaterial();
+ for(const r of REEF_ROCKS){const mesh=stone(r,floor(r.x,r.z),rockMat);group.add(mesh);solids.push(mesh);occluders.push(mesh);}
  const bed=new T.Group();bed.position.fromArray(ANEMONE.base);group.add(bed);
  const disk=new T.Mesh(new T.IcosahedronGeometry(.48,2),new T.MeshStandardMaterial({color:'#536342',roughness:.9,flatShading:true}));disk.scale.set(1.3,.22,1.0);disk.position.y=.04;bed.add(disk);occluders.push(disk);
  const vertices=[],colors=[],weights=[],indices=[],segments=11,sides=7;
