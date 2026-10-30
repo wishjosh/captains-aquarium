@@ -1,0 +1,486 @@
+{
+  "sources": [
+    {
+      "key": "coral",
+      "bytes": 481176,
+      "sha256": "3a139f2fe68eaf7ed3eabe4b43975996956a8031ee4a7dea3c6723afde7bfa8d",
+      "license": {
+        "author": "rkuhlf (https://sketchfab.com/rkuhlf)",
+        "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+        "source": "https://sketchfab.com/3d-models/coral-dbf4bee13bf84396815073e5cabf8ac3",
+        "title": "Coral"
+      },
+      "materials": 1,
+      "images": [],
+      "pieces": [
+        {
+          "name": "coral-0",
+          "sourceNode": "Object_4",
+          "triangles": 1332,
+          "vertices": 3976,
+          "normalizedSize": [
+            0.9096434066444719,
+            1,
+            1.3308654104995146
+          ],
+          "originalSize": [
+            3.854412794113159,
+            4.237278878688812,
+            5.639247894287109
+          ]
+        },
+        {
+          "name": "coral-1",
+          "sourceNode": "Object_6",
+          "triangles": 866,
+          "vertices": 2454,
+          "normalizedSize": [
+            0.6480909894793154,
+            1,
+            0.5674245473524809
+          ],
+          "originalSize": [
+            2.8929797410964966,
+            4.463848114013672,
+            2.5328969955444336
+          ]
+        },
+        {
+          "name": "coral-2",
+          "sourceNode": "Object_8",
+          "triangles": 1590,
+          "vertices": 4532,
+          "normalizedSize": [
+            0.8982604523306708,
+            1,
+            0.8359032062680724
+          ],
+          "originalSize": [
+            2.688296318054199,
+            2.9927804470062256,
+            2.501674771308899
+          ]
+        },
+        {
+          "name": "coral-3",
+          "sourceNode": "Object_10",
+          "triangles": 707,
+          "vertices": 969,
+          "normalizedSize": [
+            1.0580377609739857,
+            1,
+            0.9141803058609683
+          ],
+          "originalSize": [
+            4.210196018218994,
+            3.9792492985725403,
+            3.637751340866089
+          ]
+        },
+        {
+          "name": "coral-4",
+          "sourceNode": "Object_12",
+          "triangles": 881,
+          "vertices": 1280,
+          "normalizedSize": [
+            0.8409745319592228,
+            1,
+            0.5910309569092547
+          ],
+          "originalSize": [
+            3.9392354488372803,
+            4.684131681919098,
+            2.768466830253601
+          ]
+        },
+        {
+          "name": "coral-5",
+          "sourceNode": "Object_14",
+          "triangles": 740,
+          "vertices": 1822,
+          "normalizedSize": [
+            0.31544832502500225,
+            1,
+            0.4804008278709423
+          ],
+          "originalSize": [
+            1.257430911064148,
+            3.9861708283424377,
+            1.914959765970707
+          ]
+        },
+        {
+          "name": "coral-6",
+          "sourceNode": "Object_16",
+          "triangles": 274,
+          "vertices": 690,
+          "normalizedSize": [
+            0.48883826958932913,
+            1,
+            0.32234666411352375
+          ],
+          "originalSize": [
+            1.7663074731826782,
+            3.6132757663726807,
+            1.1647273898124695
+          ]
+        }
+      ],
+      "triangles": 6390
+    },
+    {
+      "key": "rocks",
+      "bytes": 442328,
+      "sha256": "3abb9844065cebc3a3b9a1a153912cfea49e37cf93d56d4d8c6b51d618fb2751",
+      "license": {
+        "author": "Michael Hooper (https://sketchfab.com/michaelhooper)",
+        "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+        "source": "https://sketchfab.com/3d-models/low-poly-rocks-9823ec262054408dbe26f6ddb9c0406e",
+        "title": "Low Poly Rocks"
+      },
+      "materials": 1,
+      "images": [
+        {
+          "mime": "image/jpeg",
+          "bytes": 300690
+        },
+        {
+          "mime": "image/png",
+          "bytes": 71883
+        },
+        {
+          "mime": "image/png",
+          "bytes": 3514
+        }
+      ],
+      "pieces": [
+        {
+          "name": "rocks-0",
+          "sourceNode": "defaultMaterial",
+          "triangles": 68,
+          "vertices": 112,
+          "normalizedSize": [
+            1.5041228953729369,
+            1,
+            1.3333839638965745
+          ],
+          "originalSize": [
+            0.46423402428627014,
+            0.3086410197693098,
+            0.4115369863610833
+          ]
+        },
+        {
+          "name": "rocks-1",
+          "sourceNode": "defaultMaterial",
+          "triangles": 68,
+          "vertices": 112,
+          "normalizedSize": [
+            1.4644776062895188,
+            1,
+            1.6186058785901263
+          ],
+          "originalSize": [
+            0.2458140254020691,
+            0.16785099638694856,
+            0.271684609479125
+          ]
+        },
+        {
+          "name": "rocks-2",
+          "sourceNode": "defaultMaterial",
+          "triangles": 52,
+          "vertices": 96,
+          "normalizedSize": [
+            2.7140810662887582,
+            1,
+            2.2880193260141914
+          ],
+          "originalSize": [
+            0.2815479636192322,
+            0.10373601846912467,
+            0.23735001506112235
+          ]
+        },
+        {
+          "name": "rocks-3",
+          "sourceNode": "defaultMaterial",
+          "triangles": 60,
+          "vertices": 113,
+          "normalizedSize": [
+            2.73979696162626,
+            1,
+            2.8063956295433825
+          ],
+          "originalSize": [
+            0.3057449758052826,
+            0.11159402688869385,
+            0.3131769893435772
+          ]
+        },
+        {
+          "name": "rocks-4",
+          "sourceNode": "defaultMaterial",
+          "triangles": 56,
+          "vertices": 105,
+          "normalizedSize": [
+            2.6010363867868445,
+            1,
+            1.316230994019336
+          ],
+          "originalSize": [
+            0.2550030052661896,
+            0.09803899959323681,
+            0.12904196988726735
+          ]
+        },
+        {
+          "name": "rocks-5",
+          "sourceNode": "defaultMaterial",
+          "triangles": 84,
+          "vertices": 154,
+          "normalizedSize": [
+            1.5537558548660928,
+            1,
+            1.3815182375757171
+          ],
+          "originalSize": [
+            0.28568601608276367,
+            0.1838680222430344,
+            0.2540170260357296
+          ]
+        },
+        {
+          "name": "rocks-6",
+          "sourceNode": "defaultMaterial",
+          "triangles": 98,
+          "vertices": 162,
+          "normalizedSize": [
+            1.8322672897029315,
+            1,
+            1.8702763163253595
+          ],
+          "originalSize": [
+            0.5228430032730103,
+            0.2853530192954433,
+            0.533688993780201
+          ]
+        },
+        {
+          "name": "rocks-7",
+          "sourceNode": "defaultMaterial",
+          "triangles": 96,
+          "vertices": 150,
+          "normalizedSize": [
+            0.6471354695404026,
+            1,
+            0.6953978057105866
+          ],
+          "originalSize": [
+            0.6100960075855255,
+            0.9427639749352903,
+            0.6555959994729914
+          ]
+        },
+        {
+          "name": "rocks-8",
+          "sourceNode": "defaultMaterial",
+          "triangles": 68,
+          "vertices": 151,
+          "normalizedSize": [
+            1.5775820148551947,
+            1,
+            1.3472016836297365
+          ],
+          "originalSize": [
+            0.4661250114440918,
+            0.29546800550136665,
+            0.3980549944701614
+          ]
+        }
+      ],
+      "triangles": 650
+    }
+  ],
+  "modulesBytes": 491500,
+  "coralModuleBytes": 442576,
+  "rockModuleBytes": 50040,
+  "parts": [
+    {
+      "name": "coral-0",
+      "key": "coral",
+      "sourceNode": "Object_4",
+      "bounds": [
+        0.9096434066444719,
+        1,
+        1.3308654104995146
+      ],
+      "triangles": 1332
+    },
+    {
+      "name": "coral-1",
+      "key": "coral",
+      "sourceNode": "Object_6",
+      "bounds": [
+        0.6480909894793154,
+        1,
+        0.5674245473524809
+      ],
+      "triangles": 866
+    },
+    {
+      "name": "coral-2",
+      "key": "coral",
+      "sourceNode": "Object_8",
+      "bounds": [
+        0.8982604523306708,
+        1,
+        0.8359032062680724
+      ],
+      "triangles": 1590
+    },
+    {
+      "name": "coral-3",
+      "key": "coral",
+      "sourceNode": "Object_10",
+      "bounds": [
+        1.0580377609739857,
+        1,
+        0.9141803058609683
+      ],
+      "triangles": 707
+    },
+    {
+      "name": "coral-4",
+      "key": "coral",
+      "sourceNode": "Object_12",
+      "bounds": [
+        0.8409745319592228,
+        1,
+        0.5910309569092547
+      ],
+      "triangles": 881
+    },
+    {
+      "name": "coral-5",
+      "key": "coral",
+      "sourceNode": "Object_14",
+      "bounds": [
+        0.31544832502500225,
+        1,
+        0.4804008278709423
+      ],
+      "triangles": 740
+    },
+    {
+      "name": "coral-6",
+      "key": "coral",
+      "sourceNode": "Object_16",
+      "bounds": [
+        0.48883826958932913,
+        1,
+        0.32234666411352375
+      ],
+      "triangles": 274
+    },
+    {
+      "name": "rocks-0",
+      "key": "rocks",
+      "sourceNode": "defaultMaterial",
+      "bounds": [
+        1.5041228953729369,
+        1,
+        1.3333839638965745
+      ],
+      "triangles": 68
+    },
+    {
+      "name": "rocks-1",
+      "key": "rocks",
+      "sourceNode": "defaultMaterial",
+      "bounds": [
+        1.4644776062895188,
+        1,
+        1.6186058785901263
+      ],
+      "triangles": 68
+    },
+    {
+      "name": "rocks-2",
+      "key": "rocks",
+      "sourceNode": "defaultMaterial",
+      "bounds": [
+        2.7140810662887582,
+        1,
+        2.2880193260141914
+      ],
+      "triangles": 52
+    },
+    {
+      "name": "rocks-3",
+      "key": "rocks",
+      "sourceNode": "defaultMaterial",
+      "bounds": [
+        2.73979696162626,
+        1,
+        2.8063956295433825
+      ],
+      "triangles": 60
+    },
+    {
+      "name": "rocks-4",
+      "key": "rocks",
+      "sourceNode": "defaultMaterial",
+      "bounds": [
+        2.6010363867868445,
+        1,
+        1.316230994019336
+      ],
+      "triangles": 56
+    },
+    {
+      "name": "rocks-5",
+      "key": "rocks",
+      "sourceNode": "defaultMaterial",
+      "bounds": [
+        1.5537558548660928,
+        1,
+        1.3815182375757171
+      ],
+      "triangles": 84
+    },
+    {
+      "name": "rocks-6",
+      "key": "rocks",
+      "sourceNode": "defaultMaterial",
+      "bounds": [
+        1.8322672897029315,
+        1,
+        1.8702763163253595
+      ],
+      "triangles": 98
+    },
+    {
+      "name": "rocks-7",
+      "key": "rocks",
+      "sourceNode": "defaultMaterial",
+      "bounds": [
+        0.6471354695404026,
+        1,
+        0.6953978057105866
+      ],
+      "triangles": 96
+    },
+    {
+      "name": "rocks-8",
+      "key": "rocks",
+      "sourceNode": "defaultMaterial",
+      "bounds": [
+        1.5775820148551947,
+        1,
+        1.3472016836297365
+      ],
+      "triangles": 68
+    }
+  ]
+}

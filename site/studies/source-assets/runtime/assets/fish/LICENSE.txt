@@ -1,0 +1,21 @@
+Quaternius — Animated Cute Fish Pack
+Official source: Clownfish.blend, CC0.
+Author: Quaternius. https://quaternius.com/packs/cutefish.html
+Official folder: https://drive.google.com/drive/folders/1QK5NCgIxUZ1cYGzVwaNfcfEiQhvczqUB
+Download: https://drive.google.com/uc?export=download&id=1nLwQKej4fZKFQ2-jGXtiKM6-RMXH6XG9
+Retrieved 2026-10-16. Source SHA256: 8aa829c8a3538b469edab5d5a68391aadc30258865075e4f15c0ff174a96ddce
+Game asset: clownfish-native.glb. SHA256: c1ca37d17b6f0158ce411c178bf7dba214adaff447a92ff6d5c31d0733dd29f5
+Exported from the unchanged source by official Blender 4.5.14 LTS / glTF I/O v4.5.51.
+Original geometry, materials, skin weights and six source actions exported.
+Unsupported source interpolation is baked into animation samples by the exporter.
+Previous display B used a private Eyes copy with roughness 0.16.
+Current approved white-eye design uses a private Eyes material with procedural sclera, large black pupils and small highlights.
+Eye surface style is an added game design, not part of the unmodified Quaternius source.
+Native GLB materials, geometry, body colours, skeleton and animations remain unmodified. No new geometry or raster eye texture is added.
+The game uses B scene-wide reflection cards, hemisphere/directional lighting and exposure 1.2.
+The creator's promotional render setup has not been reproduced or verified.
+
+Added 2026-10-18: Quaternius Puffer (official .blend), MoorishIdol and Cowfish (creator FBX distributed by Poly Pizza), all CC0.
+Source links, SHA256, triangle counts and six source action names: jeju-four-sources.json.
+Original GLBs are preserved. Runtime clones use the approved colour/pattern/eye materials.
+MoorishIdol joint weight sets 0 and 1 are both retained in skinning. No new animal geometry or authored animation.

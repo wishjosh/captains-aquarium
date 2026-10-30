@@ -1,0 +1,12 @@
+import * as T from './runtime/vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
+import {coralBody,coralPolyps} from './reef-forms.mjs?v=2026-10-29-clay-1';
+export function createReefDecor(floor){
+ const group=new T.Group(),occluders=[],colonies=[],time={value:0};group.name='Munseom branching coral morphology study';
+ function material(color){const m=new T.MeshStandardMaterial({color,roughness:.87,side:T.DoubleSide});m.onBeforeCompile=s=>{s.uniforms.coralTime=time;s.vertexShader=s.vertexShader.replace('#include <common>','#include <common>\nuniform float coralTime;').replace('#include <begin_vertex>','#include <begin_vertex>\nfloat bend=pow(max(position.y-.08,0.0),2.0);transformed.x+=.008*sin(coralTime*.48+position.y*.8)*bend;transformed.z+=.005*cos(coralTime*.37)*bend;');};m.customProgramCacheKey=()=> 'clay-coral-bend-v1';return m;}
+ const bodies=[coralBody(1),coralBody(2),coralBody(3)],polypForms=bodies.map((b,i)=>coralPolyps(b,i+1)),bodyMat=material('#9e9e9e'),polypMat=material('#aaaaaa');
+ // Uneven patches follow one rock face. Same species, three within-species branching variations.
+ const locations=[[2.92,-1.5,1.05,.18],[3.45,-2.20,.72,1.5],[4.35,-2.85,.89,2.6],[2.76,-3.12,.58,-.8],[4.0,-4.1,1.01,.7],[4.8,-4.7,.62,2.1],[3.26,-4.75,.75,3.1],[3.38,-.72,.38,-1.1],[4.98,-1.66,.54,1.1],[5.65,-3.35,.82,-.2],[3.08,-3.8,.28,2.2]];
+ let triangles=0,polyps=0;
+ for(let i=0;i<locations.length;i++){const[x,z,size,angle]=locations[i],g=new T.Group(),variant=i%3;g.position.set(x,floor(x,z)-.035,z);g.scale.set(size,size*(.9+(i%4)*.055),size);g.rotation.set((i%3-1)*.075,angle,(i%2?-.10:.07));g.name=i===0?'Reference colony':'Colony of the same coral type';const b=new T.Mesh(bodies[variant],bodyMat),q=new T.Mesh(polypForms[variant].geometry,polypMat);b.castShadow=b.receiveShadow=true;q.receiveShadow=true;g.add(b,q);group.add(g);colonies.push(g);occluders.push(b);triangles+=b.geometry.index.count/3+q.geometry.attributes.position.count/3;polyps+=polypForms[variant].count;}
+ return{group,get occluders(){return occluders.filter(m=>m.parent.visible);},setMode(mode){colonies.forEach((g,i)=>g.visible=mode==='group'||mode==='single'&&i===0);},update(dt){time.value+=dt;},inspect(){return{reference:'Munseom Stereonephthya-type, PARAN April/June 2024',speciesForms:1,branchingVariations:3,colonies:colonies.filter(g=>g.visible).length,branches:bodies[0].userData.skeleton.length,polyps,triangles};}};
+}
