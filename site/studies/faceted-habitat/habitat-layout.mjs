@@ -1,6 +1,6 @@
 // Metres. Recipes reference the same small rock and coral geometry library.
 export const ROCKS=[
- {part:2,x:1.02,z:-1.35,h:.36,angle:.24},{part:3,x:2.30,z:-1.40,h:.39,angle:-.3},{part:4,x:1.68,z:-.70,h:.23,angle:.8},
+ {part:2,x:1.02,z:-1.35,h:.36,angle:.24},{part:3,x:2.30,z:-1.40,h:.39,angle:-.3},{part:3,x:1.65,z:-1.10,h:.50,angle:1.6},
  {part:2,x:3.30,z:-1.85,h:.70,angle:.1},{part:6,x:4.65,z:-2.65,h:.71,angle:.5},{part:3,x:4.35,z:-4.00,h:.73,angle:.2},
  {part:5,x:3.15,z:-3.12,h:.40,angle:1.1},{part:2,x:5.12,z:-4.85,h:.64,angle:-.2},{part:1,x:3.30,z:-4.52,h:.52,angle:1.3},
  {part:2,x:-3.8,z:-6.3,h:.52,angle:.8},{part:6,x:-5.0,z:-6.8,h:.62,angle:.2},{part:3,x:-4.3,z:-8.3,h:.45,angle:-.7},

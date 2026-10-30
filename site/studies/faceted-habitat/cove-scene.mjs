@@ -1,6 +1,6 @@
 import * as T from './runtime/vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
 import {reefFloor,reefCover,TERRAIN} from './reef-terrain.mjs';
-import {recipe,PALETTE,collisionVolumes} from './habitat-layout.mjs';
+import {recipe,PALETTE,collisionVolumes} from './habitat-layout.mjs?v=2026-10-30-habitat-2';
 import {coralGeometry,anemoneGeometry,swayMaterial} from './habitat-modules.mjs';
 import {ANEMONE} from './habitat.mjs';
 export function createCoveScene(assets,{style='crevice',layout=null}={}){
