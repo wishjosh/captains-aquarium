@@ -1,0 +1,28 @@
+Captain's Aquarium — underwater scenery and four marine friends review build, 2026-10-18
+Three.js r180, GLTFLoader, SkeletonUtils, RoomEnvironment: MIT; see vendor/THREE-LICENSE.txt.
+Quaternius Pirate Kit: CC0; see assets/pirate/LICENSE.txt.
+Quaternius Animated Cute Fish Pack: official Clownfish.blend export, CC0; see assets/fish/LICENSE.txt.
+Kenney Nature Kit: CC0; see assets/nature/LICENSE.txt.
+Public Aquarium and Marine Centre: provider declares CC0; see assets/aquarium/LICENSE.txt.
+Quaternius Puffer, MoorishIdol and Cowfish: CC0; native source exports with approved display material variations. See assets/fish/jeju-four-sources.json.
+No blanket license has been selected for the game's original code.
+
+Crew: Pirate Kit Anne, Henry and Mako; see assets/pirate/crew-sources.json. Weapons hidden on runtime instances. Transport tank and pier ladder: game-authored.
+
+Underwater scenery (2026-10-18):
+Seaweed by Mohabins: https://poly.pizza/m/oYxUdpyc4u (CC0 1.0).
+Kelp by Poly by Google: https://poly.pizza/m/4cFllH6Iazk (CC BY 3.0).
+License: https://creativecommons.org/licenses/by/3.0/
+Runtime placement, uniform scaling and slow current bending added. Original GLBs retained.
+Credits and provenance: assets/underwater/LICENSE.txt and sources.json.
+
+Captain telescope (2026-10-20): game-authored approved eyepiece-forward/objective-aft geometry and right-arm holding overlay. Original character model, finger pose and 14 source clips retained. Other public crew unchanged.
+
+Anne feeding bucket (2026-10-20): approved game-authored stainless bucket, fixed hand grip and damped swing. Only Anne upper/lower left arm receives a holding overlay. Original character files, fingers and 14 animation clips retained. Captain, Mako, Henry and existing transport tank unchanged from the prior public build.
+
+Jeju ROV first playable version (2026-10-20-jeju-rov-v1)
+- Based on published 2026-10-20-anne-bucket-1, preserving approved captain and Anne equipment.
+- Existing Quaternius Pirate Kit ship-large.gltf copied byte-for-byte from the prior coastal-campus-ships preview. The original kit license is retained above; no new external asset was downloaded.
+- Game-authored ROV/frame/tank/crane geometry reused from ship-rov-study; SuBastian and BlueROV2 were visual-format research references, not imported models or images.
+- Jeju-inspired fictional coast/reef; display fish are not asserted to be Jeju-native or exact taxonomic identifications. Generic seaweed is not labeled as an exact Jeju kelp species.
+- Guided transport and timed care are game interactions, not real husbandry instructions. Existing asset notices and source files retained.
