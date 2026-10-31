@@ -18,9 +18,9 @@ export class ChromisLife{
   for(const f of members)if(f.state!=='wild'){this.agents[f.id].mode='collected';this.agents[f.id].response='magic';this.agents[f.id].activity=f.state;}
   const active=members.filter(f=>f.state==='wild'),before=this.agents.map(a=>({...a,position:[...a.position],velocity:[...a.velocity]}));
   for(const f of active){const a=this.agents[f.id],mode=f.id===selected&&['approaching','choice','observing'].includes(phase)?phase:'roaming';
-   if(mode!==a.mode){a.modeAge=0;if(mode==='approaching'){a.anchor=[...h.edge];a.calmEdge=true;}if(mode==='roaming'){a.anchor=null;a.calmEdge=false;}a.mode=mode;}
+   if(mode!==a.mode){a.modeAge=0;if(mode==='approaching'){a.anchor=[...a.position];a.calmEdge=true;}if(mode==='roaming'){a.anchor=null;a.calmEdge=false;}a.mode=mode;}
    a.modeAge+=dt;let target=shoalTarget(a.id,this.time,h),maximum=.58;a.response='natural';a.activity='at-home';
-   if(mode==='approaching'||mode==='choice'){target=a.anchor||h.edge;maximum=.65;a.response='calm';a.activity='emerging';if(distance(a.position,target)<.09&&length(a.velocity)<.10){a.calmEdge=false;a.activity='calmed';}else a.calmEdge=true;}
+   if(mode==='approaching'||mode==='choice'){target=a.anchor||a.position;maximum=.65;a.response='calm';a.activity='calming';if(distance(a.position,target)<.09&&length(a.velocity)<.10){a.calmEdge=false;a.activity='calmed';}else a.calmEdge=true;}
    if(mode==='observing'){a.response='calm';a.activity='rejoining';a.calmEdge=false;maximum=.54;if(distance(a.position,target)<.16)a.activity='at-home';}
    let desired=target.map((v,i)=>(v-a.position[i])*2.4);
    const d=captain?distance(a.position,captain.position):Infinity,velocity=captain?.velocity||[0,0,0],predicted=captain?captain.position.map((v,i)=>v+velocity[i]*.32):null,pd=predicted?distance(a.position,predicted):Infinity;
@@ -42,6 +42,6 @@ export class ChromisLife{
    f.position=[...a.position];f.velocity=[...a.velocity];f.yaw=a.yaw;
   }
  }
- caption(selected,phase){if(this.agents.every(a=>a.mode==='collected'))return '모두 선장 곁에 모였어요 · 함께 헤엄치거나 배로 돌아가세요';if(phase==='approaching')return '선택한 자리돔이 마법에 안심하고 가장자리로 나와요';if(phase==='choice')return '자리돔을 관찰하거나 물방울로 감싸 보세요';if(phase==='observing')return '안심한 자리돔이 무리 곁으로 돌아가요 · 다른 생물의 움직임도 살펴보세요';if(this.agents.some(a=>a.response==='avoiding'))return '가까이 다가가면 물러나요 · 터치하면 한 마리를 마법으로 안심시켜요';return '바위턱 위의 작은 무리를 찾아보세요 · 생물을 터치하면 다가가요';}
+ caption(selected,phase){if(this.agents.every(a=>a.mode==='collected'))return '모두 선장 곁에 모였어요 · 함께 헤엄치거나 배로 돌아가세요';if(phase==='approaching')return '선택한 자리돔이 그 자리에서 안심해요 · 가까이 다가가는 중';if(phase==='choice')return '자리돔을 관찰하거나 물방울로 감싸 보세요';if(phase==='observing')return '안심한 자리돔이 무리 곁으로 돌아가요 · 다른 생물의 움직임도 살펴보세요';if(this.agents.some(a=>a.response==='avoiding'))return '가까이 다가가면 물러나요 · 터치하면 한 마리를 마법으로 안심시켜요';return '바위턱 위의 작은 무리를 찾아보세요 · 생물을 터치하면 다가가요';}
  report(){return this.agents.map(a=>({id:a.id,place:'암반 위 자리돔 무리',mode:a.mode,response:a.response||'natural',activity:a.activity,calmEdge:a.calmEdge,position:[...a.position],velocity:[...a.velocity],remainingWild:a.mode!=='collected'}));}
 }

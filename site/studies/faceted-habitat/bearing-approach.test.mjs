@@ -1,0 +1,12 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {BearingApproach,bearingRoute} from './bearing-approach.mjs';import {ReefSwimWorld} from './reef-terrain.mjs';
+const target=[0,2.5,0],dt=1/60,gap=(a,b)=>Math.hypot(a[0]-b[0],a[2]-b[2]);
+for(let direction=0;direction<8;direction++)test('initial bearing stays on its side from direction '+direction,()=>{
+ const angle=direction*Math.PI/4,start=[Math.sin(angle)*5,2.5,Math.cos(angle)*5];let reference;
+ for(const yaw of [0,1.8,3.2]){const w=new ReefSwimWorld();w.obstacles=[];w.position=[...start];w.heading=-angle;const a=new BearingApproach();assert(a.selectView(yaw,w,target));if(reference)assert.deepEqual(a.route,reference);else reference=a.route;let cross=0;
+ for(let i=0;i<1500&&a.phase==='approaching';i++){w.step(dt,{...a.control(dt,{},w,target),speedLimit:1.7});cross=Math.max(cross,Math.abs(w.position[0]*Math.cos(angle)-w.position[2]*Math.sin(angle)));assert(w.position[0]*Math.sin(angle)+w.position[2]*Math.cos(angle)>1.4);}
+ assert.equal(a.phase,'choice');assert(cross<.08,String(cross));assert(gap(w.position,target)>1.5&&gap(w.position,target)<2.3);
+ }});
+test('near selection stays put and too-close selection backs away on its own side',()=>{for(const distance of [1,1.8,2.2]){const w=new ReefSwimWorld();w.position=[0,2.5,distance];w.obstacles=[];const a=new BearingApproach();a.selectView(2,w,target);for(let i=0;i<1500&&a.phase==='approaching';i++)w.step(dt,{...a.control(dt,{},w,target),speedLimit:1.7});assert.equal(a.phase,'choice');assert(Math.abs(w.position[0])<.01);if(distance>=1.65)assert(Math.abs(w.position[2]-distance)<.03);else assert(w.position[2]>1.5);}});
+test('a rock blocking the path causes a short safe route without switching arrival side',()=>{const start=[0,2.5,6],obstacles=[[0,3.7,.55,3]],r=bearingRoute(start,target,obstacles);assert(r.detour);assert.deepEqual(r.goal,[0,2.5,1.9]);const w=new ReefSwimWorld();w.position=start;w.obstacles=obstacles;const a=new BearingApproach();a.selectView(0,w,target);let minimum=99;for(let i=0;i<1500&&a.phase==='approaching';i++){w.step(dt,{...a.control(dt,{},w,target),speedLimit:1.7});minimum=Math.min(minimum,gap(w.position,[0,0,3.7]));}assert.equal(a.phase,'choice',JSON.stringify(a.report()));assert(minimum>1.03);assert(w.position[2]>1.5);});
+test('manual input cancels the bearing route immediately',()=>{const w=new ReefSwimWorld(),a=new BearingApproach();w.obstacles=[];a.selectView(0,w,target);assert.equal(a.control(dt,{x:.5},w,target).x,.5);assert.equal(a.phase,'free');});

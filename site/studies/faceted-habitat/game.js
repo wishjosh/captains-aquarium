@@ -1,36 +1,37 @@
-import {createChromis,attachChromisGlow} from './chromis-model.mjs?v=2026-11-01-shoal-1';
-import {ChromisLife,CHROMIS_FISH,createChromisHabitat} from './chromis-life.mjs?v=2026-11-01-shoal-1';
-import {CHROMIS_ID,CLOWN_ID,speciesSaveKey,readSpeciesRecord,writeSpeciesRecord} from './species-record.mjs?v=2026-11-01-shoal-1';
-import {PageLifecycle} from './page-lifecycle.mjs?v=2026-11-01-shoal-1';
-import {TouchAudit} from './touch-audit.mjs?v=2026-11-01-shoal-1';
-import {REVIEW_ZOOM,zoomProjection,frameScaleLimit,clearanceScale} from './zoom-camera.mjs?v=2026-11-01-shoal-1';
-import {residentCaption} from './habitat.mjs?v=2026-11-01-shoal-1';
-import {HabitatObservation} from './habitat-observation.mjs?v=2026-11-01-shoal-1';
-import {fishPose} from './fish-motion.mjs?v=2026-11-01-shoal-1';
-import {ReefSwimWorld} from './reef-terrain.mjs?v=2026-11-01-shoal-1';
-import {FrameAudit} from './frame-audit.mjs?v=2026-11-01-shoal-1';
+import {BearingApproach} from './bearing-approach.mjs?v=2026-11-01-bearing-1';
+import {createChromis,attachChromisGlow} from './chromis-model.mjs?v=2026-11-01-bearing-1';
+import {ChromisLife,CHROMIS_FISH,createChromisHabitat} from './chromis-life.mjs?v=2026-11-01-bearing-1';
+import {CHROMIS_ID,CLOWN_ID,speciesSaveKey,readSpeciesRecord,writeSpeciesRecord} from './species-record.mjs?v=2026-11-01-bearing-1';
+import {PageLifecycle} from './page-lifecycle.mjs?v=2026-11-01-bearing-1';
+import {TouchAudit} from './touch-audit.mjs?v=2026-11-01-bearing-1';
+import {REVIEW_ZOOM,zoomProjection,frameScaleLimit,clearanceScale} from './zoom-camera.mjs?v=2026-11-01-bearing-1';
+import {residentCaption} from './habitat.mjs?v=2026-11-01-bearing-1';
+import {HabitatObservation} from './habitat-observation.mjs?v=2026-11-01-bearing-1';
+import {fishPose} from './fish-motion.mjs?v=2026-11-01-bearing-1';
+import {ReefSwimWorld} from './reef-terrain.mjs?v=2026-11-01-bearing-1';
+import {FrameAudit} from './frame-audit.mjs?v=2026-11-01-bearing-1';
 import * as T from './runtime/vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
 import {GLTFLoader} from './runtime/vendor/GLTFLoader.js?v=2026-10-20-jeju-rov-v1';
 import {loadFish,createFish} from './runtime/fish.js';
 import {aquariumLighting} from './runtime/lighting.js';
-import {ViewZoom,InspectionZoom,zoomFieldOfView} from './view-zoom.mjs?v=2026-11-01-shoal-1';
-import {ViewApproach,framingTarget,comfortableRadius} from './camera-policy.mjs?v=2026-11-01-shoal-1';
-import {ViewOcclusion} from './view-occlusion.mjs?v=2026-11-01-shoal-1';
-import {createCoveScene} from './cove-scene.mjs?v=2026-11-01-shoal-1';
-import {COVE_HOME,COVE_FISH as CLOWN_FISH,CoveLife,CoveDiscovery,coveFloor,coveObstacles,coveRegion as clownRegion,coveHint as clownHint} from './cove.mjs?v=2026-11-01-shoal-1';
-import {SwimWorld,clamp,damp,wrap} from './core.mjs?v=2026-10-28-pace-1';import {Swimmer} from './captain-swim.mjs?v=2026-11-01-shoal-1';import {SwimInput} from './input.mjs?v=2026-11-01-shoal-1';
+import {ViewZoom,InspectionZoom,zoomFieldOfView} from './view-zoom.mjs?v=2026-11-01-bearing-1';
+import {ViewApproach,framingTarget,comfortableRadius} from './camera-policy.mjs?v=2026-11-01-bearing-1';
+import {ViewOcclusion} from './view-occlusion.mjs?v=2026-11-01-bearing-1';
+import {createCoveScene} from './cove-scene.mjs?v=2026-11-01-bearing-1';
+import {COVE_HOME,COVE_FISH as CLOWN_FISH,CoveLife,CoveDiscovery,coveFloor,coveObstacles,coveRegion as clownRegion,coveHint as clownHint} from './cove.mjs?v=2026-11-01-bearing-1';
+import {SwimWorld,clamp,damp,wrap} from './core.mjs?v=2026-10-28-pace-1';import {Swimmer} from './captain-swim.mjs?v=2026-11-01-bearing-1';import {SwimInput} from './input.mjs?v=2026-11-01-bearing-1';
 import {Approach} from './approach.mjs';import {School} from './school.mjs';import {attachMagicGlow} from './magic-glow.mjs';
 import {Expedition,readRecord,emptyRecord,SAVE_KEY} from './expedition.mjs';import {SWIM_PACE,AUTO_APPROACH_SPEED} from './pace.mjs';import {ScreenSteering} from './steering.mjs';import {CaptureAudio} from './audio.mjs';
 const isChromis=new URLSearchParams(location.search).get('species')!=='clownfish',SPECIES_ID=isChromis?CHROMIS_ID:CLOWN_ID,SPECIES_NAME=isChromis?'자리돔':'흰동가리',TARGET_OBJECT=isChromis?'자리돔을':'흰동가리를',RECORD_KEY=speciesSaveKey(SPECIES_ID),COVE_FISH=isChromis?CHROMIS_FISH:CLOWN_FISH;
 const coveRegion=p=>isChromis?'자리돔 바위턱':clownRegion(p),coveHint=(p,found)=>isChromis?'암반 위 작은 무리를 찾아보세요':clownHint(p,found);
 let initialRecord=emptyRecord(),storageWritable=true;try{initialRecord=readSpeciesRecord(localStorage.getItem(RECORD_KEY),SPECIES_ID);}catch{storageWritable=false;}const trip=new Expedition(initialRecord),audio=new CaptureAudio(),returnPilot=new Approach();const HOME=COVE_HOME;let savedRecord=trip.record,dexOpen=false,statusNote='',noteUntil=0,surfaceScene,surfaceCamera,boat,portraitScene,portraitCamera,portraitRenderer,portraitFish;
-const encounter=new ViewApproach(),school=new School(3),steering=new ScreenSteering(),life=isChromis?new ChromisLife():new CoveLife(),discovery=new CoveDiscovery(),observation=new HabitatObservation();let selected=0,count=3,animals=[],glows=[],effects=[],targetLabels=[],fishButtons=[];let manualView=false,arrivalPan=0;
+const encounter=isChromis?new BearingApproach():new ViewApproach(),school=new School(3),steering=new ScreenSteering(),life=isChromis?new ChromisLife():new CoveLife(),discovery=new CoveDiscovery(),observation=new HabitatObservation();let selected=0,count=3,animals=[],glows=[],effects=[],targetLabels=[],fishButtons=[];let manualView=false,arrivalPan=0;
 const $=id=>document.getElementById(id),world=new ReefSwimWorld(SWIM_PACE),canvas=$('sea');
 const renderer=new T.WebGLRenderer({canvas,antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.25));renderer.localClippingEnabled=true;renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;
 const scene=new T.Scene();scene.background=new T.Color('#246d80');scene.fog=new T.FogExp2('#246d80',.026);const seaLight=aquariumLighting(scene,{renderer});seaLight.fill.intensity=1.7;seaLight.fill.color.set('#b0dce1');seaLight.fill.groundColor.set('#476e73');seaLight.key.intensity=3.2;seaLight.key.color.set('#fff1d1');scene.environmentIntensity=.22;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;seaLight.key.castShadow=true;seaLight.key.shadow.mapSize.set(1024,1024);Object.assign(seaLight.key.shadow.camera,{left:-10,right:10,top:10,bottom:-10,near:.5,far:25});seaLight.key.shadow.bias=-.0003;seaLight.key.shadow.normalBias=.04;
 const audit=new FrameAudit();
 const camera=new T.PerspectiveCamera(49,1,.05,100),ray=new T.Raycaster(),terrain=[];let actor,fish,scenery,viewClear,frameBlend=0,ready=false,paused=true,pauseReason=null,started=false,cameraYaw=.95,cameraPitch=.22,desiredYaw=.95,cameraRadius=6.8,manual=false,collisionActive=false;const focus=new T.Vector3().fromArray(world.position);let visibilityFrame=0,visibilityCache=[],blockedViewAge=0,zoomInput,zoomAnchor=null;const viewZoom=new ViewZoom(REVIEW_ZOOM);let zoomMode='distance',zoomMethodBlend=0,zoomModeChanged=false,zoomLimited=null;
-$('title').innerHTML=isChromis?'바위턱 위에서<br>만나는 자리돔 무리':'연산호 암반에서<br>만나는 작은 움직임';$('summary').textContent=isChromis?'세 마리의 자리돔이 바위턱을 오갑니다. 생물을 터치하면 마법으로 안심시키고 가까이 다가가요.':'제주 남부 바다에서 영감을 받은 암반을 둘러보고 생물을 터치해 보세요.';$('notice').textContent=isChromis?'관찰하거나 물방울로 감싸 함께 돌아와요 · 자리돔 기록은 이 기기에 보관해요':'흰동가리를 만나 함께 돌아오는 작은 탐사 · 기록은 이 기기에 보관해요';$('otherSpecies').href=isChromis?'index.html?species=clownfish&v=2026-11-01-shoal-1':'index.html?v=2026-11-01-shoal-1';$('otherSpecies').textContent=isChromis?'이전 흰동가리 탐사·기록 열기':'자리돔 무리 탐사 열기';
+$('title').innerHTML=isChromis?'바위턱 위에서<br>만나는 자리돔 무리':'연산호 암반에서<br>만나는 작은 움직임';$('summary').textContent=isChromis?'세 마리의 자리돔이 바위턱을 오갑니다. 생물을 터치하면 마법으로 안심시키고 가까이 다가가요.':'제주 남부 바다에서 영감을 받은 암반을 둘러보고 생물을 터치해 보세요.';$('notice').textContent=isChromis?'관찰하거나 물방울로 감싸 함께 돌아와요 · 자리돔 기록은 이 기기에 보관해요':'흰동가리를 만나 함께 돌아오는 작은 탐사 · 기록은 이 기기에 보관해요';$('otherSpecies').href=isChromis?'index.html?species=clownfish&v=2026-11-01-bearing-1':'index.html?v=2026-11-01-bearing-1';$('otherSpecies').textContent=isChromis?'이전 흰동가리 탐사·기록 열기':'자리돔 무리 탐사 열기';
 const input=new SwimInput({move:$('moveZone'),look:$('lookZone'),base:$('stickBase'),knob:$('stickKnob'),rise:$('rise'),sink:$('sink'),active:()=>ready&&!paused&&!dexOpen&&['exploring','returning'].includes(trip.stage),lookActive:()=>ready&&!paused&&!dexOpen&&!zoomInput?.blocked&&['exploring','returning'].includes(trip.stage)});
 zoomInput=new InspectionZoom({surface:$('game'),active:()=>ready&&!paused&&!dexOpen&&['exploring','returning'].includes(trip.stage),width:()=>innerWidth,reserved:e=>!!e.target.closest?.('#moveZone')||input.stick?.id===e.pointerId,onStart:()=>{input.clearLook();if(tap){const t=tap;tap=null;if(t.el.hasPointerCapture(t.id))t.el.releasePointerCapture(t.id);}}});
 const touchAudit=new TouchAudit({surface:$('game'),enabled:new URLSearchParams(location.search).get('touchcheck')==='1',snapshot:()=>({playing:ready&&!paused&&!dexOpen&&['exploring','returning'].includes(trip.stage),input:input.read(),pauseReason,pinching:zoomInput.blocked,pinchIds:[...zoomInput.held],stickId:input.stick?.id,gazeId:input.gaze?.id,scale:viewZoom.value,target:viewZoom.target,min:REVIEW_ZOOM.min,max:REVIEW_ZOOM.max,method:zoomMode,limited:zoomLimited})});if(touchAudit.enabled)zoomInput.onTrace=(type,data)=>touchAudit.trace(type,data);
@@ -61,7 +62,7 @@ function cameraStep(dt,snap=false){
 }
 function framedFish(){const f=school.members[selected];return trip.stage==='exploring'&&f&&(['approaching','choice','observing'].includes(encounter.phase)||['binding','opening','joining'].includes(f.state))?f:null;}
 function placeWild(dt=0){life.step(dt,school.members,{selected,phase:encounter.phase,captain:world});}
-function selectTarget(id){if(!ready||paused||trip.stage!=='exploring'||school.members[id]?.state!=='wild')return false;selected=id;fish=animals[id];if(!encounter.selectView(cameraYaw,world,fish.position.toArray()))return false;encounter.message='마법으로 안심시켰어요 · 다가가는 중';statusNote='';noteUntil=0;discovery.seen.add(id);trip.discover(id);steering.reset(cameraYaw);manualView=false;canvas.focus({preventScroll:true});return true;}
+function selectTarget(id){if(!ready||paused||trip.stage!=='exploring'||school.members[id]?.state!=='wild')return false;selected=id;fish=animals[id];if(!encounter.selectView(cameraYaw,world,fish.position.toArray())){statusNote=encounter.message;noteUntil=world.time+4;return false;}encounter.message='마법으로 안심시켰어요 · 다가가는 중';statusNote='';noteUntil=0;discovery.seen.add(id);trip.discover(id);steering.reset(cameraYaw);manualView=false;canvas.focus({preventScroll:true});return true;}
 function recordSightings(dt){if(trip.stage!=='exploring')return;const sightings=school.members.filter(f=>f.state==='wild').map(f=>({id:f.id,visible:visibleFish(f.id),distance:Math.hypot(...f.position.map((v,i)=>v-world.position[i]))}));for(const id of discovery.step(dt,sightings)){trip.discover(id);if(encounter.phase==='free'&&world.time>=noteUntil){statusNote=COVE_FISH[id].place+'에서 '+TARGET_OBJECT+' 발견했어요';noteUntil=world.time+2.8;audio.cue('dock');}}}
 function update(dt){
  trip.step(dt);document.documentElement.style.setProperty('--scene-fade',trip.stage==='closing'?String(clamp((trip.stageAge-.7)/1.05,0,1)):'0');if(trip.stage==='complete'){complete();return;}
