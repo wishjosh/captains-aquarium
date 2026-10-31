@@ -4,7 +4,7 @@ import {loadFish,createFish} from './runtime/fish.js';
 import {aquariumLighting} from './runtime/lighting.js';
 import {Swimmer} from './captain-swim.mjs';
 import {createCoveScene} from './cove-scene.mjs';
-import {createChromis} from './chromis-model.mjs?v=2026-11-01-chromis-1';
+import {createChromis} from './chromis-model.mjs?v=2026-11-01-shoal-1';
 import {ledgePoint} from './chromis-shape.mjs?v=2026-11-01-chromis-1';
 import {ViewOcclusion} from './view-occlusion.mjs';
 import {ViewZoom,InspectionZoom} from './view-zoom.mjs';
