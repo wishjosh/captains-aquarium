@@ -1,9 +1,9 @@
-import {seaweedPlacements,seaweedBend} from './seaweed.mjs?v=2026-10-31-view-1';
+import {seaweedPlacements,seaweedBend} from './seaweed.mjs?v=2026-10-31-touch-1';
 import * as T from './runtime/vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
-import {reefFloor,reefCover,TERRAIN} from './reef-terrain.mjs?v=2026-10-31-view-1';
-import {recipe,PALETTE,collisionVolumes} from './habitat-layout.mjs?v=2026-10-31-view-1';
-import {createMotion,clayMaterial,depthMaterial} from './body-material.mjs?v=2026-10-31-view-1';
-import {ANEMONE,createResidentHabitat} from './habitat.mjs?v=2026-10-31-view-1';
+import {reefFloor,reefCover,TERRAIN} from './reef-terrain.mjs?v=2026-10-31-touch-1';
+import {recipe,PALETTE,collisionVolumes} from './habitat-layout.mjs?v=2026-10-31-touch-1';
+import {createMotion,clayMaterial,depthMaterial} from './body-material.mjs?v=2026-10-31-touch-1';
+import {ANEMONE,createResidentHabitat} from './habitat.mjs?v=2026-10-31-touch-1';
 export function createCoveScene(assets,{style='crevice',layout=null}={}){
  const group=new T.Group(),solids=[],occluders=[],water=createMotion(),config=layout||recipe(style),rockMeshes=[];group.name='Faceted small habitat';
  water.strength.value=1;
