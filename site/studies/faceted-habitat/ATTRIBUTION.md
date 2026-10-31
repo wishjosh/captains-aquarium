@@ -11,3 +11,10 @@ CC BY 4.0: https://creativecommons.org/licenses/by/4.0/
 기존 선장·배·물고기는 Quaternius Pirate Kit 및 Animated Cute Fish Pack(CC0) 원본과 기존 게임의 외형 설정을 이어 쓴다.
 
 공개 실행본의 동봉 조건: `runtime/assets/pirate/LICENSE.txt`, `runtime/assets/fish/LICENSE.txt`, `runtime/vendor/THREE-LICENSE.txt`, `runtime/NOTICE.txt`.
+
+
+자리돔 형태 시안 — 이 프로젝트에서 새로 만든 다각면체 형상·색·꼬리 움직임. 기존 Quaternius 흰동가리 모형을 변형·개명한 것이 아니다.
+
+형태·서식 참고: 국립수산과학원 e-연구바다 「Chromis notata(자리돔)」, 2026-11-01 본문과 종사진 확인.
+https://www.nifs.go.kr/portal/bt/frctA/actionSpeciesSearchView.do?taxonId=10001
+종사진은 참고만 했으며 게임 파일에 포함하거나 텍스처로 사용하지 않았다. 정확한 종 판별용 모형·생태 재현을 주장하지 않는다.
