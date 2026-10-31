@@ -42,6 +42,6 @@ export class ChromisLife{
    f.position=[...a.position];f.velocity=[...a.velocity];f.yaw=a.yaw;
   }
  }
- caption(selected,phase){if(this.agents.every(a=>a.mode==='collected'))return '모두 선장 곁에 모였어요 · 함께 헤엄치거나 배로 돌아가세요';if(phase==='approaching')return '선택한 자리돔이 그 자리에서 안심해요 · 가까이 다가가는 중';if(phase==='choice')return '자리돔을 관찰하거나 물방울로 감싸 보세요';if(phase==='observing')return '안심한 자리돔이 무리 곁으로 돌아가요 · 다른 생물의 움직임도 살펴보세요';if(this.agents.some(a=>a.response==='avoiding'))return '가까이 다가가면 물러나요 · 터치하면 한 마리를 마법으로 안심시켜요';return '바위턱 위의 작은 무리를 찾아보세요 · 생물을 터치하면 다가가요';}
+ caption(selected,phase){if(this.agents.every(a=>a.mode==='collected'))return '모두 선장 곁에 모였어요 · 함께 헤엄치거나 배로 돌아가세요';if(phase==='approaching')return '선택한 자리돔이 그 자리에서 안심해요 · 가까이 다가가는 중';if(phase==='choice')return '관찰은 움직임 보기 · 수집은 마법으로 함께하기';if(phase==='observing')return '안심한 자리돔이 무리 곁으로 돌아가요 · 다른 생물의 움직임도 살펴보세요';if(this.agents.some(a=>a.response==='avoiding'))return '가까이 다가가면 물러나요 · 터치하면 한 마리를 마법으로 안심시켜요';return '바위턱 위의 작은 무리를 찾아보세요 · 생물을 터치하면 다가가요';}
  report(){return this.agents.map(a=>({id:a.id,place:'암반 위 자리돔 무리',mode:a.mode,response:a.response||'natural',activity:a.activity,calmEdge:a.calmEdge,position:[...a.position],velocity:[...a.velocity],remainingWild:a.mode!=='collected'}));}
 }
