@@ -15,3 +15,6 @@
 #zoomLimit{grid-column:1/-1;text-align:center;font-size:10px;line-height:1.4;background:#173f47dc;padding:5px;border-radius:7px;color:#f0e2ba}
 
 #targetMark{position:absolute;transform:translate(-50%,-50%);border:1px solid #bee7d6b0;border-radius:50%;box-shadow:0 0 0 3px #12465022;pointer-events:none;z-index:1}#targetMark[data-phase=press]{border-color:#f1dc9e;box-shadow:0 0 0 3px #edda9c22}#targetMark[data-phase=observing]{border-style:dashed;border-color:#bee7d680}.fishTouch{width:56px;height:56px}.fishLabel{pointer-events:none}
+
+/* Menus retain the encounter state while removing its controls from input and focus. */
+#worldUI{display:contents}#worldUI[inert]{visibility:hidden}#dexPanel{z-index:6}
