@@ -1,7 +1,7 @@
-import {ROCKS,collisionVolumes} from './habitat-layout.mjs?v=2026-10-31-touch-2';
-import {reefFloor} from './reef-terrain.mjs?v=2026-10-31-touch-2';
+import {ROCKS,collisionVolumes} from './habitat-layout.mjs?v=2026-10-31-touch-3';
+import {reefFloor} from './reef-terrain.mjs?v=2026-10-31-touch-3';
 import {clamp,damp,wrap} from './core.mjs';
-import {ANEMONE,REEF_ROCKS,residentRoute,residentIntent} from './habitat.mjs?v=2026-10-31-touch-2';
+import {ANEMONE,REEF_ROCKS,residentRoute,residentIntent} from './habitat.mjs?v=2026-10-31-touch-3';
 
 export const COVE_HOME=[0,2.5,5.7];
 export const COVE_FISH=Object.freeze([
