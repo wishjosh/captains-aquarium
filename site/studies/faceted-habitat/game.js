@@ -1,21 +1,21 @@
-import {PageLifecycle} from './page-lifecycle.mjs?v=2026-10-31-touch-3';
-import {TouchAudit} from './touch-audit.mjs?v=2026-10-31-touch-3';
-import {REVIEW_ZOOM,zoomProjection,frameScaleLimit,clearanceScale} from './zoom-camera.mjs?v=2026-10-31-touch-3';
-import {residentCaption} from './habitat.mjs?v=2026-10-31-touch-3';
-import {HabitatObservation} from './habitat-observation.mjs?v=2026-10-31-touch-3';
-import {fishPose} from './fish-motion.mjs?v=2026-10-31-touch-3';
-import {ReefSwimWorld} from './reef-terrain.mjs?v=2026-10-31-touch-3';
-import {FrameAudit} from './frame-audit.mjs?v=2026-10-31-touch-3';
+import {PageLifecycle} from './page-lifecycle.mjs?v=2026-10-31-touch-4';
+import {TouchAudit} from './touch-audit.mjs?v=2026-10-31-touch-4';
+import {REVIEW_ZOOM,zoomProjection,frameScaleLimit,clearanceScale} from './zoom-camera.mjs?v=2026-10-31-touch-4';
+import {residentCaption} from './habitat.mjs?v=2026-10-31-touch-4';
+import {HabitatObservation} from './habitat-observation.mjs?v=2026-10-31-touch-4';
+import {fishPose} from './fish-motion.mjs?v=2026-10-31-touch-4';
+import {ReefSwimWorld} from './reef-terrain.mjs?v=2026-10-31-touch-4';
+import {FrameAudit} from './frame-audit.mjs?v=2026-10-31-touch-4';
 import * as T from './runtime/vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
 import {GLTFLoader} from './runtime/vendor/GLTFLoader.js?v=2026-10-20-jeju-rov-v1';
 import {loadFish,createFish} from './runtime/fish.js';
 import {aquariumLighting} from './runtime/lighting.js';
-import {ViewZoom,InspectionZoom,zoomFieldOfView} from './view-zoom.mjs?v=2026-10-31-touch-3';
-import {ViewApproach,framingTarget,comfortableRadius} from './camera-policy.mjs?v=2026-10-31-touch-3';
-import {ViewOcclusion} from './view-occlusion.mjs?v=2026-10-31-touch-3';
-import {createCoveScene} from './cove-scene.mjs?v=2026-10-31-touch-3';
-import {COVE_HOME,COVE_FISH,CoveLife,CoveDiscovery,coveFloor,coveObstacles,coveRegion,coveHint} from './cove.mjs?v=2026-10-31-touch-3';
-import {SwimWorld,clamp,damp,wrap} from './core.mjs?v=2026-10-28-pace-1';import {Swimmer} from './captain-swim.mjs?v=2026-10-31-touch-3';import {SwimInput} from './input.mjs';
+import {ViewZoom,InspectionZoom,zoomFieldOfView} from './view-zoom.mjs?v=2026-10-31-touch-4';
+import {ViewApproach,framingTarget,comfortableRadius} from './camera-policy.mjs?v=2026-10-31-touch-4';
+import {ViewOcclusion} from './view-occlusion.mjs?v=2026-10-31-touch-4';
+import {createCoveScene} from './cove-scene.mjs?v=2026-10-31-touch-4';
+import {COVE_HOME,COVE_FISH,CoveLife,CoveDiscovery,coveFloor,coveObstacles,coveRegion,coveHint} from './cove.mjs?v=2026-10-31-touch-4';
+import {SwimWorld,clamp,damp,wrap} from './core.mjs?v=2026-10-28-pace-1';import {Swimmer} from './captain-swim.mjs?v=2026-10-31-touch-4';import {SwimInput} from './input.mjs?v=2026-10-31-touch-4';
 import {Approach} from './approach.mjs';import {School} from './school.mjs';import {attachMagicGlow} from './magic-glow.mjs';
 import {Expedition,readRecord,emptyRecord,SAVE_KEY} from './expedition.mjs';import {SWIM_PACE,AUTO_APPROACH_SPEED} from './pace.mjs';import {ScreenSteering} from './steering.mjs';import {CaptureAudio} from './audio.mjs';
 let initialRecord=emptyRecord(),storageWritable=true;try{initialRecord=readRecord(localStorage.getItem(SAVE_KEY));}catch{storageWritable=false;}const trip=new Expedition(initialRecord),audio=new CaptureAudio(),returnPilot=new Approach();const HOME=COVE_HOME;let savedRecord=trip.record,dexOpen=false,statusNote='',noteUntil=0,surfaceScene,surfaceCamera,boat,portraitScene,portraitCamera,portraitRenderer,portraitFish;
@@ -25,8 +25,8 @@ const renderer=new T.WebGLRenderer({canvas,antialias:true,preserveDrawingBuffer:
 const scene=new T.Scene();scene.background=new T.Color('#246d80');scene.fog=new T.FogExp2('#246d80',.026);const seaLight=aquariumLighting(scene,{renderer});seaLight.fill.intensity=1.7;seaLight.fill.color.set('#b0dce1');seaLight.fill.groundColor.set('#476e73');seaLight.key.intensity=3.2;seaLight.key.color.set('#fff1d1');scene.environmentIntensity=.22;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;seaLight.key.castShadow=true;seaLight.key.shadow.mapSize.set(1024,1024);Object.assign(seaLight.key.shadow.camera,{left:-10,right:10,top:10,bottom:-10,near:.5,far:25});seaLight.key.shadow.bias=-.0003;seaLight.key.shadow.normalBias=.04;
 const audit=new FrameAudit();
 const camera=new T.PerspectiveCamera(49,1,.05,100),ray=new T.Raycaster(),terrain=[];let actor,fish,scenery,viewClear,frameBlend=0,ready=false,paused=true,pauseReason=null,started=false,cameraYaw=.95,cameraPitch=.22,desiredYaw=.95,cameraRadius=6.8,manual=false,collisionActive=false;const focus=new T.Vector3().fromArray(world.position);let visibilityFrame=0,visibilityCache=[],blockedViewAge=0,zoomInput,zoomAnchor=null;const viewZoom=new ViewZoom(REVIEW_ZOOM);let zoomMode='distance',zoomMethodBlend=0,zoomModeChanged=false,zoomLimited=null;
-const input=new SwimInput({move:$('moveZone'),look:$('lookZone'),base:$('stickBase'),knob:$('stickKnob'),rise:$('rise'),sink:$('sink'),active:()=>ready&&!paused&&!dexOpen&&!zoomInput?.blocked&&['exploring','returning'].includes(trip.stage)});
-zoomInput=new InspectionZoom({surface:$('game'),active:()=>ready&&!paused&&!dexOpen&&['exploring','returning'].includes(trip.stage),width:()=>innerWidth,reserved:e=>!!e.target.closest?.('#moveZone')||input.stick?.id===e.pointerId,onStart:()=>{input.clear();if(tap){const t=tap;tap=null;if(t.el.hasPointerCapture(t.id))t.el.releasePointerCapture(t.id);}}});
+const input=new SwimInput({move:$('moveZone'),look:$('lookZone'),base:$('stickBase'),knob:$('stickKnob'),rise:$('rise'),sink:$('sink'),active:()=>ready&&!paused&&!dexOpen&&['exploring','returning'].includes(trip.stage),lookActive:()=>ready&&!paused&&!dexOpen&&!zoomInput?.blocked&&['exploring','returning'].includes(trip.stage)});
+zoomInput=new InspectionZoom({surface:$('game'),active:()=>ready&&!paused&&!dexOpen&&['exploring','returning'].includes(trip.stage),width:()=>innerWidth,reserved:e=>!!e.target.closest?.('#moveZone')||input.stick?.id===e.pointerId,onStart:()=>{input.clearLook();if(tap){const t=tap;tap=null;if(t.el.hasPointerCapture(t.id))t.el.releasePointerCapture(t.id);}}});
 const touchAudit=new TouchAudit({surface:$('game'),enabled:new URLSearchParams(location.search).get('touchcheck')==='1',snapshot:()=>({playing:ready&&!paused&&!dexOpen&&['exploring','returning'].includes(trip.stage),input:input.read(),pauseReason,pinching:zoomInput.blocked,pinchIds:[...zoomInput.held],stickId:input.stick?.id,gazeId:input.gaze?.id,scale:viewZoom.value,target:viewZoom.target,min:REVIEW_ZOOM.min,max:REVIEW_ZOOM.max,method:zoomMode,limited:zoomLimited})});if(touchAudit.enabled)zoomInput.onTrace=(type,data)=>touchAudit.trace(type,data);
 const labels={float:'물속에 떠 있어요',start:'몸을 뻗어 출발해요',swim:'여유롭게 헤엄쳐요',coast:'속도를 줄이며 멈춰요',brake:'몸을 세워 속도를 줄여요',reverse:'앞을 보며 살짝 물러나요',turn:'몸을 돌리고 있어요',depth:'높이를 맞추고 있어요'};
 function cameraStep(dt,snap=false){
@@ -60,7 +60,7 @@ function recordSightings(dt){if(trip.stage!=='exploring')return;const sightings=
 function update(dt){
  trip.step(dt);document.documentElement.style.setProperty('--scene-fade',trip.stage==='closing'?String(clamp((trip.stageAge-.7)/1.05,0,1)):'0');if(trip.stage==='complete'){complete();return;}
  fish=animals[selected]||animals[0];const manualInput=input.read(),manualControl=steering.control(dt,manualInput,world,cameraYaw),moving=Math.max(...Object.values(manualInput).map(Math.abs))>.015;let control={};if(moving){zoomAnchor=null;zoomLimited=null;}
- if(zoomInput.blocked){control={};}
+ if(zoomInput.blocked&&!moving){control={};}
  else if(trip.stage==='returning'){
   if(moving){trip.cancelReturn();returnPilot.cancel();statusNote='귀환을 취소했어요 · 자유롭게 탐사하세요';noteUntil=world.time+3;control=manualControl;}
   else{control=returnPilot.control(dt,{},world,HOME);if(returnPilot.phase==='free'){trip.cancelReturn();statusNote=returnPilot.message;noteUntil=world.time+4;}if(returnPilot.phase==='choice')trip.dock(school.members,world.position);}
@@ -111,7 +111,7 @@ function updateMagic(f,dt){const e=effects[f.id];e.group.position.fromArray(f.po
 let tap=null;
 function visibleFish(index=selected){if(visibilityCache[index]?.frame===visibilityFrame)return visibilityCache[index].visible;let visible=false,blocker=null;const animal=animals[index];if(animal&&animal.visible){const p=project(animal.position.toArray());if(p[2]>-1&&p[2]<1&&p[0]>0&&p[0]<innerWidth&&p[1]>95&&p[1]<innerHeight-95){const delta=animal.position.clone().sub(camera.position);ray.set(camera.position,delta.clone().normalize());ray.near=.05;ray.far=delta.length()-.22;const hit=ray.intersectObjects([...(scenery?.occluders||terrain),actor.root],true).find(h=>h.distance<delta.length()-.24&&!viewClear?.clears(h));visible=!hit;if(hit){blocker=hit.object.name||'scene';for(let p=hit.object;p;p=p.parent){if(p===actor.equipment.perch)blocker='hat-parrot';if(p===actor.equipment.motor)blocker='prosthetic-propeller';}};}}visibilityCache[index]={frame:visibilityFrame,visible,blocker};return visible;}
 function pickFish(x,y){let result=-1,best=Infinity;for(const f of school.members){if(f.state!=='wild'||!visibleFish(f.id))continue;const p=project(f.position),r=Math.max(24,innerHeight*.25/(2*Math.tan(camera.fov*Math.PI/360)*camera.position.distanceTo(animals[f.id].position))),d=Math.hypot(x-p[0],y-p[1]);if(d<r&&d<best){best=d;result=f.id;}}return result;}
-$('game').addEventListener('pointerdown',e=>{if(!ready||paused||trip.stage!=='exploring'||tap||e.button!==0||zoomInput.blocked||e.target.closest('button'))return;const picked=pickFish(e.clientX,e.clientY);if(picked<0)return; e.preventDefault();e.stopImmediatePropagation();tap={picked,id:e.pointerId,x:e.clientX,y:e.clientY,moved:0,at:performance.now(),el:e.target};e.target.setPointerCapture(e.pointerId);},{capture:true});
+$('game').addEventListener('pointerdown',e=>{if(!ready||paused||trip.stage!=='exploring'||tap||e.button!==0||zoomInput.blocked||e.target.closest('button')||e.target.closest('#moveZone'))return;const picked=pickFish(e.clientX,e.clientY);if(picked<0)return; e.preventDefault();e.stopImmediatePropagation();tap={picked,id:e.pointerId,x:e.clientX,y:e.clientY,moved:0,at:performance.now(),el:e.target};e.target.setPointerCapture(e.pointerId);},{capture:true});
 $('game').addEventListener('pointermove',e=>{if(tap?.id!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();tap.moved=Math.max(tap.moved,Math.hypot(e.clientX-tap.x,e.clientY-tap.y));},{capture:true});
 for(const type of ['pointerup','pointercancel','lostpointercapture'])$('game').addEventListener(type,e=>{if(tap?.id!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();const t=tap;tap=null;if(type==='pointerup'&&t.moved<9&&performance.now()-t.at<700){selectTarget(t.picked);}if(t.el.hasPointerCapture(t.id))t.el.releasePointerCapture(t.id);},{capture:true});
 $('observe').onclick=()=>{if(encounter.choose('observe')){trip.observe(selected);encounter.message=COVE_FISH[selected].behavior+'을 살펴보세요';}canvas.focus({preventScroll:true});};$('collect').onclick=()=>{if(trip.stage==='exploring'&&encounter.phase==='choice'&&school.enchant(selected)){trip.discover(selected);audio.cue('impact');encounter.phase='free';encounter.message='물방울의 마법이 생물에게 스며들어요';}canvas.focus({preventScroll:true});};$('leave').onclick=()=>{encounter.cancel();canvas.focus({preventScroll:true});};$('again').onclick=()=>{if(encounter.phase==='observing'){encounter.phase='choice';encounter.message='흰동가리와 무엇을 할까요?';}canvas.focus({preventScroll:true});};

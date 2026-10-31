@@ -14,19 +14,19 @@ export class InspectionZoom {
   const stop=e=>{e.preventDefault();e.stopImmediatePropagation();};
   const control=e=>e.target.closest?.('button')&&!e.target.closest?.('.fishTouch');
   surface.addEventListener('pointerdown',e=>{
-   if(e.pointerType!=='touch'||!active())return;
+   if(e.pointerType!=='touch'||!active())return;if(reserved(e)||control(e)){this.suppressUntil=0;return;}
    if(this.blocked){this.held.add(e.pointerId);surface.setPointerCapture(e.pointerId);stop(e);return;}
-   this.suppressUntil=0;if(control(e)||reserved(e))return;
+   this.suppressUntil=0;
    this.points.set(e.pointerId,{x:e.clientX,y:e.clientY});this.held.add(e.pointerId);
    if(this.points.size===2){this.blocked=true;this.transferring=true;this.onStart();this.measure();this.fresh=true;for(const id of this.held)surface.setPointerCapture(id);this.transferring=false;this.onTrace?.('pinch-start',{});stop(e);}
   },true);
-  surface.addEventListener('pointermove',e=>{if(this.blocked){if(this.points.has(e.pointerId)){this.points.set(e.pointerId,{x:e.clientX,y:e.clientY});if(this.points.size===2){const before=this.span;this.measure();if(before>12&&this.span>12){const delta=Math.log(this.span/before);this.delta+=delta;this.onTrace?.('pinch-change',{delta});}}}stop(e);}else if(this.points.has(e.pointerId))this.points.set(e.pointerId,{x:e.clientX,y:e.clientY});},true);
+  surface.addEventListener('pointermove',e=>{if(this.blocked&&this.held.has(e.pointerId)){if(this.points.has(e.pointerId)){this.points.set(e.pointerId,{x:e.clientX,y:e.clientY});if(this.points.size===2){const before=this.span;this.measure();if(before>12&&this.span>12){const delta=Math.log(this.span/before);this.delta+=delta;this.onTrace?.('pinch-change',{delta});}}}stop(e);}else if(this.points.has(e.pointerId))this.points.set(e.pointerId,{x:e.clientX,y:e.clientY});},true);
   for(const type of ['pointerup','pointercancel','lostpointercapture'])surface.addEventListener(type,e=>{
    if(type==='lostpointercapture'&&(this.transferring||surface.hasPointerCapture(e.pointerId)))return;
    if(!this.held.has(e.pointerId))return;if(this.blocked&&type==='pointercancel')this.onTrace?.('touch-cancel',{});this.held.delete(e.pointerId);this.points.delete(e.pointerId);
    if(this.blocked){stop(e);if(!this.held.size){this.blocked=false;this.suppressUntil=this.clock()+350;this.onTrace?.('pinch-end',{reason:type});}}
   },true);
-  surface.addEventListener('click',e=>{if(this.blocked||this.clock()<this.suppressUntil)stop(e);},true);
+  surface.addEventListener('click',e=>{if(this.blocked&&control(e))return;if(this.blocked||this.clock()<this.suppressUntil)stop(e);},true);
   surface.addEventListener('wheel',e=>{if(!active()||control(e)||this.blocked)return;stop(e);const units=e.deltaMode===1?16:e.deltaMode===2?500:1;this.delta-=clamp(e.deltaY*units,-400,400)*.0018;this.fresh=true;},{capture:true,passive:false});
  }
  measure(){const[a,b]=[...this.points.values()];this.span=Math.hypot(a.x-b.x,a.y-b.y);this.center=[(a.x+b.x)/2,(a.y+b.y)/2];}
