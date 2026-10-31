@@ -2,11 +2,11 @@
 
 2026-10-30. 사용자가 단일 무채색 비교판의 연산호·말미잘 형태를 작은 서식처에 적용하고 군락 크기·밀도 차이를 요청했다. 기존 잠영·카메라·터치 접근·관찰·수집·동행·귀환을 이어 쓰며 이 시안의 저장 키 `captains-aquarium-faceted-habitat-v1`도 유지한다.
 
-[스마트폰 실행](https://wishjosh.github.io/captains-aquarium/studies/faceted-habitat/?v=2026-10-31-touch-1) · [10초 실행 검사](https://wishjosh.github.io/captains-aquarium/studies/faceted-habitat/?v=2026-10-31-touch-1&check=1)
+[스마트폰 실행](https://wishjosh.github.io/captains-aquarium/studies/faceted-habitat/?v=2026-10-31-touch-2) · [10초 실행 검사](https://wishjosh.github.io/captains-aquarium/studies/faceted-habitat/?v=2026-10-31-touch-2&check=1)
 
 ## 실제 휴대폰 확인을 위한 손가락 점검
 
-[손가락 점검 모드](https://wishjosh.github.io/captains-aquarium/studies/faceted-habitat/?v=2026-10-31-touch-1&touchcheck=1)는 같은 탐사판의 선택형 표시다. 일반 링크에서는 점검 창·손가락 표시·기록을 실행하지 않는다. 탐사를 떠난 뒤 기기와 과제를 골라 ‘기록 시작’을 누르면 창이 접힌다. 손가락별로 조향·시점·확대가 표시된다. 과제를 마치고 ‘기록 끝내기’를 누른 뒤 체감·선호 확대를 선택하고 결과를 복사할 수 있다. 자동 전송·기기 자동 판별·영구 저장은 하지 않는다. 최대 한 번에 약 1분 기록하며 새로 시작하면 이전 결과를 대체한다.
+[손가락 점검 모드](https://wishjosh.github.io/captains-aquarium/studies/faceted-habitat/?v=2026-10-31-touch-2&touchcheck=1)는 같은 탐사판의 선택형 표시다. 일반 링크에서는 점검 창·손가락 표시·기록을 실행하지 않는다. 탐사를 떠난 뒤 기기와 과제를 골라 ‘기록 시작’을 누르면 창이 접힌다. 손가락별로 조향·시점·확대가 표시된다. 과제를 마치고 ‘기록 끝내기’를 누른 뒤 체감·선호 확대를 선택하고 결과를 복사할 수 있다. 자동 전송·기기 자동 판별·영구 저장은 하지 않는다. 최대 한 번에 약 1분 기록하며 새로 시작하면 이전 결과를 대체한다.
 
 점검은 두 손가락 인식, 확대 요청, 실제 배율 변화, 화면·암반·배율 한계를 구분한다. 원시 손가락 입력과 시작 영역도 기록하므로 인식되지 않은 시도가 있었다는 사용자 설명과 대조할 수 있다. 실제 시도 횟수를 자동으로 아는 것이 아니므로 성공률은 계산하지 않는다. PC 마우스 확인은 손가락 입력 없음으로 표시한다. 기기·체감·선호는 사용자 선택값이며 자동 측정과 구분한다. 창을 펼친 상태·표시 자체의 비용을 포함한 점검 중 프레임 수치는 일반 게임의 성능을 대신하지 않는다.
 
