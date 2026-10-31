@@ -1,18 +1,19 @@
-import {residentCaption} from './habitat.mjs?v=2026-10-30-habitat-4';
-import {HabitatObservation} from './habitat-observation.mjs?v=2026-10-30-habitat-4';
-import {fishPose} from './fish-motion.mjs?v=2026-10-30-habitat-4';
-import {ReefSwimWorld} from './reef-terrain.mjs?v=2026-10-30-habitat-4';
-import {FrameAudit} from './frame-audit.mjs?v=2026-10-30-habitat-4';
+import {REVIEW_ZOOM,zoomProjection,frameScaleLimit,clearanceScale} from './zoom-camera.mjs?v=2026-10-31-view-1';
+import {residentCaption} from './habitat.mjs?v=2026-10-31-view-1';
+import {HabitatObservation} from './habitat-observation.mjs?v=2026-10-31-view-1';
+import {fishPose} from './fish-motion.mjs?v=2026-10-31-view-1';
+import {ReefSwimWorld} from './reef-terrain.mjs?v=2026-10-31-view-1';
+import {FrameAudit} from './frame-audit.mjs?v=2026-10-31-view-1';
 import * as T from './runtime/vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
 import {GLTFLoader} from './runtime/vendor/GLTFLoader.js?v=2026-10-20-jeju-rov-v1';
 import {loadFish,createFish} from './runtime/fish.js';
 import {aquariumLighting} from './runtime/lighting.js';
-import {ViewZoom,InspectionZoom,zoomFieldOfView} from './view-zoom.mjs?v=2026-10-30-habitat-4';
-import {ViewApproach,framingTarget,comfortableRadius} from './camera-policy.mjs?v=2026-10-30-habitat-4';
-import {ViewOcclusion} from './view-occlusion.mjs?v=2026-10-30-habitat-4';
-import {createCoveScene} from './cove-scene.mjs?v=2026-10-30-habitat-4';
-import {COVE_HOME,COVE_FISH,CoveLife,CoveDiscovery,coveFloor,coveObstacles,coveRegion,coveHint} from './cove.mjs?v=2026-10-30-habitat-4';
-import {SwimWorld,clamp,damp,wrap} from './core.mjs?v=2026-10-28-pace-1';import {Swimmer} from './captain-swim.mjs?v=2026-10-30-habitat-4';import {SwimInput} from './input.mjs';
+import {ViewZoom,InspectionZoom,zoomFieldOfView} from './view-zoom.mjs?v=2026-10-31-view-1';
+import {ViewApproach,framingTarget,comfortableRadius} from './camera-policy.mjs?v=2026-10-31-view-1';
+import {ViewOcclusion} from './view-occlusion.mjs?v=2026-10-31-view-1';
+import {createCoveScene} from './cove-scene.mjs?v=2026-10-31-view-1';
+import {COVE_HOME,COVE_FISH,CoveLife,CoveDiscovery,coveFloor,coveObstacles,coveRegion,coveHint} from './cove.mjs?v=2026-10-31-view-1';
+import {SwimWorld,clamp,damp,wrap} from './core.mjs?v=2026-10-28-pace-1';import {Swimmer} from './captain-swim.mjs?v=2026-10-31-view-1';import {SwimInput} from './input.mjs';
 import {Approach} from './approach.mjs';import {School} from './school.mjs';import {attachMagicGlow} from './magic-glow.mjs';
 import {Expedition,readRecord,emptyRecord,SAVE_KEY} from './expedition.mjs';import {SWIM_PACE,AUTO_APPROACH_SPEED} from './pace.mjs';import {ScreenSteering} from './steering.mjs';import {CaptureAudio} from './audio.mjs';
 let initialRecord=emptyRecord(),storageWritable=true;try{initialRecord=readRecord(localStorage.getItem(SAVE_KEY));}catch{storageWritable=false;}const trip=new Expedition(initialRecord),audio=new CaptureAudio(),returnPilot=new Approach();const HOME=COVE_HOME;let savedRecord=trip.record,dexOpen=false,statusNote='',noteUntil=0,surfaceScene,surfaceCamera,boat,portraitScene,portraitCamera,portraitRenderer,portraitFish;
@@ -21,26 +22,33 @@ const $=id=>document.getElementById(id),world=new ReefSwimWorld(SWIM_PACE),canva
 const renderer=new T.WebGLRenderer({canvas,antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.25));renderer.localClippingEnabled=true;renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;
 const scene=new T.Scene();scene.background=new T.Color('#246d80');scene.fog=new T.FogExp2('#246d80',.026);const seaLight=aquariumLighting(scene,{renderer});seaLight.fill.intensity=1.7;seaLight.fill.color.set('#b0dce1');seaLight.fill.groundColor.set('#476e73');seaLight.key.intensity=3.2;seaLight.key.color.set('#fff1d1');scene.environmentIntensity=.22;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;seaLight.key.castShadow=true;seaLight.key.shadow.mapSize.set(1024,1024);Object.assign(seaLight.key.shadow.camera,{left:-10,right:10,top:10,bottom:-10,near:.5,far:25});seaLight.key.shadow.bias=-.0003;seaLight.key.shadow.normalBias=.04;
 const audit=new FrameAudit();
-const camera=new T.PerspectiveCamera(49,1,.05,100),ray=new T.Raycaster(),terrain=[];let actor,fish,scenery,viewClear,frameBlend=0,ready=false,paused=true,started=false,cameraYaw=.95,cameraPitch=.22,desiredYaw=.95,cameraRadius=6.8,manual=false,collisionActive=false;const focus=new T.Vector3().fromArray(world.position);let visibilityFrame=0,visibilityCache=[],blockedViewAge=0,zoomInput,zoomAnchor=null;const viewZoom=new ViewZoom();
+const camera=new T.PerspectiveCamera(49,1,.05,100),ray=new T.Raycaster(),terrain=[];let actor,fish,scenery,viewClear,frameBlend=0,ready=false,paused=true,started=false,cameraYaw=.95,cameraPitch=.22,desiredYaw=.95,cameraRadius=6.8,manual=false,collisionActive=false;const focus=new T.Vector3().fromArray(world.position);let visibilityFrame=0,visibilityCache=[],blockedViewAge=0,zoomInput,zoomAnchor=null;const viewZoom=new ViewZoom(REVIEW_ZOOM);let zoomMode='distance',zoomMethodBlend=0,zoomModeChanged=false,zoomLimited=null;
 const input=new SwimInput({move:$('moveZone'),look:$('lookZone'),base:$('stickBase'),knob:$('stickKnob'),rise:$('rise'),sink:$('sink'),active:()=>ready&&!paused&&!dexOpen&&!zoomInput?.blocked&&['exploring','returning'].includes(trip.stage)});
-zoomInput=new InspectionZoom({surface:$('game'),active:()=>ready&&!paused&&!dexOpen&&['exploring','returning'].includes(trip.stage),width:()=>innerWidth,onStart:()=>{input.clear();if(tap){const t=tap;tap=null;if(t.el.hasPointerCapture(t.id))t.el.releasePointerCapture(t.id);}}});
-function zoomSubject(center){
- if(['choice','observing','approaching'].includes(encounter.phase))return{fish:selected};
- const point=center||[innerWidth*.5,innerHeight*.5];let nearest=-1,best=70;
- for(const f of school.members){const p=project(f.position),d=Math.hypot(p[0]-point[0],p[1]-point[1]);if(visibleFish(f.id)&&d<best){nearest=f.id;best=d;}}
- if(nearest>=0)return{fish:nearest};
- ray.setFromCamera(new T.Vector2(point[0]/innerWidth*2-1,1-point[1]/innerHeight*2),camera);ray.near=.05;ray.far=40;const hit=ray.intersectObjects(scenery?.occluders||terrain,true)[0];
- return{point:hit?hit.point.toArray():focus.toArray()};
-}
+zoomInput=new InspectionZoom({surface:$('game'),active:()=>ready&&!paused&&!dexOpen&&['exploring','returning'].includes(trip.stage),width:()=>innerWidth,reserved:e=>!!e.target.closest?.('#moveZone')||input.stick?.id===e.pointerId,onStart:()=>{input.clear();if(tap){const t=tap;tap=null;if(t.el.hasPointerCapture(t.id))t.el.releasePointerCapture(t.id);}}});
 const labels={float:'물속에 떠 있어요',start:'몸을 뻗어 출발해요',swim:'여유롭게 헤엄쳐요',coast:'속도를 줄이며 멈춰요',brake:'몸을 세워 속도를 줄여요',reverse:'앞을 보며 살짝 물러나요',turn:'몸을 돌리고 있어요',depth:'높이를 맞추고 있어요'};
 function cameraStep(dt,snap=false){
- const gesture=zoomInput.consume();if(gesture.start)zoomAnchor=zoomSubject(gesture.center);if(gesture.logScale){if(!zoomAnchor)zoomAnchor=zoomSubject(gesture.center);viewZoom.change(gesture.logScale);}viewZoom.step(dt);camera.fov=zoomFieldOfView(viewZoom.value);camera.updateProjectionMatrix();if(viewZoom.target<=1.015)zoomAnchor=null;
- const [dx,dy]=input.lookDelta();if(dx||dy){manualView=true;arrivalPan=0;}arrivalPan=Math.max(0,arrivalPan-dt);desiredYaw-=dx;cameraPitch=clamp(cameraPitch+dy,-.55,.9);cameraYaw+=wrap(desiredYaw-cameraYaw)*(snap?1:1-Math.exp(-(arrivalPan>0?2.4:16)*dt));
- const chosen=framedFish();frameBlend=snap?0:damp(frameBlend,chosen?1:0,2.6,dt);const target=new T.Vector3().fromArray(framingTarget(world.position,chosen?.position,innerWidth/innerHeight,frameBlend));
- if(zoomAnchor&&viewZoom.value>1){const p=zoomAnchor.fish!==undefined?school.members[zoomAnchor.fish].position:zoomAnchor.point;target.lerp(new T.Vector3().fromArray(p),clamp((viewZoom.value-1)/.9,0,1));}focus.lerp(target,snap?1:1-Math.exp(-4*dt));
- const radius=comfortableRadius(innerWidth/innerHeight),dir=new T.Vector3(Math.sin(cameraYaw)*Math.cos(cameraPitch),Math.sin(cameraPitch),Math.cos(cameraYaw)*Math.cos(cameraPitch));cameraRadius=snap?radius:damp(cameraRadius,radius,3,dt);camera.position.copy(focus).addScaledVector(dir,cameraRadius);
- camera.position.y=Math.max(coveFloor(camera.position.x,camera.position.z)+.55,camera.position.y);camera.lookAt(focus);camera.updateMatrixWorld(true);viewClear?.step(dt,camera,world.position,chosen?.position,snap);collisionActive=!!viewClear?.blocked?.rock;visibilityFrame++;$('viewReset').hidden=paused||!['exploring','returning'].includes(trip.stage)||Math.abs(viewZoom.target-1)<.015;
-
+ const gesture=zoomInput.consume(),[dx,dy]=input.lookDelta();if(dx||dy){manualView=true;arrivalPan=0;zoomLimited=null;}desiredYaw-=dx;cameraPitch=clamp(cameraPitch+dy,-.55,.9);cameraYaw+=wrap(desiredYaw-cameraYaw)*(snap?1:1-Math.exp(-16*dt));
+ const chosen=framedFish(),distance=chosen?Math.hypot(...chosen.position.map((v,i)=>v-world.position[i])):99,localBlend=clamp((4-distance)/1.5,0,1);frameBlend=snap?0:damp(frameBlend,chosen?1:0,2.6,dt);
+ const target=new T.Vector3().fromArray(framingTarget(world.position,chosen?.position,innerWidth/innerHeight,frameBlend*localBlend));focus.lerp(target,snap?1:1-Math.exp(-4*dt));
+ const baseRadius=comfortableRadius(innerWidth/innerHeight),dir=new T.Vector3(Math.sin(cameraYaw)*Math.cos(cameraPitch),Math.sin(cameraPitch),Math.cos(cameraYaw)*Math.cos(cameraPitch));
+ if(gesture.logScale||zoomModeChanged){
+  viewZoom.change(gesture.logScale);zoomLimited=null;
+  if(gesture.logScale>0||zoomModeChanged){
+   const subjects=[{position:world.position,half:[.52,1.0,.52]}];if(chosen&&distance<3.5)subjects.push({position:chosen.position,half:[.28,.24,.28]});
+   let limit=frameScaleLimit({baseRadius,blend:zoomMode==='lens'?1:0,focus:focus.toArray(),yaw:cameraYaw,pitch:cameraPitch,aspect:innerWidth/innerHeight,subjects});
+   if(viewZoom.target>limit)zoomLimited='frame';
+   if(zoomMode==='distance'&&cameraRadius>baseRadius/viewZoom.target){
+    const origin=focus.clone().addScaledVector(dir,cameraRadius),axis=dir.clone().negate(),travel=cameraRadius-baseRadius/viewZoom.target,offsets=[new T.Vector3(),new T.Vector3(Math.cos(cameraYaw),0,-Math.sin(cameraYaw)).multiplyScalar(.25),new T.Vector3(-Math.cos(cameraYaw),0,Math.sin(cameraYaw)).multiplyScalar(.25)];let hitDistance=Infinity;
+    for(const offset of offsets){ray.set(origin.clone().add(offset),axis);ray.near=.02;ray.far=travel+.38;const hit=ray.intersectObjects(terrain,false)[0];if(hit)hitDistance=Math.min(hitDistance,hit.distance);}
+    if(Number.isFinite(hitDistance)){const safe=clearanceScale(baseRadius,cameraRadius,hitDistance);if(safe<limit){limit=safe;if(viewZoom.target>limit)zoomLimited='rock';}}
+   }
+   viewZoom.target=Math.max(REVIEW_ZOOM.min,Math.min(viewZoom.target,Math.max(zoomModeChanged?REVIEW_ZOOM.min:viewZoom.value,limit)));
+  }zoomModeChanged=false;
+ }
+ viewZoom.step(dt);zoomMethodBlend=snap?(zoomMode==='lens'?1:0):damp(zoomMethodBlend,zoomMode==='lens'?1:0,5,dt);const projection=zoomProjection(viewZoom.value,zoomMethodBlend);camera.fov=projection.fov;camera.updateProjectionMatrix();
+ const radius=baseRadius*projection.radiusFactor;cameraRadius=radius;camera.position.copy(focus).addScaledVector(dir,cameraRadius);camera.position.y=Math.max(coveFloor(camera.position.x,camera.position.z)+.55,camera.position.y);camera.lookAt(focus);camera.updateMatrixWorld(true);viewClear?.step(dt,camera,world.position,chosen?.position,snap);collisionActive=!!viewClear?.blocked?.rock;visibilityFrame++;
+ $('viewReset').hidden=false;$('viewReset').disabled=Math.abs(viewZoom.target-1)<.015;$('zoomIn').disabled=viewZoom.target>=REVIEW_ZOOM.max-.005;$('zoomOut').disabled=viewZoom.target<=REVIEW_ZOOM.min+.005;
+ $('zoomMethod').textContent=zoomMode==='distance'?'확대: 다가가서 보기':'확대: 화면 확대';$('zoomMethod').setAttribute('aria-pressed',String(zoomMode==='lens'));$('cameraControls').dataset.limited=zoomLimited||'';$('zoomLimit').hidden=!zoomLimited;$('zoomLimit').textContent=zoomLimited==='rock'?'바위 앞에서 멈췄어요':'선장과 생물을 함께 보는 범위예요';
 }
 function framedFish(){const f=school.members[selected];return trip.stage==='exploring'&&f&&(['approaching','choice','observing'].includes(encounter.phase)||['binding','opening','joining'].includes(f.state))?f:null;}
 function placeWild(dt=0){life.step(dt,school.members,{selected,phase:encounter.phase,captain:world});}
@@ -48,8 +56,9 @@ function selectTarget(id){if(!ready||paused||trip.stage!=='exploring'||school.me
 function recordSightings(dt){if(trip.stage!=='exploring')return;const sightings=school.members.filter(f=>f.state==='wild').map(f=>({id:f.id,visible:visibleFish(f.id),distance:Math.hypot(...f.position.map((v,i)=>v-world.position[i]))}));for(const id of discovery.step(dt,sightings)){trip.discover(id);if(encounter.phase==='free'&&world.time>=noteUntil){statusNote=COVE_FISH[id].place+'에서 흰동가리를 발견했어요';noteUntil=world.time+2.8;audio.cue('dock');}}}
 function update(dt){
  trip.step(dt);document.documentElement.style.setProperty('--scene-fade',trip.stage==='closing'?String(clamp((trip.stageAge-.7)/1.05,0,1)):'0');if(trip.stage==='complete'){complete();return;}
- fish=animals[selected]||animals[0];const manualInput=input.read(),manualControl=steering.control(dt,manualInput,world,cameraYaw),moving=Math.max(...Object.values(manualInput).map(Math.abs))>.015;let control={};if(moving)zoomAnchor=null;
- if(trip.stage==='returning'){
+ fish=animals[selected]||animals[0];const manualInput=input.read(),manualControl=steering.control(dt,manualInput,world,cameraYaw),moving=Math.max(...Object.values(manualInput).map(Math.abs))>.015;let control={};if(moving){zoomAnchor=null;zoomLimited=null;}
+ if(zoomInput.blocked){control={};}
+ else if(trip.stage==='returning'){
   if(moving){trip.cancelReturn();returnPilot.cancel();statusNote='귀환을 취소했어요 · 자유롭게 탐사하세요';noteUntil=world.time+3;control=manualControl;}
   else{control=returnPilot.control(dt,{},world,HOME);if(returnPilot.phase==='free'){trip.cancelReturn();statusNote=returnPilot.message;noteUntil=world.time+4;}if(returnPilot.phase==='choice')trip.dock(school.members,world.position);}
  }else if(trip.stage==='exploring'){
@@ -58,14 +67,14 @@ function update(dt){
  world.step(dt,{...control,speedLimit:moving?SWIM_PACE.maxForward:AUTO_APPROACH_SPEED});actor.update(dt,world);school.step(dt,world);placeWild(dt);
  for(const f of school.members){const animal=animals[f.id];animal.position.fromArray(f.position);const pose=fishPose(animal.userData.swimPose||={},['binding','opening'].includes(f.state)?[0,0,0]:f.velocity,f.yaw,dt);animal.rotation.order='YXZ';animal.rotation.set(pose.pitch,f.yaw,pose.bank);animal.userData.update(dt*(f.state==='wild'?.55+Math.min(.7,Math.hypot(...f.velocity)):.35+Math.min(1.3,Math.hypot(...f.velocity))));updateMagic(f,dt);glows[f.id].update(dt,f,school.time);}
  const casting=school.members.find(f=>['binding','opening'].includes(f.state));if(casting&&Math.hypot(...casting.position.map((n,i)=>n-world.position[i]))<3.5){const side='L',tip=actor.bones.Middle1L.getWorldPosition(new T.Vector3()),strength=casting.state==='binding'?Math.sin(Math.min(1,casting.age/.5)*Math.PI/2)*.8:Math.max(0,1-casting.age)*.8;actor.arm(side,tip.lerp(new T.Vector3().fromArray(casting.position),strength),actor.tilt.localToWorld(new T.Vector3(.9,.1,.2)));}
- for(const event of encounter.events.splice(0)){if(event==='arrived')audio.cue('dock');if(event==='cancelled'&&trip.stage==='exploring'){statusNote='직접 잠영으로 돌아왔어요 · 물길을 둘러보세요';noteUntil=world.time+2.5;}}scenery.update(dt);cameraStep(dt);recordSightings(dt);observation.step(dt,{observing:selected===0&&encounter.phase==='observing',visible:visibleFish(0),behavior:life.agents[0].behavior,atRest:life.agents[0].atRest});blockedViewAge=['choice','observing'].includes(encounter.phase)&&!visibleFish(selected)?blockedViewAge+dt:0;updateEncounterUI();
+ for(const event of encounter.events.splice(0)){if(event==='arrived')audio.cue('dock');if(event==='cancelled'&&trip.stage==='exploring'){statusNote='직접 잠영으로 돌아왔어요 · 물길을 둘러보세요';noteUntil=world.time+2.5;}}scenery.update(dt,world.position);cameraStep(dt);recordSightings(dt);observation.step(dt,{observing:selected===0&&encounter.phase==='observing',visible:visibleFish(0),behavior:life.agents[0].behavior,atRest:life.agents[0].atRest});blockedViewAge=['choice','observing'].includes(encounter.phase)&&!visibleFish(selected)?blockedViewAge+dt:0;updateEncounterUI();
 }
 function start(){
  if(!ready)return;audio.unlock();if(paused&&['exploring','returning','closing'].includes(trip.stage)){paused=false;$('curtain').hidden=true;canvas.focus({preventScroll:true});return;}
  if(!trip.begin())return;resetSea();started=true;paused=false;$('curtain').hidden=true;canvas.focus({preventScroll:true});updateRecord();
 }
 function pause(){if(!started||paused||!['exploring','returning'].includes(trip.stage))return;paused=true;zoomInput.clear();$('viewReset').hidden=true;input.clear();audio.stopLoops();$('curtain').hidden=false;$('eyebrow').textContent='잠시 쉬어 가요';$('title').textContent='바닷속에서 이어서';$('summary').textContent=`${school.members.filter(f=>f.enchanted).length}마리가 함께하고 있어요. 같은 탐사를 이어갈 수 있어요.`;$('start').textContent='이어서 탐사';$('openDex').hidden=true;}
-function resetSea(){zoomInput.clear();viewZoom.reset();zoomAnchor=null;input.clear();statusNote='';noteUntil=0;world.reset();world.obstacles=scenery.colliders;school.reset(3);life.reset();discovery.reset();observation.reset();encounter.reset();returnPilot.reset();selected=0;placeWild();blockedViewAge=0;for(let i=0;i<3;i++){animals[i].visible=true;animals[i].userData.swimPose={};animals[i].rotation.set(0,school.members[i].yaw,0);animals[i].position.fromArray(school.members[i].position);effects[i].group.visible=false;glows[i].strength.value=0;glows[i].update(0,school.members[i],0);}manualView=false;arrivalPan=0;cameraYaw=desiredYaw=.15;cameraPitch=.22;focus.fromArray(world.position);frameBlend=0;steering.reset(cameraYaw);actor.update(0,world);cameraStep(0,true);$('hud').hidden=$('touchControls').hidden=$('hint').hidden=$('areaNote').hidden=false;$('openDex').hidden=false;}
+function resetSea(){zoomInput.clear();viewZoom.reset();zoomMode='distance';zoomMethodBlend=0;zoomLimited=null;zoomAnchor=null;input.clear();statusNote='';noteUntil=0;world.reset();world.obstacles=scenery.colliders;school.reset(3);life.reset();discovery.reset();observation.reset();encounter.reset();returnPilot.reset();selected=0;placeWild();blockedViewAge=0;for(let i=0;i<3;i++){animals[i].visible=true;animals[i].userData.swimPose={};animals[i].rotation.set(0,school.members[i].yaw,0);animals[i].position.fromArray(school.members[i].position);effects[i].group.visible=false;glows[i].strength.value=0;glows[i].update(0,school.members[i],0);}manualView=false;arrivalPan=0;cameraYaw=desiredYaw=.15;cameraPitch=.22;focus.fromArray(world.position);frameBlend=0;steering.reset(cameraYaw);actor.update(0,world);cameraStep(0,true);$('hud').hidden=$('touchControls').hidden=$('hint').hidden=$('areaNote').hidden=false;$('openDex').hidden=false;}
 function updateRecord(){const r=trip.record;$('record').textContent=r.trips?`탐사 ${r.trips}회 · 흰동가리 수집 ${r.collected}마리`:'아직 기록이 없어요 · 첫 탐사를 떠나 보세요';}
 function complete(){
  input.clear();zoomInput.clear();$('viewReset').hidden=true;paused=false;$('hud').hidden=$('touchControls').hidden=$('hint').hidden=$('areaNote').hidden=true;for(const id of ['choices','again','boatMark'])$(id).hidden=true;for(const e of [...targetLabels,...fishButtons])e.hidden=true;
@@ -75,7 +84,8 @@ function complete(){
  if(observation.note)$('summary').textContent+=' '+observation.note;
  $('start').textContent='다시 탐사하기';$('openDex').hidden=false;updateRecord();if(!storageWritable)$('notice').textContent='이 탐사의 기록은 화면을 닫기 전까지 유지돼요';
 }
-$('viewReset').onclick=()=>{viewZoom.reset();zoomAnchor=null;canvas.focus({preventScroll:true});};
+$('zoomIn').onclick=()=>{zoomInput.nudge(.16);canvas.focus({preventScroll:true});};$('zoomOut').onclick=()=>{zoomInput.nudge(-.16);canvas.focus({preventScroll:true});};$('zoomMethod').onclick=()=>{zoomMode=zoomMode==='distance'?'lens':'distance';zoomModeChanged=true;canvas.focus({preventScroll:true});};
+$('viewReset').onclick=()=>{viewZoom.target=1;zoomLimited=null;zoomAnchor=null;canvas.focus({preventScroll:true});};
 $('start').onclick=start;$('pause').onclick=pause;$('behind').onclick=()=>{desiredYaw=-world.heading+1.0;cameraPitch=.22;canvas.focus({preventScroll:true});};
 $('sound').onclick=()=>{audio.setEnabled(!audio.enabled);$('sound').textContent=audio.enabled?'♪':'♩';$('sound').setAttribute('aria-label',audio.enabled?'소리 끄기':'소리 켜기');};
 $('return').onclick=()=>{if(trip.returnToBoat()){encounter.cancel();returnPilot.select();steering.reset(cameraYaw);input.clear();statusNote='생물들과 함께 입수 지점으로 돌아가요 · 조이스틱으로 취소';noteUntil=world.time+4;audio.cue('dock');}canvas.focus({preventScroll:true});};
@@ -124,5 +134,5 @@ function buildSurface(shipAsset,fishAsset){
  portraitScene=new T.Scene();portraitCamera=new T.PerspectiveCamera(38,1.3,.05,20);portraitCamera.position.set(2.1,.75,3.2);portraitCamera.lookAt(0,0,0);portraitRenderer=new T.WebGLRenderer({canvas:$('portrait'),alpha:true,antialias:true});portraitRenderer.setSize(260,200,false);portraitRenderer.outputColorSpace=T.SRGBColorSpace;portraitRenderer.toneMapping=T.ACESFilmicToneMapping;aquariumLighting(portraitScene,{renderer:portraitRenderer});portraitFish=createFish(fishAsset,{kind:'fish',length:1.65,appearance:'white-eye'});portraitFish.rotation.y=.35;portraitScene.add(portraitFish);
 }
 let previous=performance.now(),surfaceClock=0;
-function frame(now){audit.sample(now,ready&&!paused&&!dexOpen&&['exploring','returning'].includes(trip.stage),renderer.info,renderer.getPixelRatio());const dt=Math.min(.05,(now-previous)/1000);previous=now;if(ready){if(!paused&&!dexOpen&&['exploring','returning','closing'].includes(trip.stage))update(dt);const above=['briefing','complete'].includes(trip.stage);if(above){surfaceClock+=dt;boat.position.y=Math.sin(surfaceClock*.55)*.025;surfaceCamera.aspect=innerWidth/innerHeight;surfaceCamera.updateProjectionMatrix();renderer.render(surfaceScene,surfaceCamera);}else renderer.render(scene,camera);if(dexOpen){portraitFish.userData.update(dt*.65);portraitFish.rotation.y+=dt*.13;portraitRenderer.render(portraitScene,portraitCamera);}canvas.dataset.inspection=JSON.stringify({performance:audit.report(),ready,paused,dexOpen,trip:trip.inspect(),position:world.position,heading:world.heading,cameraYaw,view:{...viewZoom.report(),anchor:zoomAnchor,focus:focus.toArray(),clear:viewClear?.report(),radius:cameraRadius,distance:camera.position.distanceTo(focus),pitch:cameraPitch,position:camera.position.toArray(),fov:camera.fov},steering:steering.report(),motion:world.report(),pace:{...world.tuning},equipment:actor.equipment.report(),input:input.read(),encounter:encounter.report(),school:school.report(),cove:{region:coveRegion(world.position),seen:[...discovery.seen],life:life.report(),observation:observation.report(),scene:scenery.inspect()},storageWritable,screens:school.members.map(f=>({id:f.id,p:project(f.position),visible:visibleFish(f.id),blocker:visibilityCache[f.id]?.blocker}))});}requestAnimationFrame(frame);}requestAnimationFrame(frame);
+function frame(now){audit.sample(now,ready&&!paused&&!dexOpen&&['exploring','returning'].includes(trip.stage),renderer.info,renderer.getPixelRatio());const dt=Math.min(.05,(now-previous)/1000);previous=now;if(ready){if(!paused&&!dexOpen&&['exploring','returning','closing'].includes(trip.stage))update(dt);const above=['briefing','complete'].includes(trip.stage);if(above){surfaceClock+=dt;boat.position.y=Math.sin(surfaceClock*.55)*.025;surfaceCamera.aspect=innerWidth/innerHeight;surfaceCamera.updateProjectionMatrix();renderer.render(surfaceScene,surfaceCamera);}else renderer.render(scene,camera);if(dexOpen){portraitFish.userData.update(dt*.65);portraitFish.rotation.y+=dt*.13;portraitRenderer.render(portraitScene,portraitCamera);}canvas.dataset.inspection=JSON.stringify({performance:audit.report(),ready,paused,dexOpen,trip:trip.inspect(),position:world.position,heading:world.heading,cameraYaw,view:{...viewZoom.report(),method:zoomMode,methodBlend:zoomMethodBlend,limited:zoomLimited,gesture:zoomInput.report(),anchor:null,focus:focus.toArray(),clear:viewClear?.report(),radius:cameraRadius,distance:camera.position.distanceTo(focus),pitch:cameraPitch,position:camera.position.toArray(),fov:camera.fov},steering:steering.report(),motion:world.report(),pace:{...world.tuning},equipment:actor.equipment.report(),input:input.read(),encounter:encounter.report(),school:school.report(),cove:{region:coveRegion(world.position),seen:[...discovery.seen],life:life.report(),observation:observation.report(),scene:scenery.inspect()},storageWritable,screens:school.members.map(f=>({id:f.id,p:project(f.position),visible:visibleFish(f.id),blocker:visibilityCache[f.id]?.blocker}))});}requestAnimationFrame(frame);}requestAnimationFrame(frame);
 
