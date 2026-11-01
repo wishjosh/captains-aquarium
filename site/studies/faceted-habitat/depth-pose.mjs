@@ -1,0 +1,14 @@
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const smooth=(a,b,rate,dt)=>a+(b-a)*(1-Math.exp(-rate*Math.max(0,dt)));
+// Use actual motion: a held depth button at the floor/surface is not a stroke.
+export class DepthPose{
+ constructor(){this.rise=0;this.sink=0;}
+ update(dt,verticalSpeed,cruise){
+  const speed=Number.isFinite(verticalSpeed)?verticalSpeed:0;
+  const strength=clamp((Math.abs(speed)-.025)/.55,0,1);
+  this.rise=smooth(this.rise,speed>0?strength:0,6,dt);
+  this.sink=smooth(this.sink,speed<0?strength:0,6,dt);
+  const amount=this.rise+this.sink;
+  return {rise:this.rise,sink:this.sink,amount,blend:amount*(1-.48*clamp(cruise,0,1))};
+ }
+}
