@@ -1,4 +1,4 @@
-import {returnRoute} from './return-route.mjs';
+import {returnRoute} from './return-route.mjs?v=2026-11-01-extension-1';
 import {clamp,wrap} from './core.mjs';
 export class ReturnPilot {
  constructor(){this.reset();}
@@ -8,7 +8,7 @@ export class ReturnPilot {
  control(dt,manual,w,target){
   if(Math.max(...Object.values(manual).map(Math.abs),0)>.015){this.cancel();return manual;}
   if(this.phase!=='approaching')return {};
-  if(!this.route){this.route=returnRoute(w.position,target,w.obstacles||[]);if(!this.route){this.cancel();this.message='바위 옆으로 조금 이동한 뒤 귀환해 주세요';return {};}}
+  if(!this.route){this.route=returnRoute(w.position,target,w.obstacles||[],w.bounds);if(!this.route){this.cancel();this.message='바위 옆으로 조금 이동한 뒤 귀환해 주세요';return {};}}
   let point=this.route[this.waypoint];if(this.waypoint<this.route.length-1&&Math.hypot(point[0]-w.position[0],point[2]-w.position[2])<.6)point=this.route[++this.waypoint];
   const final=this.waypoint===this.route.length-1;
   this.age+=dt;const dx=point[0]-w.position[0],dz=point[2]-w.position[2],dy=point[1]-w.position[1],distance=Math.hypot(dx,dz),error=wrap(Math.atan2(dx,-dz)-w.heading),speed=Math.hypot(...w.velocity);

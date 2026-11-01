@@ -1,12 +1,12 @@
 import {clamp,wrap} from './core.mjs';
-import {HabitatApproach} from './habitat.mjs';
+import {HabitatApproach} from './habitat.mjs?v=2026-11-01-extension-1';
 const gap=(a,b)=>Math.hypot(a[0]-b[0],a[2]-b[2]);
-const within=p=>p[0]>=-20.5&&p[0]<=20.5&&p[2]>=-30.5&&p[2]<=17.5;
+const within=(p,b)=>p[0]>=b[0][0]+.5&&p[0]<=b[0][1]-.5&&p[2]>=b[2][0]+.5&&p[2]<=b[2][1]-.5;
 // Plan only on selection. Camera orientation never enters the route calculation.
-export function bearingRoute(position,target,obstacles=[],heading=0){
+export function bearingRoute(position,target,obstacles=[],heading=0,bounds=[[-21,21],[-.6,7],[-31,18]]){
  const d=gap(position,target),dx=d>.001?(position[0]-target[0])/d:-Math.sin(heading),dz=d>.001?(position[2]-target[2])/d:Math.cos(heading),radius=d>=1.65&&d<=2.25?d:1.9;
  const height=Math.min(position[1],target[1]),rocks=obstacles.filter(o=>height<=(o[3]??1)+1.05).map(([x,z,r])=>({x,z,r:r+.67}));
- const clear=p=>within(p)&&rocks.every(o=>Math.hypot(p[0]-o.x,p[2]-o.z)>o.r);
+ const clear=p=>within(p,bounds)&&rocks.every(o=>Math.hypot(p[0]-o.x,p[2]-o.z)>o.r);
  const segment=(a,b)=>rocks.every(o=>{const vx=b[0]-a[0],vz=b[2]-a[2],l=vx*vx+vz*vz,t=l?Math.max(0,Math.min(1,((o.x-a[0])*vx+(o.z-a[2])*vz)/l)):0,dist=Math.hypot(a[0]+vx*t-o.x,a[2]+vz*t-o.z);return dist>o.r||(gap(a,position)<.001&&Math.hypot(a[0]-o.x,a[2]-o.z)<=o.r&&t===0);});
  const goals=[];for(const angle of [0,.2,-.2,.4,-.4,.65,-.65,1,-1]){const c=Math.cos(angle),s=Math.sin(angle),p=[target[0]+(dx*c-dz*s)*radius,target[1],target[2]+(dx*s+dz*c)*radius];if(clear(p))goals.push({p,angle});}
  if(!goals.length)return null;
@@ -18,7 +18,7 @@ export function bearingRoute(position,target,obstacles=[],heading=0){
  if(!Number.isFinite(costs[1]))return null;const points=[];for(let i=1;i>0;i=prev[i])points.unshift(nodes[i]);return{points,goal,detour:true,arrivalAngle:goals[0].angle};
 }
 export class BearingApproach extends HabitatApproach{
- selectView(_yaw,w,target){if(!super.select())return false;this.target=[...target];this.route=bearingRoute(w.position,target,w.obstacles,w.heading);this.waypoint=0;this.parking=false;if(!this.route){this.cancel();this.message='바위 옆으로 조금 이동한 뒤 다시 터치해 주세요';return false;}return true;}
+ selectView(_yaw,w,target){if(!super.select())return false;this.target=[...target];this.route=bearingRoute(w.position,target,w.obstacles,w.heading,w.bounds);this.waypoint=0;this.parking=false;if(!this.route){this.cancel();this.message='바위 옆으로 조금 이동한 뒤 다시 터치해 주세요';return false;}return true;}
  control(dt,manual,w,target,{settled=true}={}){
   if(this.phase!=='approaching')return super.control(dt,manual,w,target,{settled});
   if(Math.max(...Object.values(manual).map(Math.abs),0)>.015){this.cancel();return manual;}

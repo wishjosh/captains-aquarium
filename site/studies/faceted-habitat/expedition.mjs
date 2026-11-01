@@ -1,8 +1,8 @@
 export const SAVE_KEY='captains-aquarium-faceted-habitat-v1';
 export const emptyRecord=()=>({revision:1,trips:0,collected:0,discovered:false,observed:false,lastCount:0});
-export function readRecord(raw){if(!raw)return emptyRecord();const r=JSON.parse(raw);if(r?.revision!==1||!['trips','collected','lastCount'].every(k=>Number.isSafeInteger(r[k])&&r[k]>=0)||r.lastCount>3||r.collected<r.lastCount||typeof r.discovered!=='boolean'||typeof r.observed!=='boolean'||r.observed&&!r.discovered||r.collected>0&&!r.discovered)throw Error('Invalid expedition record');return{revision:1,trips:r.trips,collected:r.collected,discovered:r.discovered,observed:r.observed,lastCount:r.lastCount};}
+export function readRecord(raw,maxCount=3){if(!raw)return emptyRecord();const r=JSON.parse(raw);if(r?.revision!==1||!['trips','collected','lastCount'].every(k=>Number.isSafeInteger(r[k])&&r[k]>=0)||r.lastCount>maxCount||r.collected<r.lastCount||typeof r.discovered!=='boolean'||typeof r.observed!=='boolean'||r.observed&&!r.discovered||r.collected>0&&!r.discovered)throw Error('Invalid expedition record');return{revision:1,trips:r.trips,collected:r.collected,discovered:r.discovered,observed:r.observed,lastCount:r.lastCount};}
 export class Expedition {
- constructor(record=emptyRecord()){this.record=readRecord(JSON.stringify(record));this.stage='briefing';this.elapsed=0;this.stageAge=0;this.observations=new Set();this.discoveries=new Set();this.result=null;this.pending=[];this.committed=false;}
+ constructor(record=emptyRecord(),{maxCount=3}={}){this.record=readRecord(JSON.stringify(record),maxCount);this.stage='briefing';this.elapsed=0;this.stageAge=0;this.observations=new Set();this.discoveries=new Set();this.result=null;this.pending=[];this.committed=false;}
  begin(){if(!['briefing','complete'].includes(this.stage))return false;this.stage='exploring';this.elapsed=this.stageAge=0;this.observations.clear();this.discoveries.clear();this.result=null;this.pending=[];this.committed=false;return true;}
  discover(id){if(this.stage==='exploring')this.discoveries.add(id);}
  observe(id){if(this.stage==='exploring'){this.observations.add(id);this.discoveries.add(id);}}

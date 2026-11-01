@@ -8,16 +8,17 @@ export function createChromisHabitat(support=()=>.8){
  const y=Math.max(2.05,top+.65);return{center:[1.55,y,-1.3],edge:[.45,y+.05,.28],minY:y-.18,maxY:y+.65,radius:2.5};
 }
 const offsets=[[-.55,-.02,.35],[.40,.18,.05],[.06,-.10,-.58]];
-export function shoalTarget(id,t,h){const o=offsets[id],slow=t*.21,angle=Math.sin(t*.13)*.48,c=Math.cos(angle),s=Math.sin(angle),pulse=Math.sin(t*.57+id*2.1);return[h.center[0]+Math.sin(slow)*.32+o[0]*c-o[2]*s+pulse*.08,h.center[1]+o[1]+Math.sin(t*.42+id*1.7)*.07,h.center[2]+Math.sin(t*.16)*.24+o[2]*c+o[0]*s+Math.sin(t*.37+id)*.10];}
+export function shoalTarget(id,t,h){const o=offsets[id%3],slow=t*.21,angle=Math.sin(t*.13)*.48,c=Math.cos(angle),s=Math.sin(angle),pulse=Math.sin(t*.57+id*2.1);return[h.center[0]+Math.sin(slow)*.32+o[0]*c-o[2]*s+pulse*.08,h.center[1]+o[1]+Math.sin(t*.42+id*1.7)*.07,h.center[2]+Math.sin(t*.16)*.24+o[2]*c+o[0]*s+Math.sin(t*.37+id)*.10];}
 export class ChromisLife{
  constructor(habitat=createChromisHabitat()){this.setHabitat(habitat);}
- setHabitat(h){this.habitat=h;this.reset();}
- reset(){this.time=0;this.agents=CHROMIS_FISH.map(({id})=>({id,position:shoalTarget(id,0,this.habitat),velocity:[0,0,0],yaw:Math.PI/2,mode:'roaming',modeAge:0,calmEdge:false,anchor:null,retreat:false,clearAge:0,activity:'at-home'}));}
+ setHabitat(h){this.habitat=h;this.habitats=[h];this.reset();}
+ setHabitats(hs){this.habitat=hs[0];this.habitats=hs;this.reset();}
+ reset(){this.time=0;this.agents=this.habitats.flatMap((h,index)=>CHROMIS_FISH.map(({id:local})=>{const id=index*3+local;return({id,position:shoalTarget(id,0,h),velocity:[0,0,0],yaw:Math.PI/2,mode:'roaming',modeAge:0,calmEdge:false,anchor:null,retreat:false,clearAge:0,activity:'at-home'});}));}
  step(dt,members,{selected=-1,phase='free',captain=null}={}){
   dt=clamp(dt,0,.05);this.time+=dt;const h=this.habitat;
   for(const f of members)if(f.state!=='wild'){this.agents[f.id].mode='collected';this.agents[f.id].response='magic';this.agents[f.id].activity=f.state;}
   const active=members.filter(f=>f.state==='wild'),before=this.agents.map(a=>({...a,position:[...a.position],velocity:[...a.velocity]}));
-  for(const f of active){const a=this.agents[f.id],mode=f.id===selected&&['approaching','choice','observing'].includes(phase)?phase:'roaming';
+  for(const f of active){const h=this.habitats[Math.floor(f.id/3)],a=this.agents[f.id],mode=f.id===selected&&['approaching','choice','observing'].includes(phase)?phase:'roaming';
    if(mode!==a.mode){a.modeAge=0;if(mode==='approaching'){a.anchor=[...a.position];a.calmEdge=true;}if(mode==='roaming'){a.anchor=null;a.calmEdge=false;}a.mode=mode;}
    a.modeAge+=dt;let target=shoalTarget(a.id,this.time,h),maximum=.58;a.response='natural';a.activity='at-home';
    if(mode==='approaching'||mode==='choice'){target=a.anchor||a.position;maximum=.65;a.response='calm';a.activity='calming';if(distance(a.position,target)<.09&&length(a.velocity)<.10){a.calmEdge=false;a.activity='calmed';}else a.calmEdge=true;}

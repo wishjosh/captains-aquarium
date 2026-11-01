@@ -1,5 +1,5 @@
 import {clamp,wrap,damp} from './core.mjs';
-import {HabitatApproach} from './habitat.mjs';
+import {HabitatApproach} from './habitat.mjs?v=2026-11-01-extension-1';
 export const comfortableRadius=aspect=>6.8*Math.max(1,.95/aspect);
 export function framingTarget(captain,target,aspect,blend){const p=[...captain];p[1]+=.12;if(!target)return p;const distance=Math.hypot(...target.map((n,i)=>n-captain[i])),weight=(aspect<.7?.48:.34)*clamp((7-distance)/3,0,1)*blend;return p.map((n,i)=>n+(target[i]-captain[i])*weight);}
 export class SoftGate{

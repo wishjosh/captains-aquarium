@@ -1,11 +1,13 @@
-import {terrainTiles} from './exploration-region.mjs';
-import {seaweedPlacements,seaweedBend} from './seaweed.mjs?v=2026-10-31-touch-4';
+import {createTerrainStream} from './terrain-stream.mjs?v=2026-11-01-extension-1';
+import {EXTENSION_PATCHES} from './region-extension.mjs?v=2026-11-01-extension-1';
+import {terrainTiles} from './exploration-region.mjs?v=2026-11-01-extension-1';
+import {seaweedPlacements,seaweedBend} from './seaweed.mjs?v=2026-11-01-extension-1';
 import * as T from './runtime/vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
-import {reefFloor,reefCover,TERRAIN} from './reef-terrain.mjs?v=2026-10-31-touch-4';
-import {recipe,PALETTE,collisionVolumes} from './habitat-layout.mjs?v=2026-10-31-touch-4';
+import {reefFloor,reefCover,TERRAIN} from './reef-terrain.mjs?v=2026-11-01-extension-1';
+import {recipe,PALETTE,collisionVolumes} from './habitat-layout.mjs?v=2026-11-01-extension-1';
 import {createMotion,clayMaterial,depthMaterial} from './body-material.mjs?v=2026-10-31-touch-4';
-import {ANEMONE,createResidentHabitat} from './habitat.mjs?v=2026-10-31-touch-4';
-export function createCoveScene(assets,{style='crevice',layout=null}={}){
+import {ANEMONE,createResidentHabitat} from './habitat.mjs?v=2026-11-01-extension-1';
+export function createCoveScene(assets,{style='crevice',layout=null,streaming=false}={}){
  const group=new T.Group(),solids=[],occluders=[],water=createMotion(),config=layout||recipe(style),rockMeshes=[];group.name='Faceted small habitat';
  water.strength.value=1;
  const forms=assets.softForms?.scene;if(!forms)throw Error('Prepared soft form asset missing');const coralGeometry=forms.children[0].geometry.clone(),anemoneGeometry=forms.children[1].geometry;coralGeometry.computeBoundingSphere();coralGeometry.boundingSphere.radius+=.08;anemoneGeometry.computeBoundingSphere();anemoneGeometry.boundingSphere.radius+=.08;
@@ -13,7 +15,7 @@ export function createCoveScene(assets,{style='crevice',layout=null}={}){
  const rockMat=new T.MeshStandardMaterial({color:'#46565a',roughness:.95,metalness:0,flatShading:true});
  const groundMaterial=new T.MeshStandardMaterial({vertexColors:true,roughness:1});
  const groundTiles=[];
- for(const tile of terrainTiles()){
+ if(!streaming){for(const tile of terrainTiles()){
   const positions=[],colors=[],points=(x,z)=>new T.Vector3(x,reefFloor(x,z),z);
   for(let z=0;z<tile.size;z++)for(let x=0;x<tile.size;x++){
    const X=tile.x+x,Z=tile.z+z,A=points(X,Z),B=points(X+1,Z),C=points(X,Z+1),D=points(X+1,Z+1);
@@ -34,7 +36,7 @@ export function createCoveScene(assets,{style='crevice',layout=null}={}){
   const [a0,a1]=pair(i/72),[b0,b1]=pair((i+1)/72);
   for(const p of [a0,b0,a1,b0,b1,a1]){horizonPositions.push(...p);const c=new T.Color('#a6ad97').lerp(new T.Color('#43575a'),reefCover(p[0],p[2]));horizonColors.push(c.r,c.g,c.b);}
  }}
- const hg=new T.BufferGeometry();hg.setAttribute('position',new T.Float32BufferAttribute(horizonPositions,3));hg.setAttribute('color',new T.Float32BufferAttribute(horizonColors,3));hg.computeVertexNormals();const horizon=new T.Mesh(hg,groundMaterial.clone());horizon.material.side=T.DoubleSide;horizon.name='Distant seabed continuation';group.add(horizon);
+ const hg=new T.BufferGeometry();hg.setAttribute('position',new T.Float32BufferAttribute(horizonPositions,3));hg.setAttribute('color',new T.Float32BufferAttribute(horizonColors,3));hg.computeVertexNormals();const horizon=new T.Mesh(hg,groundMaterial.clone());horizon.material.side=T.DoubleSide;horizon.name='Distant seabed continuation';group.add(horizon);}
  const rockAnchors=[];for(const r of config.rocks){const geo=templates.get('rocks-'+r.part);if(!geo)throw Error('Missing rock part '+r.part);const mesh=new T.Mesh(geo,rockMat);mesh.name='Connected low reef slab';mesh.scale.setScalar(r.h);mesh.rotation.y=r.angle;mesh.position.set(r.x,reefFloor(r.x,r.z)-r.h*.14,r.z);mesh.castShadow=mesh.receiveShadow=true;group.add(mesh);solids.push(mesh);occluders.push(mesh);rockMeshes.push(mesh);rockAnchors.push(r);}
  group.updateMatrixWorld(true);const ray=new T.Raycaster(),placed=[];
  for(const c of config.corals){ray.set(new T.Vector3(c.x,8,c.z),new T.Vector3(0,-1,0));const hit=ray.intersectObjects(rockMeshes,false)[0];if(!hit)throw Error('Coral anchor misses rock '+JSON.stringify(c));placed.push({...c,y:hit.point.y-.035});}
@@ -48,6 +50,8 @@ export function createCoveScene(assets,{style='crevice',layout=null}={}){
  // Small contextual seaweed at the existing third resident, using shared plain geometry.
  const leaves=[],green=new T.MeshStandardMaterial({color:'#657c63',roughness:1,side:T.DoubleSide});const leafGeo=new T.BufferGeometry();leafGeo.setAttribute('position',new T.Float32BufferAttribute([0,0,0,-.11,.35,.01,.01,.69,.04,-.11,.35,.01,.15,.58,.03,.01,.69,.04,.01,.69,.04,.15,.58,.03,.16,1.0,.08],3));leafGeo.computeVertexNormals();for(const placement of seaweedPlacements(reefFloor)){const leaf=new T.Mesh(leafGeo,green);leaf.position.fromArray(placement.position);leaf.rotation.y=placement.angle;leaf.scale.setScalar(placement.scale);leaf.userData.placement=placement;leaf.name='Passable seaweed';group.add(leaf);leaves.push(leaf);}
  group.updateMatrixWorld(true);
- function inspect(){let triangles=0;const geometries=new Set();group.traverse(n=>{if(n.isMesh){geometries.add(n.geometry);triangles+=(n.geometry.index?n.geometry.index.count:n.geometry.attributes.position.count)/3*(n.isInstancedMesh?n.count:1);}});return{style,terrain:{tiles:groundTiles.length,triangles:groundTiles.reduce((n,g)=>n+g.geometry.attributes.position.count/3,0),streaming:false},rocks:rockMeshes.length,rockSourceParts:templates.size,coralForms:1,coralColonies:placed.length,tentacles:30,anemoneBaseParts:0,triangles,uniqueGeometries:geometries.size,coralAnchors:placed.map(c=>[c.x,c.y,c.z]),anemoneBase:tentacles.position.toArray(),residentHabitat:habitat,bands:placed.map(c=>({band:c.band,h:c.h,x:c.x,z:c.z})),motion:water.time.value,sharedCoralGeometry:true,seaweed:{passable:true,positions:leaves.map(l=>l.position.toArray()),maxBend:Math.max(...leaves.map(l=>Math.hypot(l.rotation.x,l.rotation.z)))},source:'Michael Hooper rock modules; accepted soft-form GLB and shared water material'};}
- return{group,habitat,solids,occluders,clearables:occluders,colliders:collisionVolumes(config.rocks,reefFloor),rockMeshes,coralBatches,update(dt,captain=null){water.time.value+=dt;for(const l of leaves){const b=seaweedBend(l.userData.placement,captain,water.time.value),rate=1-Math.exp(-dt*4);l.rotation.x+=(b.x-l.rotation.x)*rate;l.rotation.z+=(b.z-l.rotation.z)*rate;}},inspect};
+ const firstObjects=[...group.children],extraOccluders=[];const stream=streaming?createTerrainStream({templates,rockMat,coralGeometry,coralMat}):null;if(stream)group.add(stream.group);
+ const fixedSolids=[...solids],fixedOccluders=[...occluders];function syncStream(){if(!stream)return;solids.splice(0,solids.length,...fixedSolids.filter(o=>o.visible),...stream.solids);occluders.splice(0,occluders.length,...fixedOccluders.filter(o=>o.visible),...extraOccluders,...stream.occluders);}syncStream();
+ function inspect(){let triangles=0;const geometries=new Set();group.traverse(n=>{if(n.isMesh){geometries.add(n.geometry);triangles+=(n.geometry.index?n.geometry.index.count:n.geometry.attributes.position.count)/3*(n.isInstancedMesh?n.count:1);}});return{style,terrain:stream?stream.inspect():{tiles:groundTiles.length,triangles:groundTiles.reduce((n,g)=>n+g.geometry.attributes.position.count/3,0),streaming:false},rocks:rockMeshes.length,rockSourceParts:templates.size,coralForms:1,coralColonies:placed.length,tentacles:30,anemoneBaseParts:0,triangles,uniqueGeometries:geometries.size,coralAnchors:placed.map(c=>[c.x,c.y,c.z]),anemoneBase:tentacles.position.toArray(),residentHabitat:habitat,bands:placed.map(c=>({band:c.band,h:c.h,x:c.x,z:c.z})),motion:water.time.value,sharedCoralGeometry:true,seaweed:{passable:true,positions:leaves.map(l=>l.position.toArray()),maxBend:Math.max(...leaves.map(l=>Math.hypot(l.rotation.x,l.rotation.z)))},source:'Michael Hooper rock modules; accepted soft-form GLB and shared water material'};}
+ return{group,habitat,solids,occluders,addOccluders(items){extraOccluders.push(...items);if(!stream)occluders.push(...items);else syncStream();},clearables:occluders,colliders:collisionVolumes([...config.rocks,...(streaming?EXTENSION_PATCHES.flatMap(p=>p.rocks):[])],reefFloor),rockMeshes,coralBatches,update(dt,captain=null){water.time.value+=dt;if(stream&&captain){const near=Math.hypot(captain[0],captain[2]+4)<38;for(const o of firstObjects){if(o.userData.habitatVisible===undefined)o.userData.habitatVisible=o.visible;o.visible=o.userData.habitatVisible&&near;}stream.update(captain);syncStream();}for(const l of leaves){const b=seaweedBend(l.userData.placement,captain,water.time.value),rate=1-Math.exp(-dt*4);l.rotation.x+=(b.x-l.rotation.x)*rate;l.rotation.z+=(b.z-l.rotation.z)*rate;}},inspect};
 }

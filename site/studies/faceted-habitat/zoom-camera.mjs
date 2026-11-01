@@ -1,4 +1,4 @@
-import {zoomFieldOfView} from './view-zoom.mjs';
+import {zoomFieldOfView} from './view-zoom.mjs?v=2026-11-01-extension-1';
 export const REVIEW_ZOOM={min:1/1.3,max:1/.65};
 // The subject stays the same size during method changes; perspective changes continuously.
 export function zoomProjection(scale,blend=0){const lens=1+(scale-1)*blend;return{fov:zoomFieldOfView(lens),radiusFactor:lens/scale};}

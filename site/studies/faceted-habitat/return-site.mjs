@@ -1,5 +1,5 @@
 import * as T from './runtime/vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
-import {RETURN_SITE} from './return-site-config.mjs';
+import {RETURN_SITE} from './return-site-config.mjs?v=2026-11-01-extension-1';
 // Code-native faceted wood, cloth, rope and basalt, with static parts batched by material.
 export function createReturnSite(floor){
  const root=new T.Group();root.name='Ship return rope';root.position.set(RETURN_SITE.home[0]+RETURN_SITE.ropeOffset[0],0,RETURN_SITE.home[2]+RETURN_SITE.ropeOffset[2]);

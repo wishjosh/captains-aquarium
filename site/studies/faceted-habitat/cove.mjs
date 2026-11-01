@@ -1,9 +1,9 @@
-import {ROCKS,collisionVolumes} from './habitat-layout.mjs?v=2026-10-31-touch-4';
-import {reefFloor} from './reef-terrain.mjs?v=2026-10-31-touch-4';
+import {ROCKS,collisionVolumes} from './habitat-layout.mjs?v=2026-11-01-extension-1';
+import {reefFloor} from './reef-terrain.mjs?v=2026-11-01-extension-1';
 import {clamp,damp,wrap} from './core.mjs';
-import {ANEMONE,REEF_ROCKS,residentRoute,residentIntent} from './habitat.mjs?v=2026-10-31-touch-4';
+import {ANEMONE,REEF_ROCKS,residentRoute,residentIntent} from './habitat.mjs?v=2026-11-01-extension-1';
 
-import {RETURN_SITE} from './return-site-config.mjs';
+import {RETURN_SITE} from './return-site-config.mjs?v=2026-11-01-extension-1';
 export const COVE_HOME=RETURN_SITE.home;
 export const COVE_FISH=Object.freeze([
  {id:0,place:'말미잘 바위틈',behavior:'말미잘 가장자리에서 짧게 헤엄치고 쉬는 모습',center:[1.35,1.8,.15]},
@@ -86,6 +86,6 @@ export class CoveLife{
 export class CoveDiscovery{
  constructor(){this.reset();}
  reset(){this.seen=new Set();this.dwell=[0,0,0];}
- step(dt,sightings){const events=[];for(const s of sightings){this.dwell[s.id]=s.visible&&s.distance<=(s.id===0?4.3:7.2)?this.dwell[s.id]+dt:0;if(this.dwell[s.id]>.22&&!this.seen.has(s.id)){this.seen.add(s.id);events.push(s.id);}}return events;}
+ step(dt,sightings){const events=[];for(const s of sightings){this.dwell[s.id]=s.visible&&s.distance<=(s.id===0?4.3:7.2)?(this.dwell[s.id]||0)+dt:0;if(this.dwell[s.id]>.22&&!this.seen.has(s.id)){this.seen.add(s.id);events.push(s.id);}}return events;}
  label(id,distance){return this.seen.has(id)&&distance<=4.8;}
 }

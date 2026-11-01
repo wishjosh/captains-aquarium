@@ -1,6 +1,6 @@
 import {magicPulse} from './magic-glow.mjs';
 import * as T from './runtime/vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
-import {chromisShape,CHROMIS} from './chromis-shape.mjs?v=2026-11-01-chromis-1';
+import {chromisShape,CHROMIS} from './chromis-shape.mjs?v=2026-11-01-extension-1';
 let shared;
 export function createChromis({length=CHROMIS.length}={}){
  if(!shared){const data=chromisShape(),g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(data.position,3));g.setAttribute('color',new T.Float32BufferAttribute(data.color,3));g.computeVertexNormals();g.computeBoundingBox();g.computeBoundingSphere();g.boundingSphere.radius+=.03;shared={g,data};}
