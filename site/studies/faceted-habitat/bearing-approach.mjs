@@ -1,7 +1,7 @@
 import {clamp,wrap} from './core.mjs';
 import {HabitatApproach} from './habitat.mjs';
 const gap=(a,b)=>Math.hypot(a[0]-b[0],a[2]-b[2]);
-const within=p=>p[0]>=-8.5&&p[0]<=8.5&&p[2]>=-13.5&&p[2]<=6.5;
+const within=p=>p[0]>=-20.5&&p[0]<=20.5&&p[2]>=-30.5&&p[2]<=17.5;
 // Plan only on selection. Camera orientation never enters the route calculation.
 export function bearingRoute(position,target,obstacles=[],heading=0){
  const d=gap(position,target),dx=d>.001?(position[0]-target[0])/d:-Math.sin(heading),dz=d>.001?(position[2]-target[2])/d:Math.cos(heading),radius=d>=1.65&&d<=2.25?d:1.9;

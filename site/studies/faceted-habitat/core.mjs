@@ -22,7 +22,7 @@ export class SwimWorld {
   if(!y&&Math.abs(this.velocity[1])<.01)this.velocity[1]=0;
   const p=this.position.map((v,i)=>v+this.velocity[i]*dt);
   for(const [cx,cz,r,height=1.0] of this.obstacles){if(p[1]>height+1.05)continue;const dx=p[0]-cx,dz=p[2]-cz,d=Math.hypot(dx,dz),limit=r+.48;if(d<limit){const nx=d?dx/d:1,nz=d?dz/d:0;p[0]=cx+nx*limit;p[2]=cz+nz*limit;const into=this.velocity[0]*nx+this.velocity[2]*nz;if(into<0){this.velocity[0]-=into*nx;this.velocity[2]-=into*nz;}}}
-  const bounds=[[-9,9],[1.2,5.5],[-14,7]];for(let i=0;i<3;i++){const bounded=clamp(p[i],...bounds[i]);if(bounded!==p[i])this.velocity[i]=0;p[i]=bounded;}this.position=p;
+  const bounds=this.bounds||[[-9,9],[1.2,5.5],[-14,7]];for(let i=0;i<3;i++){const bounded=clamp(p[i],...bounds[i]);if(bounded!==p[i])this.velocity[i]=0;p[i]=bounded;}this.position=p;
   this.forwardSpeed=this.velocity[0]*forward[0]+this.velocity[2]*forward[2];
   const actual=Math.hypot(this.velocity[0],this.velocity[2]);
   this.effort=damp(this.effort,Math.max(Math.abs(z),Math.abs(x)*.5,Math.abs(y)*.6),5,dt);
