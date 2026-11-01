@@ -3,7 +3,8 @@ import {reefFloor} from './reef-terrain.mjs?v=2026-10-31-touch-4';
 import {clamp,damp,wrap} from './core.mjs';
 import {ANEMONE,REEF_ROCKS,residentRoute,residentIntent} from './habitat.mjs?v=2026-10-31-touch-4';
 
-export const COVE_HOME=[0,2.5,5.7];
+import {RETURN_SITE} from './return-site-config.mjs';
+export const COVE_HOME=RETURN_SITE.home;
 export const COVE_FISH=Object.freeze([
  {id:0,place:'말미잘 바위틈',behavior:'말미잘 가장자리에서 짧게 헤엄치고 쉬는 모습',center:[1.35,1.8,.15]},
  {id:1,place:'바위턱',behavior:'바위 가장자리를 돌아오는 움직임',center:[-2.9,2.45,-6.3]},

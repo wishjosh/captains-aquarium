@@ -18,3 +18,5 @@
 
 /* Menus retain the encounter state while removing its controls from input and focus. */
 #worldUI{display:contents}#worldUI[inert]{visibility:hidden}#dexPanel{z-index:6}
+
+#homeTouch{position:absolute;transform:translate(-50%,-100%);font-size:11px;min-height:36px;padding:6px 12px;border-radius:18px;background:#244c50d9;border-color:#c5a05c99;color:#eee0b9;z-index:1}#boatMark{color:#eee0b9;border-color:#c5a05c99}

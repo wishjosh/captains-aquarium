@@ -18,3 +18,5 @@ CC BY 4.0: https://creativecommons.org/licenses/by/4.0/
 형태·서식 참고: 국립수산과학원 e-연구바다 「Chromis notata(자리돔)」, 2026-11-01 본문과 종사진 확인.
 https://www.nifs.go.kr/portal/bt/frctA/actionSpeciesSearchView.do?taxonId=10001
 종사진은 참고만 했으며 게임 파일에 포함하거나 텍스처로 사용하지 않았다. 정확한 종 판별용 모형·생태 재현을 주장하지 않는다.
+
+귀환 밧줄·나무 가로대·수중 표식·등·밸러스트는 이 프로젝트에서 만든 코드 기반 다각면체 조형이다. 외부 이미지·모델은 추가하지 않았다.
