@@ -4,12 +4,13 @@ import {damp,clamp} from './core.mjs';
 import {fitCaptainEquipment} from './captain-equipment.mjs?v=2026-11-01-extension-1';
 import {DepthPose} from './depth-pose.mjs?v=2026-11-02-stroke-1';
 import {strokePose,STROKE_PERIOD,travelPitch} from './stroke-cycle.mjs?v=2026-11-02-stroke-1';
+import {TurnStroke,turnArm} from './turn-stroke.mjs?v=2026-11-02-turn-1';
 const V=(x=0,y=0,z=0)=>new T.Vector3(x,y,z);
 export class Swimmer{
  constructor(asset,scene,floor=()=>-Infinity){
   this.floor=floor;
   this.actor=createCaptain(asset);this.actor.userData.controller.update(0,false);this.root=new T.Group();this.tilt=new T.Group();this.root.add(this.tilt);this.tilt.add(this.actor);this.actor.position.y=-1.06;scene.add(this.root);this.bones={};this.actor.traverse(n=>{if(n.isBone)this.bones[n.name]=n;});
-  this.base=Object.values(this.bones).map(b=>[b,b.position.clone(),b.quaternion.clone()]);this.depthPose=new DepthPose();this.depth={rise:0,sink:0,amount:0,blend:0};this.phase=0;this.stroke=strokePose(0);this.swimAmount=0;this.lean=.16;this.bank=0;this.lastHands={};this.equipment=fitCaptainEquipment(this);
+  this.base=Object.values(this.bones).map(b=>[b,b.position.clone(),b.quaternion.clone()]);this.depthPose=new DepthPose();this.turnStroke=new TurnStroke();this.turn={signed:0,amount:0,phase:0};this.depth={rise:0,sink:0,amount:0,blend:0};this.phase=0;this.stroke=strokePose(0);this.swimAmount=0;this.lean=.16;this.bank=0;this.lastHands={};this.equipment=fitCaptainEquipment(this);
  }
  aim(bone,from,to){const q=bone.getWorldQuaternion(new T.Quaternion()),parent=bone.parent.getWorldQuaternion(new T.Quaternion());const delta=new T.Quaternion().setFromUnitVectors(from.normalize(),to.normalize());bone.quaternion.copy(parent.invert().multiply(delta).multiply(q));this.root.updateMatrixWorld(true);}
  arm(side,target,pole){const upper=this.bones['UpperArm'+side],lower=this.bones['LowerArm'+side],tip=this.bones['Middle1'+side];if(!upper||!lower||!tip)return;
@@ -18,18 +19,19 @@ export class Swimmer{
  }
  update(dt,w){
   for(const[b,p,q]of this.base){b.position.copy(p);b.quaternion.copy(q);}
-  if(dt===0&&w.time===0){this.depthPose=new DepthPose();this.phase=0;this.stroke=strokePose(0);this.swimAmount=0;this.lean=.16;}
+  if(dt===0&&w.time===0){this.depthPose=new DepthPose();this.turnStroke=new TurnStroke();this.turn={signed:0,amount:0,phase:0};this.phase=0;this.stroke=strokePose(0);this.swimAmount=0;this.lean=.16;}
   let floor=-Infinity;for(const [dx,dz]of [[0,0],[.8,0],[-.8,0],[0,.8],[0,-.8]])floor=Math.max(floor,this.floor(w.position[0]+dx,w.position[2]+dz));
   const depth=this.depth=this.depthPose.update(dt,w.velocity[1],w.cruise,w.position[1]-floor);
+  const turn=this.turn=this.turnStroke.update(dt,w.turnRate);
   const swim=w.cruise,reverse=clamp(-w.forwardSpeed/.45,0,1),brake=w.state==='brake'?1:0;
   const active=Math.max(swim,depth.amount);this.swimAmount=damp(this.swimAmount,active,5,dt);
   this.phase+=dt*(2*Math.PI/STROKE_PERIOD)*Math.max(.10,active);const cycle=this.phase%(Math.PI*2),pose=this.stroke=strokePose(this.phase),stroke=pose.kick;
-  this.lean=damp(this.lean,(.16+swim*1.32)*(1-depth.dive-depth.rise)+travelPitch(w.forwardSpeed,w.velocity[1])*(depth.dive+depth.rise)-brake*.20-reverse*.12,4,dt);this.bank=damp(this.bank,-w.turnRate*swim*.20,5,dt);
+  this.lean=damp(this.lean,(.16+swim*1.32)*(1-depth.dive-depth.rise)+travelPitch(w.forwardSpeed,w.velocity[1])*(depth.dive+depth.rise)-brake*.20-reverse*.12,4,dt);this.bank=damp(this.bank,clamp(-w.turnRate*swim*.16-turn.signed*.08,-.25,.25),5,dt);
   this.root.position.fromArray(w.position);this.root.position.y+=Math.sin(w.time*1.6)*.018;this.root.rotation.y=Math.PI-w.heading;this.tilt.rotation.set(this.lean,0,this.bank);
   this.bones.Abdomen?.rotateX(-.02*active);this.bones.Torso?.rotateX(-.04*active);
   const forwardLook=swim*(1-.6*depth.amount);
   this.bones.Neck?.rotateX(-.14*forwardLook-.30*depth.rise);this.bones.Head?.rotateX(-.24*forwardLook-.40*depth.rise);
-  this.bones.Torso?.rotateX(.12*Math.max(0,depth.dive-depth.trail));this.bones.Torso?.rotateY(-w.turnRate*.06);
+  this.bones.Torso?.rotateX(.12*Math.max(0,depth.dive-depth.trail));this.bones.Torso?.rotateY(-w.turnRate*.06);this.bones.Neck?.rotateY(-turn.signed*.06);this.bones.Head?.rotateY(-turn.signed*.08);
   this.root.updateMatrixWorld(true);
   for(const side of ['L','R']){
    const sign=side==='L'?1:-1,upper=this.bones['UpperLeg'+side],lower=this.bones['LowerLeg'+side],foot=this.bones['Foot'+side];if(!upper||!lower||!foot)continue;
@@ -45,12 +47,13 @@ export class Swimmer{
    const floatX=.43+Math.sin(w.time*2.1)*.05,floatY=-.22+Math.cos(w.time*2.1)*.04;
    const hand=V(sign*floatX,floatY,.27);
    hand.lerp(V(sign*pose.hand[0],pose.hand[1],pose.hand[2]),this.swimAmount);
-   hand.z+=reverse*.12*Math.sin(w.time*3.1)+w.turnRate*sign*.12;hand.x+=sign*Math.abs(w.turnRate)*.05;hand.y+=brake*.12;
+   const paddle=turnArm(side,turn);hand.lerp(V(...paddle.hand),turn.amount*.82);
+   hand.z+=reverse*.12*Math.sin(w.time*3.1);hand.y+=brake*.12;
    const pole=V(sign*(pose.stage==='recover'?.48:.90),.10+.30*active,.40);this.arm(side,this.tilt.localToWorld(hand),this.tilt.localToWorld(pole));
   }
   this.root.updateMatrixWorld(true);this.equipment.update(dt,w);
  }
- report(){return {equipment:this.equipment.report(),source:'original captain rig',swimPose:'authored reach-catch-pull-glide-recover cycle',stroke:{...this.stroke,period:STROKE_PERIOD,amount:this.swimAmount},lean:this.lean,bank:this.bank,depth:{...this.depth},phase:this.phase,landmarks:Object.fromEntries(['Head','Abdomen','FootL','FootR'].filter(n=>this.bones[n]).map(n=>[n,this.bones[n].getWorldPosition(V()).toArray()])),hands:this.lastHands,bones:Object.keys(this.bones)};}
+ report(){return {equipment:this.equipment.report(),source:'original captain rig',swimPose:'authored reach-catch-pull-glide-recover cycle',stroke:{...this.stroke,period:STROKE_PERIOD,amount:this.swimAmount},turn:{...this.turn,leftRole:turnArm('L',this.turn).role,rightRole:turnArm('R',this.turn).role},lean:this.lean,bank:this.bank,depth:{...this.depth},phase:this.phase,landmarks:Object.fromEntries(['Head','Abdomen','FootL','FootR'].filter(n=>this.bones[n]).map(n=>[n,this.bones[n].getWorldPosition(V()).toArray()])),hands:this.lastHands,bones:Object.keys(this.bones)};}
 }
 
 
