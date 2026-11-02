@@ -8,7 +8,7 @@ import {reefFloor,reefCover,TERRAIN} from './reef-terrain.mjs?v=2026-11-02-disco
 import {recipe,PALETTE,collisionVolumes} from './habitat-layout.mjs?v=2026-11-01-extension-1';
 import {createMotion,clayMaterial,depthMaterial} from './body-material.mjs?v=2026-10-31-touch-4';
 import {ANEMONE,createResidentHabitat} from './habitat.mjs?v=2026-11-01-extension-1';
-export function createCoveScene(assets,{style='crevice',layout=null,streaming=false}={}){
+export function createCoveScene(assets,{style='crevice',layout=null,streaming=false,sandMask=null}={}){
  const group=new T.Group(),solids=[],occluders=[],water=createMotion(),config=layout||recipe(style),rockMeshes=[];group.name='Faceted small habitat';
  water.strength.value=1;
  const forms=assets.softForms?.scene;if(!forms)throw Error('Prepared soft form asset missing');const coralGeometry=forms.children[0].geometry.clone(),anemoneGeometry=forms.children[1].geometry;coralGeometry.computeBoundingSphere();coralGeometry.boundingSphere.radius+=.08;anemoneGeometry.computeBoundingSphere();anemoneGeometry.boundingSphere.radius+=.08;
@@ -23,7 +23,7 @@ export function createCoveScene(assets,{style='crevice',layout=null,streaming=fa
    for(const triangle of [[A,C,B],[B,C,D]]){
     const cx=triangle.reduce((s,v)=>s+v.x,0)/3,cz=triangle.reduce((s,v)=>s+v.z,0)/3;
     const c=new T.Color('#a6ad97').lerp(new T.Color('#43575a'),reefCover(cx,cz));
-    c.multiplyScalar(.96+.04*Math.sin(cx*1.7+cz*.9));
+    if(sandMask)c.lerp(new T.Color('#c7c2a2'),sandMask(cx,cz));c.multiplyScalar(.96+.04*Math.sin(cx*1.7+cz*.9));
     for(const v of triangle){positions.push(...v.toArray());colors.push(c.r,c.g,c.b);}
    }
   }
