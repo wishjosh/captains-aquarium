@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {strokePose,travelPitch} from './stroke-cycle.mjs';
+test('side glide and full reach have real holds with quiet legs',()=>{for(const u of [.46,.55,.70]){const p=strokePose(u*2*Math.PI);assert.equal(p.stage,'glide');assert.deepEqual(p.hand,[.29,-.47,.07]);}assert.equal(strokePose(.66*2*Math.PI).kick,0);assert.equal(strokePose(.1).stage,'reach');});
+test('stroke loops and stage boundaries are continuous',()=>{for(const u of [0,.14,.28,.43,.72,.89,1]){const a=strokePose((u-1e-6)*2*Math.PI),b=strokePose((u+1e-6)*2*Math.PI);assert.ok(Math.hypot(...a.hand.map((x,i)=>x-b.hand[i]))<.001);}});
+test('recovery stays close to the torso before reaching forward',()=>{for(let u=.72;u<=1;u+=.01)assert.ok(strokePose(u*2*Math.PI).hand[0]<=.30);});
+test('vertical and diagonal travel point the whole body along motion',()=>{assert.ok(travelPitch(0,.7)<.1);assert.ok(travelPitch(0,-.7)>2.5);assert.ok(travelPitch(2,.7)>.5&&travelPitch(2,.7)<Math.PI/2);assert.ok(travelPitch(2,-.7)>Math.PI/2);});

@@ -1,7 +1,7 @@
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const smooth=(a,b,rate,dt)=>a+(b-a)*(1-Math.exp(-rate*Math.max(0,dt)));
-export const DEPTH_PERIOD=1.7;
-export function depthStroke(phase){const u=((phase/(2*Math.PI))%1+1)%1;const t=u<.42?u/.42:(1-u)/.58;return t*t*(3-2*t);}
+import {STROKE_PERIOD} from './stroke-cycle.mjs?v=2026-11-02-stroke-1';
+export const DEPTH_PERIOD=STROKE_PERIOD;
 // Actual motion drives strokes; floor clearance limits the head-first pose.
 export class DepthPose{
  constructor(){this.rise=0;this.sink=0;this.dive=0;this.trail=0;}
