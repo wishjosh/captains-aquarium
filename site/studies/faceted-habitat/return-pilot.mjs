@@ -1,4 +1,4 @@
-import {returnRoute} from './return-route.mjs?v=2026-11-01-extension-1';
+import {returnRoute} from './return-route.mjs?v=2026-11-02-discovery-1';
 import {clamp,wrap} from './core.mjs';
 export class ReturnPilot {
  constructor(){this.reset();}

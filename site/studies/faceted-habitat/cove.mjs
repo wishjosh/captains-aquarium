@@ -1,5 +1,5 @@
 import {ROCKS,collisionVolumes} from './habitat-layout.mjs?v=2026-11-01-extension-1';
-import {reefFloor} from './reef-terrain.mjs?v=2026-11-01-extension-1';
+import {reefFloor} from './reef-terrain.mjs?v=2026-11-02-discovery-1';
 import {clamp,damp,wrap} from './core.mjs';
 import {ANEMONE,REEF_ROCKS,residentRoute,residentIntent} from './habitat.mjs?v=2026-11-01-extension-1';
 

@@ -1,12 +1,13 @@
+import {PASSAGE_PATCHES} from './discovery-route.mjs?v=2026-11-02-discovery-1';
 import * as T from './runtime/vendor/three.module.js';
-import {reefFloor,reefCover} from './reef-terrain.mjs?v=2026-11-01-extension-1';
+import {reefFloor,reefCover} from './reef-terrain.mjs?v=2026-11-02-discovery-1';
 import {TileWindow,EXTENSION_PATCHES,tileAt,tileDescriptor} from './region-extension.mjs?v=2026-11-01-extension-1';
 // Shared geometry for props; only tile buffers are allocated and disposed on a crossing.
 export function createTerrainStream({templates,rockMat,coralGeometry,coralMat}){
  const group=new T.Group(),solids=[],occluders=[],window=new TileWindow(),material=new T.MeshStandardMaterial({vertexColors:true,roughness:1}),dummy=new T.Object3D();let horizon=null,horizonKey='',revision=-1,maxBuildMs=0,initialBuildMs=0;
  function ground(tile,step=1){const positions=[],colors=[];for(let z=0;z<tile.size;z+=step)for(let x=0;x<tile.size;x+=step){const X=tile.x+x,Z=tile.z+z,ps=[[X,Z],[X,Z+step],[X+step,Z],[X+step,Z],[X,Z+step],[X+step,Z+step]];for(let k=0;k<6;k+=3){const cx=(ps[k][0]+ps[k+1][0]+ps[k+2][0])/3,cz=(ps[k][1]+ps[k+1][1]+ps[k+2][1])/3,c=new T.Color('#a6ad97').lerp(new T.Color('#43575a'),reefCover(cx,cz)).multiplyScalar(.96+.04*Math.sin(cx*1.7+cz*.9));for(let i=k;i<k+3;i++){positions.push(ps[i][0],reefFloor(...ps[i]),ps[i][1]);colors.push(c.r,c.g,c.b);}}}
  const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(positions,3));g.setAttribute('color',new T.Float32BufferAttribute(colors,3));g.computeVertexNormals();g.computeBoundingSphere();const mesh=new T.Mesh(g,material);mesh.name='Seabed tile '+tile.id;mesh.receiveShadow=true;return mesh;}
- function create(tile){const root=new T.Group(),mesh=ground(tile),objects=[mesh];root.add(mesh);for(const patch of EXTENSION_PATCHES){const key=tileAt(patch.rocks[0].x,patch.rocks[0].z);if(key.x!==tile.cx||key.z!==tile.cz)continue;
+ function create(tile){const root=new T.Group(),mesh=ground(tile),objects=[mesh];root.add(mesh);for(const patch of [...PASSAGE_PATCHES,...EXTENSION_PATCHES]){const key=tileAt(patch.rocks[0].x,patch.rocks[0].z);if(key.x!==tile.cx||key.z!==tile.cz)continue;
   const rocks=[];for(const r of patch.rocks){const m=new T.Mesh(templates.get('rocks-'+r.part),rockMat);m.scale.setScalar(r.h);m.rotation.y=r.angle;m.position.set(r.x,reefFloor(r.x,r.z)-r.h*.14,r.z);m.name='Connected '+patch.id+' reef';m.castShadow=m.receiveShadow=true;root.add(m);rocks.push(m);objects.push(m);}
   root.updateMatrixWorld(true);const ray=new T.Raycaster(),coral=new T.InstancedMesh(coralGeometry,coralMat,patch.corals.length);patch.corals.forEach((c,i)=>{ray.set(new T.Vector3(c.x,10,c.z),new T.Vector3(0,-1,0));const y=ray.intersectObjects(rocks,false)[0]?.point.y??reefFloor(c.x,c.z);dummy.position.set(c.x,y-.03,c.z);dummy.rotation.set(0,i*1.7,0);dummy.scale.setScalar(c.h);dummy.updateMatrix();coral.setMatrixAt(i,dummy.matrix);coral.setColorAt(i,new T.Color(['#c9848b','#c69a87','#b29ab0'][i]));});coral.name='Corals on '+patch.id;coral.computeBoundingSphere();root.add(coral);objects.push(coral);
  }group.add(root);return{root,mesh,objects};}
