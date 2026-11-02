@@ -28,7 +28,7 @@ import {ViewApproach,framingTarget,comfortableRadius} from './camera-policy.mjs?
 import {ViewOcclusion} from './view-occlusion.mjs?v=2026-11-01-extension-1';
 import {createCoveScene} from './cove-scene.mjs?v=2026-11-01-extension-1';
 import {COVE_HOME,COVE_FISH as CLOWN_FISH,CoveLife,CoveDiscovery,coveFloor,coveObstacles,coveRegion as clownRegion,coveHint as clownHint} from './cove.mjs?v=2026-11-01-extension-1';
-import {SwimWorld,clamp,damp,wrap} from './core.mjs?v=2026-10-28-pace-1';import {Swimmer} from './captain-swim.mjs?v=2026-11-02-turn-1';import {SwimInput} from './swim-input.mjs?v=2026-11-02-stroke-1';
+import {SwimWorld,clamp,damp,wrap} from './core.mjs?v=2026-10-28-pace-1';import {Swimmer} from './captain-swim.mjs?v=2026-11-02-parrot-1';import {SwimInput} from './swim-input.mjs?v=2026-11-02-stroke-1';
 import {School} from './school.mjs';import {attachMagicGlow} from './magic-glow.mjs';
 import {Expedition,readRecord,emptyRecord,SAVE_KEY} from './expedition.mjs?v=2026-11-01-extension-1';import {SWIM_PACE,AUTO_APPROACH_SPEED} from './pace.mjs?v=2026-11-01-extension-1';import {ScreenSteering} from './steering.mjs?v=2026-11-01-extension-1';import {CaptureAudio} from './audio.mjs';
 const isChromis=new URLSearchParams(location.search).get('species')!=='clownfish',SPECIES_ID=isChromis?CHROMIS_ID:CLOWN_ID,SPECIES_NAME=isChromis?'자리돔':'흰동가리',TARGET_OBJECT=isChromis?'자리돔을':'흰동가리를',RECORD_KEY=speciesSaveKey(SPECIES_ID),COVE_FISH=isChromis?REGION_FISH:CLOWN_FISH,FISH_COUNT=COVE_FISH.length;

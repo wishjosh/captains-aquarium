@@ -1,7 +1,7 @@
 import * as T from './runtime/vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
 import {createCaptain} from './runtime/pirate.js';
 import {damp,clamp} from './core.mjs';
-import {fitCaptainEquipment} from './captain-equipment.mjs?v=2026-11-01-extension-1';
+import {fitCaptainEquipment} from './captain-equipment.mjs?v=2026-11-02-parrot-1';
 import {DepthPose} from './depth-pose.mjs?v=2026-11-02-stroke-1';
 import {strokePose,STROKE_PERIOD,travelPitch} from './stroke-cycle.mjs?v=2026-11-02-stroke-1';
 import {TurnStroke,turnArm} from './turn-stroke.mjs?v=2026-11-02-turn-1';
