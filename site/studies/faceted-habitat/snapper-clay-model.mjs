@@ -1,3 +1,4 @@
+import {colourSnapper} from './snapper-appearance.mjs?v=2026-11-03-fin-1';
 import * as T from './runtime/vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
 import {clone} from './runtime/vendor/SkeletonUtils.js?v=2026-10-20-jeju-rov-v1';
 const smooth=(a,b,x)=>T.MathUtils.smoothstep(x,a,b);
@@ -39,7 +40,7 @@ function addVentralFin(model,fin,material,{name,x=0,ys,heights,splay=0,sweep=.35
  const mesh=new T.SkinnedMesh(g,material);mesh.name=name;mesh.position.copy(fin.position);mesh.quaternion.copy(fin.quaternion);mesh.scale.copy(fin.scale);fin.parent.add(mesh);mesh.bind(fin.skeleton,fin.bindMatrix.clone());mesh.frustumCulled=false;mesh.castShadow=true;
  proxies.forEach(m=>m.material.dispose());return {mesh,roots,maxDiscardedWeight:Math.max(...losses)};
 }
-export function createSnapperClay(asset,{length=.85,variant='proposed'}={}){
+export function createSnapperClay(asset,{length=.85,variant='proposed',appearance='clay'}={}){
  if(!['source','previous','proposed'].includes(variant))throw Error('Unknown clay variant');
  const model=clone(asset.scene),ownedGeometry=new Set(),ownedMaterials=new Set();let fin,originalTriangles=0;
  model.traverse(o=>{if(!o.isMesh)return;originalTriangles+=(o.geometry.index?.count||o.geometry.attributes.position.count)/3;if(o.material.name==='RedSnapper_Fins')fin=o;});
@@ -58,11 +59,12 @@ export function createSnapperClay(asset,{length=.85,variant='proposed'}={}){
   for(const sign of [-1,1]){const added=addVentralFin(model,fin,clay,{name:'Chromis pelvic '+(sign<0?'left':'right'),x:sign*.0035,ys:[-.008,-.0065,-.005,-.0035,-.002,-.0005],heights:[0,.004,.0065,.006,.003,0],splay:sign*.45,sweep:.6});pelvic.push(added);ownedGeometry.add(added.mesh.geometry);}
  }
  model.traverse(o=>{if(!o.isMesh)return;o.frustumCulled=false;o.castShadow=true;if(o.material.name==='Eyes'){const eye=new T.MeshStandardMaterial({color:'#464b48',roughness:.7});ownedMaterials.add(eye);o.material=eye;}else o.material=clay;});
+ if(appearance==='colour'||appearance==='fins')colourSnapper(model,{finDetail:appearance==='fins'}).forEach(m=>ownedMaterials.add(m));
  const mixer=new T.AnimationMixer(model),clip=asset.animations.find(a=>a.name.endsWith('Swimming_Normal'));if(!clip)throw Error('Native swim missing');mixer.clipAction(clip).play();mixer.update(0);model.updateMatrixWorld(true);
  // Normalize both variants using unchanged source bounds, so body sizes remain identical.
  asset.scene.updateMatrixWorld(true);const box=new T.Box3().setFromObject(asset.scene),size=box.getSize(new T.Vector3()),offset=new T.Group(),scaled=new T.Group(),root=new T.Group();offset.position.copy(box.getCenter(new T.Vector3())).negate();offset.add(model);scaled.scale.setScalar(length/size.z);scaled.add(offset);root.add(scaled);
  root.userData.update=dt=>mixer.update(dt);root.userData.setTime=t=>mixer.setTime(t);
- root.userData.inspect=()=>({variant,source:'Quaternius RedSnapper / Poly Pizza',originalTriangles,addedTriangles:[anal,...pelvic].filter(Boolean).reduce((n,f)=>n+f.mesh.geometry.index.count/3,0),pelvicFinCount:pelvic.length,pelvicRoots:pelvic.map(f=>f.roots),bodyChanged:variant==='proposed',rigChanged:false,clip:clip.name,sourceBounds:size.toArray(),analRoots:anal?.roots,maxDiscardedWeight:Math.max(0,...[anal,...pelvic].filter(Boolean).map(f=>f.maxDiscardedWeight))});
+ root.userData.inspect=()=>({variant,appearance,source:'Quaternius RedSnapper / Poly Pizza',originalTriangles,addedTriangles:[anal,...pelvic].filter(Boolean).reduce((n,f)=>n+f.mesh.geometry.index.count/3,0),pelvicFinCount:pelvic.length,pelvicRoots:pelvic.map(f=>f.roots),bodyChanged:variant==='proposed',rigChanged:false,clip:clip.name,sourceBounds:size.toArray(),analRoots:anal?.roots,maxDiscardedWeight:Math.max(0,...[anal,...pelvic].filter(Boolean).map(f=>f.maxDiscardedWeight))});
  root.userData.dispose=()=>{mixer.stopAllAction();mixer.uncacheRoot(model);ownedGeometry.forEach(g=>g.dispose());ownedMaterials.forEach(m=>m.dispose());const skeletons=new Set();model.traverse(o=>{if(o.isSkinnedMesh)skeletons.add(o.skeleton);});skeletons.forEach(s=>s.dispose());};
  return root;
 }
