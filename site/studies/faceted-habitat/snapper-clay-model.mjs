@@ -1,6 +1,12 @@
 import * as T from './runtime/vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
 import {clone} from './runtime/vendor/SkeletonUtils.js?v=2026-10-20-jeju-rov-v1';
 const smooth=(a,b,x)=>T.MathUtils.smoothstep(x,a,b);
+export function reshapeBodyPoint(x,y,z){
+ // Preserve lateral volume; only adjust the side profile, smoothly fading at the eyes and tail.
+ const belly=smooth(-.014,-.005,y)*(1-smooth(.007,.019,y))*smooth(.004,.011,-z);
+ const forehead=(1-smooth(-.019,-.010,y))*smooth(.003,.010,z);
+ return [x,y-.0010*forehead,z+.0015*belly];
+}
 export function reshapeFinPoint(x,y,z){
  // This FBX-derived asset uses local +Y toward the tail and +Z toward the back.
  if(y>.020){
@@ -34,13 +40,19 @@ function addVentralFin(model,fin,material,{name,x=0,ys,heights,splay=0,sweep=.35
  proxies.forEach(m=>m.material.dispose());return {mesh,roots,maxDiscardedWeight:Math.max(...losses)};
 }
 export function createSnapperClay(asset,{length=.85,variant='proposed'}={}){
- if(!['source','proposed'].includes(variant))throw Error('Unknown clay variant');
+ if(!['source','previous','proposed'].includes(variant))throw Error('Unknown clay variant');
  const model=clone(asset.scene),ownedGeometry=new Set(),ownedMaterials=new Set();let fin,originalTriangles=0;
  model.traverse(o=>{if(!o.isMesh)return;originalTriangles+=(o.geometry.index?.count||o.geometry.attributes.position.count)/3;if(o.material.name==='RedSnapper_Fins')fin=o;});
  if(!fin)throw Error('Expected source fin mesh missing');
  const clay=new T.MeshStandardMaterial({color:'#a9ada6',roughness:.83,metalness:0,side:T.DoubleSide,flatShading:true});ownedMaterials.add(clay);
  let anal=null;const pelvic=[];
- if(variant==='proposed'){
+ if(variant==='proposed')model.traverse(o=>{
+  if(!o.isMesh||!/RedSnapper_(Main|Light)/.test(o.material.name))return;
+  const g=o.geometry.clone(),p=g.attributes.position;
+  for(let i=0;i<p.count;i++)p.setXYZ(i,...reshapeBodyPoint(p.getX(i),p.getY(i),p.getZ(i)));
+  g.computeVertexNormals();g.computeBoundingBox();g.computeBoundingSphere();o.geometry=g;ownedGeometry.add(g);
+ });
+ if(variant!=='source'){
   const g=fin.geometry.clone(),p=g.attributes.position;for(let i=0;i<p.count;i++)p.setXYZ(i,...reshapeFinPoint(p.getX(i),p.getY(i),p.getZ(i)));g.computeVertexNormals();g.computeBoundingBox();g.computeBoundingSphere();fin.geometry=g;ownedGeometry.add(g);
   anal=addVentralFin(model,fin,clay,{name:'Chromis anal fin / source-weight interpolation',ys:[.003,.006,.009,.012,.015,.018],heights:[0,.0018,.0042,.0047,.0026,0]});ownedGeometry.add(anal.mesh.geometry);
   for(const sign of [-1,1]){const added=addVentralFin(model,fin,clay,{name:'Chromis pelvic '+(sign<0?'left':'right'),x:sign*.0035,ys:[-.008,-.0065,-.005,-.0035,-.002,-.0005],heights:[0,.004,.0065,.006,.003,0],splay:sign*.45,sweep:.6});pelvic.push(added);ownedGeometry.add(added.mesh.geometry);}
@@ -50,7 +62,7 @@ export function createSnapperClay(asset,{length=.85,variant='proposed'}={}){
  // Normalize both variants using unchanged source bounds, so body sizes remain identical.
  asset.scene.updateMatrixWorld(true);const box=new T.Box3().setFromObject(asset.scene),size=box.getSize(new T.Vector3()),offset=new T.Group(),scaled=new T.Group(),root=new T.Group();offset.position.copy(box.getCenter(new T.Vector3())).negate();offset.add(model);scaled.scale.setScalar(length/size.z);scaled.add(offset);root.add(scaled);
  root.userData.update=dt=>mixer.update(dt);root.userData.setTime=t=>mixer.setTime(t);
- root.userData.inspect=()=>({variant,source:'Quaternius RedSnapper / Poly Pizza',originalTriangles,addedTriangles:[anal,...pelvic].filter(Boolean).reduce((n,f)=>n+f.mesh.geometry.index.count/3,0),pelvicFinCount:pelvic.length,pelvicRoots:pelvic.map(f=>f.roots),bodyChanged:false,rigChanged:false,clip:clip.name,sourceBounds:size.toArray(),analRoots:anal?.roots,maxDiscardedWeight:Math.max(0,...[anal,...pelvic].filter(Boolean).map(f=>f.maxDiscardedWeight))});
+ root.userData.inspect=()=>({variant,source:'Quaternius RedSnapper / Poly Pizza',originalTriangles,addedTriangles:[anal,...pelvic].filter(Boolean).reduce((n,f)=>n+f.mesh.geometry.index.count/3,0),pelvicFinCount:pelvic.length,pelvicRoots:pelvic.map(f=>f.roots),bodyChanged:variant==='proposed',rigChanged:false,clip:clip.name,sourceBounds:size.toArray(),analRoots:anal?.roots,maxDiscardedWeight:Math.max(0,...[anal,...pelvic].filter(Boolean).map(f=>f.maxDiscardedWeight))});
  root.userData.dispose=()=>{mixer.stopAllAction();mixer.uncacheRoot(model);ownedGeometry.forEach(g=>g.dispose());ownedMaterials.forEach(m=>m.dispose());const skeletons=new Set();model.traverse(o=>{if(o.isSkinnedMesh)skeletons.add(o.skeleton);});skeletons.forEach(s=>s.dispose());};
  return root;
 }

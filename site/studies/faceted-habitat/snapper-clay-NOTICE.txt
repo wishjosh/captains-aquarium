@@ -1,4 +1,4 @@
 RedSnapper: Quaternius, CC0. Distribution: https://poly.pizza/m/BRKfDKwPTv
 Pack: https://quaternius.com/packs/cutefish.html
-Source GLB preserved. Display copy adjusts tail/dorsal and adds an 8-triangle anal fin and two 8-triangle pelvic fins. Body, rig and swimming clip preserved.
+Source GLB preserved. Display copy adjusts tail/dorsal and adds an 8-triangle anal fin and two 8-triangle pelvic fins. Display body forehead and belly adjusted; lateral width, eyes, rig and swimming clip preserved. Previous fin-only variant available.
 Three.js: MIT; see runtime/vendor/THREE-LICENSE.txt.
