@@ -1,8 +1,8 @@
 import * as T from './runtime/vendor/three.module.js';
 import {reefFloor} from './reef-terrain.mjs?v=2026-11-02-discovery-1';
 import {eckloniaGeometry,sargassumGeometry,urchinGeometry} from './jeju-life-geometry.mjs?v=2026-11-10-jeju-2';
-import {JEJU_ENVIRONMENT_VERSION,ROCK_BEDS,plantCandidates,jejuGroundBlend,jejuZone,jejuHint,seeded,routeDistance} from './jeju-habitat-layout.mjs?v=2026-11-10-jeju-2';
-export {jejuZone,jejuHint} from './jeju-habitat-layout.mjs?v=2026-11-10-jeju-2';
+import {JEJU_ENVIRONMENT_VERSION,ROCK_BEDS,plantCandidates,jejuGroundBlend,jejuZone,jejuHint,seeded,routeDistance} from './jeju-habitat-layout.mjs?v=2026-11-10-life-2';
+export {jejuZone,jejuHint} from './jeju-habitat-layout.mjs?v=2026-11-10-life-2';
 const V=(x=0,y=0,z=0)=>new T.Vector3(x,y,z);
 function animateMaterial(material,time,player,{vegetation=false}={}){
  const previous=material.onBeforeCompile;

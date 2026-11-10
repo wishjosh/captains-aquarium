@@ -1,0 +1,14 @@
+import {SPECIES} from './jeju-species.mjs?v=2026-11-10-life-2';
+export function createJejuNotebook({book,onOpen,onClose}){
+ const button=document.createElement('button');button.id='openLifeBook';button.type='button';document.getElementById('worldUI').append(button);
+ const resultButton=document.createElement('button');resultButton.id='resultLifeBook';resultButton.type='button';resultButton.textContent='제주 생물 수첩';document.querySelector('#curtain .buttons').append(resultButton);
+ const panel=document.createElement('section');panel.id='lifeBook';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-labelledby','lifeBookTitle');
+ panel.innerHTML='<article><div class="lifeBookHead"><div><small>JEJU COAST · FIELD NOTES</small><h2 id="lifeBookTitle">바다에서 만난 이웃들</h2></div><button id="closeLifeBook" aria-label="생물 수첩 닫기">×</button></div><p id="lifeBookCount"></p><p class="lifeBookIntro">자리돔 무리와 연산호 정원을 중심으로 여러 이웃을 만나 보세요. 가까이에서 화면에 보인 생물은 수첩에 남아요.</p><div id="lifeBookList"></div><p class="lifeBookFoot">제주 연안의 기록을 참고해 만든 가상 해역이에요. 크기·밀도·동선은 탐사에 맞게 표현했어요. 수첩은 이 페이지에서 다음 탐사까지 이어지며, 새로고침하거나 닫으면 사라져요.</p></article>';
+ document.getElementById('game').append(panel);const close=panel.querySelector('#closeLifeBook'),list=panel.querySelector('#lifeBookList'),count=panel.querySelector('#lifeBookCount');let opener=null,open=false,lastCount=-1;
+ function render(){count.textContent='발견 '+book.seen.size+' / '+SPECIES.length+'가지';list.replaceChildren();for(const s of SPECIES){const item=document.createElement('div');item.className='lifeBookItem'+(book.seen.has(s.id)?' found':'');const mark=document.createElement('span');mark.className='lifeBookMark';mark.style.background=s.color;mark.textContent=book.seen.has(s.id)?'✓':'?';const text=document.createElement('div'),title=document.createElement('h3');title.textContent=s.name+(s.role?' · '+s.role:'');const status=document.createElement('small');status.textContent=book.seen.has(s.id)?'발견했어요':'찾아볼 곳 · '+s.where;const note=document.createElement('p');note.textContent=s.note;text.append(title,status,note);item.append(mark,text);list.append(item);}}
+ function show(e){if(open)return;opener=e.currentTarget;open=true;render();panel.hidden=false;onOpen();close.focus({preventScroll:true});}
+ function hide(){if(!open)return;open=false;panel.hidden=true;onClose();opener?.focus({preventScroll:true});}
+ button.onclick=resultButton.onclick=show;close.onclick=hide;
+ panel.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();hide();}if(e.key==='Tab'){e.preventDefault();close.focus({preventScroll:true});}});
+ return{update(){if(lastCount===book.seen.size)return;lastCount=book.seen.size;button.textContent='생물 수첩 '+lastCount+'/'+SPECIES.length;resultButton.textContent='생물 수첩 · '+lastCount+'가지 발견';if(open)render();},get open(){return open;}};
+}
