@@ -1,0 +1,37 @@
+import * as T from './runtime/vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
+import {GLTFLoader} from './runtime/vendor/GLTFLoader.js?v=2026-10-20-jeju-rov-v1';
+import {createSnapperClay} from './snapper-clay-model.mjs';
+import {createFish} from './runtime/fish.js';
+import {createRockBream} from './rock-bream-model.mjs?v=2026-11-10-bream-1';
+import {coastalFishGeometry} from './jeju-fauna-geometry.mjs?v=2026-11-10-life-2';
+const canvas=document.querySelector('#view'),stage=document.querySelector('.stage'),cards=[...document.querySelectorAll('.card')],status=document.querySelector('#status');
+const renderer=new T.WebGLRenderer({canvas,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.autoClear=false;
+let yaw=Math.PI/2,pitch=0,time=0,moving=false,variant='new',clay=false,solo=false,drag=null,last=performance.now(),frames=[],framesAt=last,reportAt=0;
+const views=cards.map(el=>{const scene=new T.Scene();scene.background=new T.Color('#3e656b');scene.add(new T.HemisphereLight('#edf0ee','#707873',2));const sun=new T.DirectionalLight('#fff8ee',3);sun.position.set(-2,4,5);scene.add(sun);return{el,rect:el.querySelector('.render'),scene,camera:new T.PerspectiveCamera(34,1,.01,30)};});
+const models={},oldTime={value:0};
+function oldBream(isClay){
+ const material=new T.MeshStandardMaterial({vertexColors:!isClay,color:isClay?'#9ba8a6':'#ffffff',roughness:.72,side:T.DoubleSide});
+ material.onBeforeCompile=s=>{s.uniforms.coastTime=oldTime;s.vertexShader=s.vertexShader.replace('#include <common>','#include <common>\nuniform float coastTime;attribute float coastBody;varying vec3 coastLocal;varying float coastBodyV;').replace('#include <begin_vertex>','#include <begin_vertex>\ncoastLocal=position;coastBodyV=coastBody;transformed.z+=sin(coastTime*6.4+position.x*4.)*smoothstep(.1,.67,-position.x)*.095;');
+ if(!isClay){const rgb=hex=>'vec3('+new T.Color(hex).toArray().join(',')+')';s.fragmentShader=s.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 coastLocal;varying float coastBodyV;').replace('#include <color_fragment>',`#include <color_fragment>\nif(coastBodyV>.5){vec3 coat=${rgb('#b9c4bc')};coat=mix(coat,${rgb('#e1ddbd')},(1.0-smoothstep(-.30,0.0,coastLocal.y))*.3);coat*=1.0-smoothstep(0.0,.30,coastLocal.y)*.15;diffuseColor.rgb=mix(coat,${rgb('#273b3c')},smoothstep(.10,.25,sin((coastLocal.x+.49)*3.141593*14.0))*.95);}`);}};
+ const mesh=new T.Mesh(coastalFishGeometry('rockbream'),material),root=new T.Group();mesh.rotation.y=-Math.PI/2;mesh.scale.setScalar(.85/1.23);root.add(mesh);root.userData.setTime=t=>oldTime.value=t;return root;
+}
+function select(){const fish=variant==='old'?(clay?models.oldClay:models.old):(clay?models.newClay:models.new);if(views[1].fish)views[1].scene.remove(views[1].fish);views[1].fish=fish;views[1].scene.add(fish);document.querySelector('#variantLabel').textContent=(variant==='new'?'다듬은 형태':'기존 형태 시안')+(clay?' · 무채색':'');status.textContent=(moving?'세 친구의 유영을 비교하고 있어요.':'멈춘 모습 · 화면을 끌어 돌려 볼 수 있어요.')+(clay?' 돌돔의 무늬를 숨겼습니다.':'');}
+try{
+ const loader=new GLTFLoader(),[snapper,puffer]=await Promise.all([loader.loadAsync(new URL('./assets/RedSnapper-source.glb',import.meta.url).href),loader.loadAsync(new URL('./runtime/assets/fish/Puffer.glb',import.meta.url).href)]);
+ models.chromis=createSnapperClay(snapper,{length:.85,appearance:'fins'});models.puffer=createFish(puffer,{kind:'puffer',length:.85,appearance:'white-eye'});models.new=createRockBream(snapper);models.newClay=createRockBream(snapper,{appearance:'clay'});models.old=oldBream(false);models.oldClay=oldBream(true);
+ views[0].fish=models.chromis;views[0].scene.add(models.chromis);views[2].fish=models.puffer;views[2].scene.add(models.puffer);select();
+}catch(e){const el=document.querySelector('#loadError');el.hidden=false;el.textContent='모델을 불러오지 못했습니다. 새로고침해 주세요.';status.textContent='불러오기 오류';console.error(e);}
+for(const b of document.querySelectorAll('[data-variant]'))b.onclick=()=>{variant=b.dataset.variant;for(const c of document.querySelectorAll('[data-variant]'))c.setAttribute('aria-pressed',String(c===b));select();};
+for(const b of document.querySelectorAll('[data-view]'))b.onclick=()=>{const v=b.dataset.view;yaw=v==='front'?0:v==='side'?Math.PI/2:1.02;pitch=v==='angle'?.14:0;for(const c of document.querySelectorAll('[data-view]'))c.setAttribute('aria-pressed',String(c===b));};
+document.querySelector('#clay').onclick=e=>{clay=!clay;e.currentTarget.setAttribute('aria-pressed',String(clay));select();};
+document.querySelector('#solo').onclick=e=>{solo=!solo;e.currentTarget.setAttribute('aria-pressed',String(solo));e.currentTarget.textContent=solo?'세 친구 함께':'돌돔 크게';document.querySelector('.cards').classList.toggle('solo',solo);};
+document.querySelector('#motion').onclick=e=>{moving=!moving;e.currentTarget.setAttribute('aria-pressed',String(moving));e.currentTarget.textContent=moving?'유영 멈추기':'유영 보기';select();};
+stage.onpointerdown=e=>{if(drag)return;drag={id:e.pointerId,x:e.clientX,y:e.clientY};stage.setPointerCapture(e.pointerId);};stage.onpointermove=e=>{if(drag?.id!==e.pointerId)return;yaw-=(e.clientX-drag.x)*.008;if(e.pointerType!=='touch')pitch=T.MathUtils.clamp(pitch+(e.clientY-drag.y)*.008,-.8,.8);drag={id:e.pointerId,x:e.clientX,y:e.clientY};for(const b of document.querySelectorAll('[data-view]'))b.setAttribute('aria-pressed','false');};for(const name of['pointerup','pointercancel','lostpointercapture'])stage.addEventListener(name,e=>{if(drag?.id===e.pointerId)drag=null;});
+function resize(){renderer.setSize(stage.clientWidth,stage.clientHeight,false);}new ResizeObserver(resize).observe(stage);resize();
+function draw(now){const dt=Math.min(.05,(now-last)/1000);if(now-last<250)frames.push(now-last);last=now;if(moving)time+=dt;
+ if(models.new&&moving){models.chromis.userData.setTime(time);models.new.userData.setTime(time);models.newClay.userData.setTime(time);models.puffer.userData.update(moving?dt:0);oldTime.value=time;}
+ renderer.setScissorTest(false);renderer.setClearColor('#3e656b');renderer.clear();renderer.setScissorTest(true);const outer=stage.getBoundingClientRect();let calls=0,triangles=0;
+ for(const v of views){if(!v.fish||v.el.offsetParent===null)continue;const r=v.rect.getBoundingClientRect(),left=r.left-outer.left,bottom=outer.bottom-r.bottom;v.camera.aspect=r.width/r.height;v.camera.updateProjectionMatrix();const d=(solo?1.34:1.78)/Math.min(1,v.camera.aspect);v.camera.position.set(Math.sin(yaw)*Math.cos(pitch)*d,Math.sin(pitch)*d,Math.cos(yaw)*Math.cos(pitch)*d);v.camera.lookAt(0,0,0);renderer.setViewport(left,bottom,r.width,r.height);renderer.setScissor(left,bottom,r.width,r.height);renderer.render(v.scene,v.camera);calls+=renderer.info.render.calls;triangles+=renderer.info.render.triangles;}
+ if(now-reportAt>700&&models.new){const elapsed=(now-framesAt)/1000,sorted=[...frames].sort((a,b)=>a-b);canvas.dataset.inspection=JSON.stringify({ready:true,variant,clay,solo,moving,time,yaw,pitch,models:{bream:models.new.userData.inspect(),chromis:models.chromis.userData.inspect(),puffer:models.puffer.userData.inspect()},frameSample:{frames:frames.length,seconds:elapsed,fps:frames.length/elapsed,p95:sorted[Math.floor(sorted.length*.95)]},render:{calls,triangles},size:[stage.clientWidth,stage.clientHeight]});reportAt=now;if(elapsed>10){frames=[];framesAt=now;}}
+ requestAnimationFrame(draw);
+}requestAnimationFrame(draw);
