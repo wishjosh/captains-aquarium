@@ -114,7 +114,17 @@ function complete(){
  if(savedRecord!==trip.record){savedRecord=trip.record;if(storageWritable&&!gardenMode)try{if(localStorage.getItem(RECORD_KEY)!==savedRecordRaw||journey?.conflict)throw Error('Record changed in another tab');savedRecordRaw=writeSpeciesRecord(trip.record,SPECIES_ID);localStorage.setItem(RECORD_KEY,savedRecordRaw);}catch{storageWritable=false;}if(storageWritable)journey?.finish();audio.cue('recovered');}
  $('curtain').hidden=false;$('eyebrow').textContent='오늘의 탐사 기록';$('title').textContent=trip.result.count?`${trip.result.count}마리와 함께 돌아왔어요`:trip.result.observed?TARGET_OBJECT+' 살펴보고 돌아왔어요':'바다를 둘러보고 돌아왔어요';
  $('summary').textContent=`발견 ${trip.result.discovered}마리 · 관찰 ${trip.result.observed}마리 · 탐사 ${Math.floor(trip.result.seconds/60)}분 ${trip.result.seconds%60}초. ${trip.result.count?SPECIES_NAME+'의 수집 기록을 바다 도감에 남겼어요.':trip.result.observed?'가까이에서 움직임을 살펴본 기록을 남겼어요.':trip.result.discovered?'바다에서 만난 생물의 발견 기록을 남겼어요.':'다음에는 마음에 드는 생물을 만나 보세요.'}`;
- if(observation.note)$('summary').textContent+=' '+observation.note;if(garden){$('title').textContent=garden.model.found?'작은 정원을 찾아냈어요':'물길을 둘러보고 돌아왔어요';$('summary').textContent=(garden.model.found?'바위 안쪽에서 가시복을 만났어요. 작은 지느러미와 얼룩무늬를 살펴보았나요?':'아직 바위 안쪽의 생물을 만나지 못했어요. 다음 탐사에서 다시 찾아볼 수 있어요.')+' 이번 탐사 기록은 저장하지 않아요.';}
+ if(observation.note)$('summary').textContent+=' '+observation.note;
+ if(garden){
+  const result=trip.result;
+  if(!result.count&&garden.model.found)$('title').textContent='작은 정원을 찾아냈어요';
+  const discoveries=`자리돔 발견 ${result.discovered}마리 · 관찰 ${result.observed}마리 · 수집 ${result.count}마리.`;
+  const gardenResult=garden.model.found
+   ?'바위 안쪽에서 가시복을 만났어요. 다음 탐사에서는 다시 찾아가 지느러미와 몸의 무늬를 살펴보세요.'
+   :'다음 탐사에서는 무리 너머 바위 가장자리의 밝은 모래 길을 따라 작은 정원을 찾아보세요.';
+  $('summary').textContent=`${discoveries} ${gardenResult}`;
+  $('notice').textContent='탐색 시안 · 자리돔 누적 기록은 이 페이지에서 다음 탐사까지 이어져요. 새로고침하거나 닫으면 사라져요.';
+ }
  $('start').textContent='다시 탐사하기';$('start').focus({preventScroll:true});$('openDex').hidden=false;updateRecord();if(!storageWritable||journey&&!journey.writable)$('notice').textContent='이 탐사의 기록은 화면을 닫기 전까지 유지돼요';
 }
 $('zoomIn').onclick=worldAction(()=>{zoomInput.nudge(.16);canvas.focus({preventScroll:true});});$('zoomOut').onclick=worldAction(()=>{zoomInput.nudge(-.16);canvas.focus({preventScroll:true});});$('zoomMethod').onclick=worldAction(()=>{zoomMode=zoomMode==='distance'?'lens':'distance';zoomModeChanged=true;canvas.focus({preventScroll:true});});
