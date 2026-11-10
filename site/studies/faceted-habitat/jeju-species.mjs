@@ -1,5 +1,5 @@
 // Game-sized silhouettes and encounter roles, based on the references in ATTRIBUTION.md.
-export const BIODIVERSITY_VERSION='2026-11-10-life-3';
+export const BIODIVERSITY_VERSION='2026-11-11-companions-1';
 export const SPECIES=[
  {id:'chromis',name:'자리돔',role:'대표 만남',where:'모래 물길 끝의 첫 바위턱',note:'작은 무리가 바위턱 위를 오가요. 터치해 관찰하고 함께 귀환할 수 있어요.',color:'#9b9f89'},
  {id:'softcoral',name:'연산호 군락',role:'대표 풍경',where:'바위 안쪽 정원과 동쪽 산호턱',note:'부드러운 가지가 모여 만든 군락이에요. 크기와 빈 공간을 비교해 보세요.',color:'#d4948e'},

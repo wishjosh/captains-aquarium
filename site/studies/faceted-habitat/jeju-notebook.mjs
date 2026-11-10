@@ -1,4 +1,4 @@
-import {SPECIES} from './jeju-species.mjs?v=2026-11-10-life-3';
+import {SPECIES} from './jeju-species.mjs?v=2026-11-11-companions-1';
 export function createJejuNotebook({book,onOpen,onClose}){
  const button=document.createElement('button');button.id='openLifeBook';button.type='button';document.getElementById('worldUI').append(button);
  const resultButton=document.createElement('button');resultButton.id='resultLifeBook';resultButton.type='button';resultButton.textContent='제주 생물 수첩';document.querySelector('#curtain .buttons').append(resultButton);

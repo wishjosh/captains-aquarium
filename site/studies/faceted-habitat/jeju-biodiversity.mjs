@@ -1,8 +1,8 @@
 import * as T from './runtime/vendor/three.module.js';
 import {reefFloor} from './reef-terrain.mjs?v=2026-11-02-discovery-1';
-import {ROCK_BEDS} from './jeju-habitat-layout.mjs?v=2026-11-10-life-3';
-import {SPECIES,FISH_SPECIES,COAST_GROUPS,EncounterBook,BIODIVERSITY_VERSION} from './jeju-species.mjs?v=2026-11-10-life-3';
-import {seaFanGeometry} from './jeju-fauna-geometry.mjs?v=2026-11-10-life-3';
+import {ROCK_BEDS} from './jeju-habitat-layout.mjs?v=2026-11-11-companions-1';
+import {SPECIES,FISH_SPECIES,COAST_GROUPS,EncounterBook,BIODIVERSITY_VERSION} from './jeju-species.mjs?v=2026-11-11-companions-1';
+import {seaFanGeometry} from './jeju-fauna-geometry.mjs?v=2026-11-11-companions-1';
 import {createCoastalSchool} from './coastal-fish-school.mjs?v=2026-11-10-fish-1';
 const V=(x=0,y=0,z=0)=>new T.Vector3(x,y,z);
 export function createJejuBiodiversity({scene,environment,scenery,garden,assets}){
@@ -26,17 +26,23 @@ export function createJejuBiodiversity({scene,environment,scenery,garden,assets}
  for(const a of er.urchinAnchors)staticTargets.push({id:'urchin',position:[a.x,a.y+.14,a.z]});
  for(const p of garden.inspect().coralAnchors)staticTargets.push({id:'softcoral',position:[p[0],p[1]+.35,p[2]]});
  scene.add(group);let age=0,lastNew=null;
- function update(dt,captain=[0,2.5,12]){
+ function update(dt,captain=[0,2.5,12],held=null){
   time.value+=dt;const indices={};
-  for(const a of agents){const g=COAST_GROUPS[a.group],s=FISH_SPECIES.find(s=>s.id===a.kind),angle=time.value*s.speed+a.phase*.18,spacing=(a.index-(g.count-1)/2)*.34;
+  for(const a of agents){
+   if(a.captured)continue;
+   if(a!==held){const g=COAST_GROUPS[a.group],s=FISH_SPECIES.find(s=>s.id===a.kind),angle=time.value*s.speed+a.phase*.18,spacing=(a.index-(g.count-1)/2)*.34;
    let x=g.center[0]+Math.cos(angle)*g.radius[0]+spacing,z=g.center[1]+Math.sin(angle)*g.radius[1]+Math.sin(a.phase)*.4;
    const dx=x-captain[0],dz=z-captain[2],dist=Math.hypot(dx,dz);if(dist<2){const away=(2-dist)*.6;x+=dx/Math.max(.1,dist)*away;z+=dz/Math.max(.1,dist)*away;}
    const target=[x,floor(x,z)+g.lift+.12*Math.sin(time.value*.6+a.phase),z];if(!a.position)a.position=[...target];a.previous=[...a.position];const blend=dt===0?1:1-Math.exp(-dt*2.8);for(let j=0;j<3;j++)a.position[j]+=(target[j]-a.position[j])*blend;
    // The floor changes at grid boundaries; a second clamp prevents interpolation through a shelf.
    a.position[1]=Math.max(a.position[1],floor(a.position[0],a.position[2])+.37);
-   const vx=a.position[0]-a.previous[0],vz=a.position[2]-a.previous[2];if(Math.hypot(vx,vz)>.00001)a.direction=Math.atan2(-vz,vx);else if(dt===0)a.direction=Math.atan2(-Math.cos(angle)*g.radius[1],-Math.sin(angle)*g.radius[0]);
+   const vx=a.position[0]-a.previous[0],vz=a.position[2]-a.previous[2];if(Math.hypot(vx,vz)>.00001)a.direction=Math.atan2(-vz,vx);else if(dt===0)a.direction=Math.atan2(-Math.cos(angle)*g.radius[1],-Math.sin(angle)*g.radius[0]);}
    dummy.position.fromArray(a.position);dummy.rotation.set(0,a.direction+Math.PI/2,Math.sin(time.value*.5+a.phase)*.035);dummy.scale.setScalar(a.scale);dummy.updateMatrix();const i=indices[a.kind]||0;batches.get(a.kind).setMatrixAt(i,dummy.matrix);indices[a.kind]=i+1;
-  }for(const batch of batches.values())batch.commit();
+  }
+  for(const [kind,batch] of batches){
+   for(const mesh of batch.meshes)mesh.count=indices[kind]||0;
+   batch.commit();
+  }
  }
  const sightRay=new T.Raycaster(),clip=V(),delta=V();
  function visible(target,camera,position){
@@ -49,10 +55,10 @@ export function createJejuBiodiversity({scene,environment,scenery,garden,assets}
   if(!active)return;age+=dt;if(age<.32)return;const elapsed=age;age=0;
   if(chromis)book.mark('chromis');if(puffer)book.mark('puffer');
   for(const s of SPECIES){if(book.seen.has(s.id)||['chromis','puffer'].includes(s.id))continue;
-   const targets=[...agents.filter(a=>a.kind===s.id).map(a=>a.position),...staticTargets.filter(a=>a.id===s.id).map(a=>a.position)].sort((a,b)=>Math.hypot(...a.map((v,i)=>v-position[i]))-Math.hypot(...b.map((v,i)=>v-position[i])));
+   const targets=[...agents.filter(a=>a.kind===s.id&&!a.captured).map(a=>a.position),...staticTargets.filter(a=>a.id===s.id).map(a=>a.position)].sort((a,b)=>Math.hypot(...a.map((v,i)=>v-position[i]))-Math.hypot(...b.map((v,i)=>v-position[i])));
    const seen=targets.slice(0,3).some(p=>visible(p,camera,position));if(book.observe(s.id,seen,elapsed))lastNew=s.id;
   }
  }
  update(0);let triangles=0;group.traverse(o=>{if(o.isMesh)triangles+=(o.geometry.index?.count??o.geometry.attributes.position.count)/3*(o.isInstancedMesh?o.count:1);});
- return{group,book,agents,coralAnchors,update,observe,takeNew(){const id=lastNew;lastNew=null;return id?SPECIES.find(s=>s.id===id):null;},inspect(){return{version:BIODIVERSITY_VERSION,ambientFish:agents.length,fishKinds:FISH_SPECIES.map(s=>({id:s.id,count:s.count})),fanColonies:6,additionalSoftCorals:6,additionalTriangles:triangles,additionalDrawBatches:[...batches.values()].reduce((n,b)=>n+b.report.batches,2),additionalTextureBytes:0,runtimeAnimationTextureBytes:[...batches.values()].reduce((n,b)=>n+b.report.textureBytes,0),art:[...batches.values()].map(b=>b.report),book:book.report(),fish:agents.map(a=>({kind:a.kind,position:[...a.position],floor:floor(a.position[0],a.position[2])})),coralAnchors};}};
+ return{group,book,agents,coralAnchors,update,observe,takeNew(){const id=lastNew;lastNew=null;return id?SPECIES.find(s=>s.id===id):null;},inspect(){return{version:BIODIVERSITY_VERSION,ambientFish:agents.length,fishKinds:FISH_SPECIES.map(s=>({id:s.id,count:s.count})),fanColonies:6,additionalSoftCorals:6,additionalTriangles:triangles,additionalDrawBatches:[...batches.values()].reduce((n,b)=>n+b.report.batches,2),additionalTextureBytes:0,runtimeAnimationTextureBytes:[...batches.values()].reduce((n,b)=>n+b.report.textureBytes,0),art:[...batches.values()].map(b=>b.report),book:book.report(),fish:agents.map(a=>({kind:a.kind,captured:!!a.captured,position:[...a.position],floor:floor(a.position[0],a.position[2])})),coralAnchors};}};
 }
