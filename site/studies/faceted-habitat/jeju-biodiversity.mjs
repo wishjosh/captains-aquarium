@@ -1,8 +1,9 @@
 import * as T from './runtime/vendor/three.module.js';
 import {reefFloor} from './reef-terrain.mjs?v=2026-11-02-discovery-1';
-import {ROCK_BEDS} from './jeju-habitat-layout.mjs?v=2026-11-10-life-2';
-import {SPECIES,FISH_SPECIES,COAST_GROUPS,EncounterBook,BIODIVERSITY_VERSION} from './jeju-species.mjs?v=2026-11-10-life-2';
-import {coastalFishGeometry,seaFanGeometry} from './jeju-fauna-geometry.mjs?v=2026-11-10-life-2';
+import {ROCK_BEDS} from './jeju-habitat-layout.mjs?v=2026-11-10-life-3';
+import {SPECIES,FISH_SPECIES,COAST_GROUPS,EncounterBook,BIODIVERSITY_VERSION} from './jeju-species.mjs?v=2026-11-10-life-3';
+import {seaFanGeometry} from './jeju-fauna-geometry.mjs?v=2026-11-10-life-3';
+import {createCoastalSchool} from './coastal-fish-school.mjs?v=2026-11-10-fish-1';
 const V=(x=0,y=0,z=0)=>new T.Vector3(x,y,z);
 export function createJejuBiodiversity({scene,environment,scenery,garden,assets}){
  const group=new T.Group();group.name='Jeju coastal biodiversity';const book=new EncounterBook(),time={value:0},dummy=new T.Object3D(),batches=new Map(),agents=[],staticTargets=[],probe=new T.Raycaster(),heightCache=new Map();
@@ -10,21 +11,7 @@ export function createJejuBiodiversity({scene,environment,scenery,garden,assets}
  const surface=(x,z)=>{probe.set(V(x,14,z),V(0,-1,0));return probe.intersectObjects(rockTargets,false)[0]?.point.y??reefFloor(x,z);};
  const floor=(x,z)=>{let y=reefFloor(x,z);for(const dx of[0,1])for(const dz of[0,1]){const cx=Math.floor(x)+dx,cz=Math.floor(z)+dz,key=cx+':'+cz;if(!heightCache.has(key))heightCache.set(key,surface(cx,cz));y=Math.max(y,heightCache.get(key));}return y;};
  for(const s of FISH_SPECIES){
-  const material=new T.MeshStandardMaterial({vertexColors:true,roughness:.72,side:T.DoubleSide});
-  material.onBeforeCompile=shader=>{shader.uniforms.coastTime=time;shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nuniform float coastTime; attribute float coastBody; varying vec3 coastLocal; varying float coastBodyV;');shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
-    coastLocal=position;coastBodyV=coastBody;
-    float phase=instanceMatrix[3].x*.73+instanceMatrix[3].z*.51;
-    float tailWeight=smoothstep(.1,.67,-position.x);
-    transformed.z+=sin(coastTime*6.4+phase+position.x*4.)*tailWeight*.095;
-  `);
-   const base=new T.Color(s.color),dark=new T.Color('#273b3c'),pale=new T.Color('#e1ddbd'),rgb=c=>'vec3('+c.toArray().map(n=>n.toFixed(6)).join(',')+')';
-   const pattern=s.pattern==='bars'?'smoothstep(.10,.25,sin((coastLocal.x+.49)*3.141593*14.0))':s.pattern==='diagonal'?'smoothstep(-.1,.1,sin((coastLocal.y/'+s.height.toFixed(4)+'+coastLocal.x*.48)*3.141593*5.0))':s.pattern==='line'?'1.0-smoothstep(.13,.17,abs(coastLocal.y/'+s.height.toFixed(4)+'-.05))':'0.0';
-   shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 coastLocal; varying float coastBodyV;');
-   shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
-    if(coastBodyV>.5){vec3 coat=${rgb(base)};coat=mix(coat,${rgb(pale)},(1.0-smoothstep(-${s.height.toFixed(4)},0.0,coastLocal.y))*${s.pattern==='blue'?'0.04':'0.3'});coat*=1.0-smoothstep(0.0,${s.height.toFixed(4)},coastLocal.y)*.15;diffuseColor.rgb=mix(coat,${rgb(dark)},(${pattern})*.95);}
-   `);
-  };material.customProgramCacheKey=()=> 'coastal-fish-tail-2-'+s.id;
-  const mesh=new T.InstancedMesh(coastalFishGeometry(s.id),material,s.count);mesh.name=s.name+' observation school';mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);mesh.frustumCulled=false;mesh.receiveShadow=true;group.add(mesh);batches.set(s.id,mesh);
+  const school=createCoastalSchool(assets.coastalFish,{kind:s.id,count:s.count,time});group.add(school.group);batches.set(s.id,school);
  }
  for(const [gi,g]of COAST_GROUPS.entries())for(let i=0;i<g.count;i++){const species=FISH_SPECIES.find(s=>s.id===g.kind);agents.push({kind:g.kind,group:gi,index:i,phase:i*2.399+gi*.8,scale:species.length*(.88+(i%4)*.065),position:null,previous:null,direction:0});}
  const coralAnchors=[];
@@ -48,8 +35,8 @@ export function createJejuBiodiversity({scene,environment,scenery,garden,assets}
    // The floor changes at grid boundaries; a second clamp prevents interpolation through a shelf.
    a.position[1]=Math.max(a.position[1],floor(a.position[0],a.position[2])+.37);
    const vx=a.position[0]-a.previous[0],vz=a.position[2]-a.previous[2];if(Math.hypot(vx,vz)>.00001)a.direction=Math.atan2(-vz,vx);else if(dt===0)a.direction=Math.atan2(-Math.cos(angle)*g.radius[1],-Math.sin(angle)*g.radius[0]);
-   dummy.position.fromArray(a.position);dummy.rotation.set(0,a.direction,Math.sin(time.value*.5+a.phase)*.035);dummy.scale.setScalar(a.scale);dummy.updateMatrix();const i=indices[a.kind]||0;batches.get(a.kind).setMatrixAt(i,dummy.matrix);indices[a.kind]=i+1;
-  }for(const batch of batches.values())batch.instanceMatrix.needsUpdate=true;
+   dummy.position.fromArray(a.position);dummy.rotation.set(0,a.direction+Math.PI/2,Math.sin(time.value*.5+a.phase)*.035);dummy.scale.setScalar(a.scale);dummy.updateMatrix();const i=indices[a.kind]||0;batches.get(a.kind).setMatrixAt(i,dummy.matrix);indices[a.kind]=i+1;
+  }for(const batch of batches.values())batch.commit();
  }
  const sightRay=new T.Raycaster(),clip=V(),delta=V();
  function visible(target,camera,position){
@@ -67,5 +54,5 @@ export function createJejuBiodiversity({scene,environment,scenery,garden,assets}
   }
  }
  update(0);let triangles=0;group.traverse(o=>{if(o.isMesh)triangles+=(o.geometry.index?.count??o.geometry.attributes.position.count)/3*(o.isInstancedMesh?o.count:1);});
- return{group,book,agents,coralAnchors,update,observe,takeNew(){const id=lastNew;lastNew=null;return id?SPECIES.find(s=>s.id===id):null;},inspect(){return{version:BIODIVERSITY_VERSION,ambientFish:agents.length,fishKinds:FISH_SPECIES.map(s=>({id:s.id,count:s.count})),fanColonies:6,additionalSoftCorals:6,additionalTriangles:triangles,additionalDrawBatches:group.children.length,additionalTextureBytes:0,book:book.report(),fish:agents.map(a=>({kind:a.kind,position:[...a.position],floor:floor(a.position[0],a.position[2])})),coralAnchors};}};
+ return{group,book,agents,coralAnchors,update,observe,takeNew(){const id=lastNew;lastNew=null;return id?SPECIES.find(s=>s.id===id):null;},inspect(){return{version:BIODIVERSITY_VERSION,ambientFish:agents.length,fishKinds:FISH_SPECIES.map(s=>({id:s.id,count:s.count})),fanColonies:6,additionalSoftCorals:6,additionalTriangles:triangles,additionalDrawBatches:[...batches.values()].reduce((n,b)=>n+b.report.batches,2),additionalTextureBytes:0,runtimeAnimationTextureBytes:[...batches.values()].reduce((n,b)=>n+b.report.textureBytes,0),art:[...batches.values()].map(b=>b.report),book:book.report(),fish:agents.map(a=>({kind:a.kind,position:[...a.position],floor:floor(a.position[0],a.position[2])})),coralAnchors};}};
 }
