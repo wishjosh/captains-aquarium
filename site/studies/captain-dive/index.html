@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#123d4a"><title>캡틴 다이브 · 세 가지 수집 놀이</title>
+<meta name="description" content="톡 쏘기, 헤엄치기, 원 그리기. 한 손으로 즐기는 30초 바다 수집 놀이.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23123d4a'/%3E%3Ccircle cx='32' cy='32' r='21' fill='%237bd3c2'/%3E%3Cpath d='M15 32L25 24H40L48 32L40 40H25Z' fill='%23f9cf70'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css?v=1">
+</head>
+<body>
+<main class="layout">
+<section class="intro">
+<a class="brand" href="./"><span class="brand-icon">≈</span> CAPTAIN DIVE <span class="tag">PLAY LAB 01</span></a>
+<h1>작은 바다,<br><em>세 가지 손맛.</em></h1>
+<p class="lead">같은 생물을 다른 방법으로 모아보세요.<br>한 손으로, 한 판에 30초.</p>
+<nav class="modes" aria-label="수집 방식">
+<button class="mode active" data-mode="tap" aria-pressed="true"><span class="num">01</span><span><b>톡 쏘기</b><small>기다렸다가, 한 번에 톡.</small></span><span class="mode-mark">↑</span></button>
+<button class="mode" data-mode="swim" aria-pressed="false"><span class="num">02</span><span><b>헤엄치기</b><small>가고 싶은 쪽으로 쓱.</small></span><span class="mode-mark">↔</span></button>
+<button class="mode" data-mode="loop" aria-pressed="false"><span class="num">03</span><span><b>원 그리기</b><small>물고기 둘레를 빙글.</small></span><span class="mode-mark">◌</span></button>
+</nav>
+<div class="note"><span>오늘의 바다</span><strong>제주에서 만난 세 친구</strong><p>자리돔 · 가시복 · 용치놀래기<br>단순한 그림과 게임용 움직임으로 만나요.</p></div>
+<p class="local-note" id="save-note">모은 기록은 이 브라우저에 저장돼요.</p>
+</section>
+<section class="play-column" aria-label="플레이 화면">
+<div class="console">
+<header class="console-head"><span><i></i> JEJU · LITTLE SEA</span><button id="sound" class="icon-button" aria-pressed="false">소리 꺼짐</button></header>
+<div class="screen">
+<div class="hud"><span id="mode-name">01 톡 쏘기</span><span id="clock">30초</span><span id="count">0마리</span></div>
+<canvas id="sea" width="360" height="480" tabindex="0" aria-label="수집 놀이 화면. 톡 쏘기는 화면 누르기 또는 스페이스, 헤엄치기는 좌우 끌기 또는 방향키, 원 그리기는 드래그 또는 스페이스로 시작하고 방향키로 그린 후 스페이스로 마칩니다."></canvas>
+<div class="overlay" id="overlay">
+<div class="overlay-card"><span class="eyebrow" id="overlay-label">01 · 타이밍 놀이</span><div class="gesture" id="gesture" aria-hidden="true">↑</div><h2 id="overlay-title">톡, 물방울을 쏴요</h2><p id="overlay-note">물고기가 지나갈 때 화면을 눌러요.<br>물방울은 선장 앞쪽으로 날아가요.</p><div id="result-fish" class="result-fish"></div><button id="start" class="primary">30초 시작</button><button id="next" class="secondary" hidden>다음 방식 해보기 →</button></div>
+</div>
+<div class="message" id="message" role="status" aria-live="polite">톡 쏘기부터 시작해 볼까요?</div>
+</div>
+<div class="console-foot"><p id="control-tip">화면 어디든 톡 · PC는 Space</p><button id="pause" class="small-button" disabled>쉬기</button><button id="finish" class="small-button" disabled>마치기</button></div>
+</div>
+<section class="collection" aria-label="방식별 수집 목록">
+<div class="collection-title"><h2>내가 모은 생물</h2><span id="collection-mode">톡 쏘기 · 0 / 3종</span></div>
+<div id="cards" class="cards"></div>
+<p id="best-note" class="best-note">첫 번째 친구를 만나러 가요.</p>
+</section>
+</section>
+</main>
+<dialog id="detail"><button id="close-detail" class="close" aria-label="카드 닫기">×</button><canvas id="portrait" width="240" height="150"></canvas><span class="eyebrow">CAPTAIN'S COLLECTION</span><h2 id="detail-title"></h2><p id="detail-note"></p><button id="detail-done" class="primary">도감으로</button></dialog>
+<script type="module" src="game.mjs?v=1"></script>
+</body></html>
