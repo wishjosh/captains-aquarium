@@ -536,7 +536,8 @@ $('back-to-cards').addEventListener('click', () => {
   $('collection').hidden = false;
   previousCard.focus();
 });
-$('return').addEventListener('click', () => {
+const returnButton = $('return');
+function beginReturn() {
   if (stage !== 'dive') return;
   stage = 'return';
   returnAlongPath = false;
@@ -548,7 +549,22 @@ $('return').addEventListener('click', () => {
   $('return').disabled = true;
   updateStatus('동행과 함께 귀환 밧줄로 돌아가는 중이에요.');
   audio.cue('dock');
+}
+
+returnButton.addEventListener('click', beginReturn);
+// Chrome can suppress the compatibility click immediately after a drag on the canvas.
+let returnTouch = null;
+returnButton.addEventListener('pointerdown', event => {
+  if (event.pointerType === 'touch') returnTouch = event.pointerId;
 });
+returnButton.addEventListener('pointerup', event => {
+  if (event.pointerId !== returnTouch) return;
+  returnTouch = null;
+  const bounds = returnButton.getBoundingClientRect();
+  if (event.clientX >= bounds.left && event.clientX <= bounds.right &&
+      event.clientY >= bounds.top && event.clientY <= bounds.bottom) beginReturn();
+});
+returnButton.addEventListener('pointercancel', () => { returnTouch = null; });
 
 const sea = $('sea');
 sea.addEventListener('pointerdown', event => {
