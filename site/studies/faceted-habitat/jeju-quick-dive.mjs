@@ -12,6 +12,12 @@ const $ = id => document.getElementById(id);
 const vec = (x = 0, y = 0, z = 0) => new T.Vector3(x, y, z);
 const { clamp } = T.MathUtils;
 const castRange = 5;
+const fishDepth = 1.5;
+const swimHint = '조작부를 위로 밀어 모래 물길을 따라가요.';
+const aimModes = {
+  assist: { name: '이름으로 조준', help: '물고기 이름을 누르고, 가까이에서 물방울 버튼을 눌러요.' },
+  direct: { name: '직접 조준', help: '물속을 눌러 조준하고, 손을 떼면 그 자리에 물방울을 쏴요.' },
+};
 const species = [
   { id: 'chromis', name: '자리돔', hint: '모래 물길이 처음 굽는 쪽', x: -2.3, z: -4, speed: .65 },
   { id: 'puffer', name: '가시복', hint: '감태숲 안쪽의 바위 곁', x: 2.1, z: -26, speed: .55 },
@@ -24,12 +30,18 @@ const follow = player.clone();
 const screenPoint = vec();
 const castOrigin = vec();
 const castTarget = vec();
+const aimRay = new T.Raycaster();
+const aimPlane = new T.Plane(vec(0, 1, 0), -fishDepth);
+const aimScreen = new T.Vector2();
+const aimPoint = vec();
 const audio = new CaptureAudio();
 const storagePrefix = 'captains-aquarium-jeju-quick-dive:';
 const collected = new Set();
 const portraits = new Map();
 const keys = new Set();
 let stage = 'intro';
+let aimMode = 'assist';
+let aimPointer = null;
 let heading = 0;
 let sceneTime = 0;
 let last = 0;
@@ -194,7 +206,7 @@ function updateStatus(next) {
 
 function resetFish(fish) {
   fish.caught = false;
-  fish.root.position.set(fish.spec.x, 1.5, fish.spec.z);
+  fish.root.position.set(fish.spec.x, fishDepth, fish.spec.z);
   fish.root.rotation.y = Math.PI / 2;
 }
 
@@ -209,7 +221,7 @@ function attachFish(spec, model) {
   resetFish(fish);
   $('targets').append(button);
   button.addEventListener('click', () => {
-    if (stage !== 'dive' || fish.caught) return;
+    if (stage !== 'dive' || aimMode !== 'assist' || fish.caught) return;
     selected = selected === fish ? null : fish;
     updateStatus(selected ? selected.spec.name + '을 살펴봐요.' : '모래 물길을 따라 더 둘러봐요.');
   });
@@ -222,6 +234,7 @@ function adjustView() {
   const height = window.innerHeight;
   renderer.setSize(width, height, false);
   camera.aspect = width / height;
+  camera.fov = camera.aspect > 1.1 ? 53 : 63;
   camera.updateProjectionMatrix();
 }
 
@@ -266,7 +279,7 @@ function updateFish(dt) {
     if (caught) {
       destination.set(player.x + (index ? .85 : -.85), 1.75, player.z + (stage === 'return' ? -.75 : .7));
     } else {
-      destination.set(spec.x + Math.sin(phase) * .76, 1.5 + Math.cos(phase) * .13, spec.z + Math.cos(phase) * .40);
+      destination.set(spec.x + Math.sin(phase) * .76, fishDepth + Math.cos(phase) * .13, spec.z + Math.cos(phase) * .40);
     }
     const x = destination.x - root.position.x;
     const z = destination.z - root.position.z;
@@ -281,14 +294,21 @@ function updateFish(dt) {
 }
 
 function fire() {
-  if (stage !== 'dive' || !selected || selected.caught || shot || selected.root.position.distanceTo(player) > castRange) return;
+  if (aimMode === 'assist' && selected && !selected.caught && !$('shoot').disabled) {
+    launch(selected.root.position, selected);
+  }
+}
+
+function launch(point, target = null) {
+  if (stage !== 'dive' || shot || point.distanceTo(player) > castRange) return;
   castOrigin.copy(player);
   castOrigin.y += .18;
-  castTarget.copy(selected.root.position);
-  shot = { fish: selected, elapsed: 0, time: clamp(castOrigin.distanceTo(castTarget) / 5.4, .21, .87) };
+  castTarget.copy(point);
+  shot = { fish: target, elapsed: 0, time: clamp(castOrigin.distanceTo(castTarget) / 5.4, .21, .87) };
   bubble.scale.setScalar(1);
   bubble.position.copy(castOrigin);
   bubble.visible = true;
+  updateStatus('물방울이 날아가고 있어요.');
   audio.cue('shot');
 }
 
@@ -307,14 +327,16 @@ function updateShot(dt) {
   bubble.position.lerpVectors(castOrigin, castTarget, fraction);
   bubble.position.y += Math.sin(fraction * Math.PI) * .30;
   if (fraction < 1) return;
-  const fish = shot.fish;
-  if (fish.root.position.distanceTo(castTarget) > .37) {
+  const candidates = shot.fish ? [shot.fish] : animals;
+  const fish = candidates.find(animal => !animal.caught && animal.root.position.distanceTo(castTarget) <= .37);
+  if (!fish) {
     shot = null;
     bubble.visible = false;
     audio.cue('miss');
-    updateStatus('빗나갔어요. 조금 더 가까이에서 다시 노려요.');
+    updateStatus(aimMode === 'direct' ? '빗나갔어요. 물고기가 갈 자리를 조금 앞서 노려봐요.' : '빗나갔어요. 조금 더 가까이에서 다시 노려요.');
     return;
   }
+  shot.fish = fish;
   shot.impact = true;
   fish.caught = true;
   count += 1;
@@ -329,15 +351,30 @@ function updateHud() {
   $('place').textContent = player.z > 4 ? '감태숲 입구' : player.z > -13 ? '모래 물길' : '감태숲 안쪽';
   for (const fish of animals) {
     screenPoint.copy(fish.root.position);
-    screenPoint.y += .47;
+    if (aimMode === 'assist') screenPoint.y += .47;
     screenPoint.project(camera);
     const visible = diving && !fish.caught && fish.root.position.distanceTo(player) < 11 &&
       screenPoint.z > -1 && screenPoint.z < 1 && Math.abs(screenPoint.x) < .91 && screenPoint.y < .66 && screenPoint.y > -.62;
     fish.button.hidden = !visible;
     if (!visible) continue;
-    fish.button.style.left = clamp((screenPoint.x + 1) * innerWidth * .5, 55, innerWidth - 55) + 'px';
+    const labelX = (screenPoint.x + 1) * innerWidth * .5;
+    fish.button.style.left = (aimMode === 'direct' ? labelX : clamp(labelX, 55, innerWidth - 55)) + 'px';
     fish.button.style.top = (1 - screenPoint.y) * 50 + '%';
     fish.button.setAttribute('aria-pressed', String(fish === selected));
+  }
+  if (aimMode === 'direct') {
+    $('shoot').hidden = true;
+    const point = aimPointer === null ? null : resolveAimPoint();
+    aim.visible = diving && !shot && !!point;
+    if (aim.visible) {
+      aim.position.copy(point);
+      aim.quaternion.copy(camera.quaternion);
+      aim.material.color.set(point.distanceTo(player) <= castRange ? '#ffde86' : '#ef9a85');
+    }
+    if (diving && !count && status === swimHint && animals.some(fish => !fish.button.hidden)) {
+      updateStatus('물고기 앞을 눌러 조준하고 손을 떼어 쏘세요.');
+    }
+    return;
   }
   if (selected && (selected.caught || selected.root.position.distanceTo(player) >= 12)) selected = null;
   const distance = selected?.root.position.distanceTo(player) ?? Infinity;
@@ -346,6 +383,7 @@ function updateHud() {
   $('shoot').disabled = !readyToShoot;
   aim.visible = readyToShoot;
   if (aim.visible) {
+    aim.material.color.set('#ffde86');
     aim.position.copy(selected.root.position);
     aim.quaternion.copy(camera.quaternion);
   }
@@ -357,7 +395,29 @@ function updateHud() {
   }
 }
 
+function applyAimMode(mode) {
+  aimMode = mode;
+  $('game').dataset.aim = mode;
+  $('mode-label').textContent = aimModes[mode].name;
+  $('mode-help').textContent = aimModes[mode].help;
+  for (const fish of animals) {
+    fish.button.tabIndex = mode === 'direct' ? -1 : 0;
+    fish.button.setAttribute('aria-hidden', String(mode === 'direct'));
+  }
+}
+
+function resolveAimPoint() {
+  aimRay.setFromCamera(aimScreen, camera);
+  return aimRay.ray.intersectPlane(aimPlane, aimPoint);
+}
+
+function updateAimScreen(event) {
+  const bounds = $('sea').getBoundingClientRect();
+  aimScreen.set((event.clientX - bounds.left) / bounds.width * 2 - 1, 1 - (event.clientY - bounds.top) / bounds.height * 2);
+}
+
 function clearInput() {
+  aimPointer = null;
   keys.clear();
   pointer = null;
   swipeX = 0;
@@ -384,7 +444,7 @@ function start() {
   $('stick').hidden = false;
   $('return').disabled = false;
   $('companions').textContent = '동행 0마리';
-  updateStatus('조작부를 위로 밀어 모래 물길을 따라가요.');
+  updateStatus(swimHint);
   if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
   audio.unlock();
 }
@@ -396,6 +456,7 @@ function finish() {
   for (const fish of caught) record(fish.spec);
   $('hud').hidden = true;
   $('result').hidden = false;
+  $('result-mode').textContent = '탐사 마침 · ' + aimModes[aimMode].name;
   $('result-title').textContent = count ? count + '마리와 함께 돌아왔어요' : '탐사를 마쳤어요';
   const report = [];
   if (newlyCollected.length) report.push('새 카드 · ' + newlyCollected.map(fish => fish.spec.name).join(', ') + '.');
@@ -449,6 +510,17 @@ function showDex(panel) {
   $('close-dex').focus();
 }
 
+for (const option of document.querySelectorAll('[name="aim-mode"]')) {
+  option.addEventListener('change', () => {
+    if (option.checked) applyAimMode(option.value);
+  });
+}
+$('change-mode').addEventListener('click', () => {
+  stage = 'intro';
+  $('result').hidden = true;
+  $('intro').hidden = false;
+  document.querySelector('[name="aim-mode"]:checked').focus();
+});
 $('start').addEventListener('click', start);
 $('restart').addEventListener('click', start);
 $('shoot').addEventListener('click', fire);
@@ -477,6 +549,30 @@ $('return').addEventListener('click', () => {
   updateStatus('동행과 함께 귀환 밧줄로 돌아가는 중이에요.');
   audio.cue('dock');
 });
+
+const sea = $('sea');
+sea.addEventListener('pointerdown', event => {
+  if (stage !== 'dive' || aimMode !== 'direct' || aimPointer !== null || shot || event.button > 0) return;
+  aimPointer = event.pointerId;
+  updateAimScreen(event);
+  sea.setPointerCapture(aimPointer);
+});
+sea.addEventListener('pointermove', event => {
+  if (event.pointerId === aimPointer) updateAimScreen(event);
+});
+sea.addEventListener('pointerup', event => {
+  if (event.pointerId !== aimPointer) return;
+  aimPointer = null;
+  updateAimScreen(event);
+  const point = resolveAimPoint();
+  if (point && point.distanceTo(player) <= castRange) launch(point);
+  else updateStatus('물방울이 닿기엔 멀어요. 조금 가까이 헤엄쳐요.');
+});
+for (const type of ['pointercancel', 'lostpointercapture']) {
+  sea.addEventListener(type, event => {
+    if (event.pointerId === aimPointer) aimPointer = null;
+  });
+}
 
 const stick = $('stick');
 const movementKeys = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD']);
@@ -572,6 +668,7 @@ async function boot() {
     attachFish(spec, createModel());
     portrait(spec, createModel);
   });
+  applyAimMode(document.querySelector('[name="aim-mode"]:checked').value);
   adjustView();
   movePlayer(0);
   positionView(1);
