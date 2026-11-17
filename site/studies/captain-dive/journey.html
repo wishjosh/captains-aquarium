@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#103f49" />
+    <title>캡틴 다이브 · 제주 감태숲</title>
+    <link rel="stylesheet" href="journey.css?v=1" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <a href="journey.html">≈ 캡틴 다이브</a><span>제주 · 감태숲</span>
+      </header>
+      <nav aria-label="보기">
+        <button id="book-tab" aria-pressed="true">
+          도감 <span id="progress">0/3</span></button
+        ><button id="tank-tab" aria-pressed="false">작은 수조</button>
+      </nav>
+      <section id="harbor">
+        <div id="book">
+          <div class="heading">
+            <h1>오늘은 누구를 만날까요?</h1>
+            <p>카드를 눌러 다음 목표를 골라요.</p>
+          </div>
+          <div id="cards"></div>
+        </div>
+        <div id="tank" hidden>
+          <div class="heading">
+            <h1>함께 돌아온 바다</h1>
+            <p id="tank-caption">생물을 모으면 이곳에서 함께 헤엄쳐요.</p>
+          </div>
+          <canvas
+            id="aquarium"
+            width="360"
+            height="260"
+            aria-label="수집한 생물이 함께 헤엄치는 작은 수조"
+          ></canvas>
+        </div>
+        <div class="departure">
+          <p id="target-label">감태숲의 세 친구를 만나러 가요.</p>
+          <button id="depart" class="primary">감태숲 탐사 시작</button
+          ><small id="storage-note"
+            >모은 기록은 이 기기·브라우저에 저장돼요.</small
+          >
+        </div>
+      </section>
+      <section id="dive" hidden>
+        <div class="hud">
+          <b id="timer">90초</b><span id="dive-target">자유 탐사</span
+          ><b id="round-count">0마리</b>
+        </div>
+        <div class="sea-wrap">
+          <canvas
+            id="sea"
+            width="360"
+            height="520"
+            tabindex="0"
+            aria-label="감태숲 탐사. 물고기를 향해 끌어 조준하고 손을 떼면 물방울이 발사됩니다."
+          ></canvas>
+          <div id="paused" hidden>
+            <h2>잠깐 쉬어요</h2>
+            <button id="resume" class="primary">계속 탐사</button>
+          </div>
+        </div>
+        <p id="feedback" role="status" aria-live="polite">
+          물고기를 향해 끌고, 놓으면 발사!
+        </p>
+        <div class="actions">
+          <button id="pause">쉬기</button
+          ><button id="return">모은 생물과 귀환</button>
+        </div>
+      </section>
+      <section id="result" hidden>
+        <span class="eyebrow">감태숲 탐사 완료</span>
+        <h1 id="result-title"></h1>
+        <div id="haul"></div>
+        <button id="to-book" class="primary">도감에서 다음 목표 고르기</button
+        ><button id="to-tank">작은 수조 보기</button>
+      </section>
+      <dialog id="detail">
+        <button id="close" aria-label="닫기">×</button
+        ><canvas id="portrait" width="280" height="130"></canvas>
+        <h2 id="fish-name"></h2>
+        <p id="fish-note"></p>
+        <p id="fish-count"></p>
+        <button id="choose" class="primary">다음 목표로 선택</button>
+      </dialog>
+      <footer>90초의 작은 탐사 · 자리돔 / 가시복 / 용치놀래기</footer>
+    </main>
+    <script type="module" src="journey.mjs?v=1"></script>
+  </body>
+</html>

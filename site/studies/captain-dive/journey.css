@@ -1,0 +1,288 @@
+* {
+  box-sizing: border-box;
+}
+[hidden] {
+  display: none !important;
+}
+:root {
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+  color: #eef5dc;
+  background: #0b2934;
+}
+body {
+  margin: 0;
+}
+main {
+  max-width: 460px;
+  margin: auto;
+  min-height: 100dvh;
+  background: #103f49;
+  padding: 18px 18px max(18px, env(safe-area-inset-bottom));
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0 20px;
+}
+header a {
+  font-weight: 850;
+  color: #f2d38c;
+  text-decoration: none;
+  font-size: 19px;
+}
+header span {
+  font-size: 12px;
+  color: #b8d3c7;
+}
+button {
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid #70978c;
+  border-radius: 13px;
+  background: #214f56;
+  color: #edf4de;
+  padding: 13px;
+  min-height: 46px;
+}
+button:focus-visible {
+  outline: 3px solid #f2d38c;
+  outline-offset: 3px;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.primary {
+  background: #f0d18c;
+  color: #173b43;
+  border: 0;
+  font-weight: 800;
+}
+nav {
+  display: flex;
+  gap: 8px;
+  padding-bottom: 18px;
+}
+nav button {
+  flex: 1;
+}
+nav [aria-pressed="true"] {
+  background: #d4e7c7;
+  color: #173b43;
+  font-weight: 800;
+}
+.heading {
+  margin: 8px 0 20px;
+}
+h1 {
+  font-size: 24px;
+  line-height: 1.35;
+  margin: 0 0 9px;
+}
+p {
+  line-height: 1.65;
+  color: #c4dcd0;
+}
+.heading p {
+  font-size: 14px;
+  margin: 0;
+}
+#cards {
+  display: grid;
+  gap: 10px;
+}
+.card {
+  display: flex;
+  align-items: center;
+  text-align: left;
+  width: 100%;
+  padding: 8px 12px;
+  background: #1b4a51;
+  border-color: #47776e;
+}
+.card canvas {
+  width: 100px;
+  height: 70px;
+  image-rendering: pixelated;
+}
+.card div {
+  flex: 1;
+}
+.card strong {
+  display: block;
+  font-size: 17px;
+}
+.card small {
+  display: block;
+  color: #bcd4c4;
+  margin-top: 7px;
+}
+.card.target {
+  border: 2px solid #f0d18c;
+}
+.card.new strong:after {
+  content: " 새 친구";
+  font-size: 11px;
+  color: #f5d891;
+}
+.departure {
+  padding: 20px 0 0;
+  text-align: center;
+}
+.departure p {
+  margin: 0 0 10px;
+  font-size: 14px;
+}
+.departure button {
+  width: 100%;
+}
+small#storage-note {
+  display: block;
+  font-size: 11px;
+  color: #abc6bc;
+  margin-top: 14px;
+}
+canvas {
+  max-width: 100%;
+}
+#sea {
+  width: 100%;
+  display: block;
+  touch-action: none;
+  border-radius: 15px;
+  background: #286b72;
+}
+#aquarium {
+  width: 100%;
+  border: 5px solid #82b9aa;
+  border-radius: 30px;
+  background: #286b72;
+  display: block;
+}
+.hud {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 13px;
+  align-items: center;
+  margin: 0 0 10px;
+}
+.hud b {
+  color: #f4d990;
+}
+.sea-wrap {
+  position: relative;
+}
+#paused {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  background: #0b2934d9;
+  border-radius: 15px;
+  padding: 30px;
+}
+.actions {
+  display: flex;
+  gap: 10px;
+}
+.actions button {
+  flex: 1;
+}
+#feedback {
+  min-height: 26px;
+  margin: 12px 0;
+  font-size: 13px;
+  text-align: center;
+  color: #f1dfb0;
+}
+#result {
+  text-align: center;
+  padding: 30px 0;
+}
+#result button {
+  width: 100%;
+  margin-top: 12px;
+}
+.eyebrow {
+  color: #a9d9c7;
+  font-size: 13px;
+}
+#result h1 {
+  margin: 15px 0;
+}
+#haul {
+  margin: 20px 0;
+}
+#haul p {
+  border-bottom: 1px solid #467269;
+  padding: 10px;
+}
+dialog {
+  background: #e3edd2;
+  color: #153e47;
+  border: 0;
+  border-radius: 24px;
+  padding: 24px;
+  width: min(90vw, 360px);
+}
+dialog::backdrop {
+  background: #061d29bc;
+}
+dialog p {
+  color: #315d5c;
+}
+dialog canvas {
+  display: block;
+  margin: auto;
+  image-rendering: pixelated;
+}
+dialog .primary {
+  width: 100%;
+  background: #164e56;
+  color: #f2e2b1;
+}
+#close {
+  float: right;
+  min-height: 40px;
+  padding: 5px 14px;
+  font-size: 25px;
+}
+footer {
+  text-align: center;
+  font-size: 10px;
+  color: #8db3a7;
+  padding: 25px 0 4px;
+}
+@media (min-width: 700px) {
+  main {
+    margin: 24px auto;
+    border-radius: 24px;
+    min-height: 0;
+    box-shadow: 0 20px 80px #001b28;
+  }
+}
+@media (max-height: 750px) {
+  #sea {
+    max-height: 62dvh;
+    width: auto;
+    margin: auto;
+  }
+  .heading {
+    margin: 0 0 12px;
+  }
+  main {
+    padding-top: 10px;
+  }
+  header {
+    padding-bottom: 12px;
+  }
+  nav {
+    padding-bottom: 12px;
+  }
+}
