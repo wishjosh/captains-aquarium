@@ -16,6 +16,7 @@ import {
 } from "./reef-motion.mjs";
 import { createWorld } from "./reef-world.mjs";
 import { CaptureAudio } from "../faceted-habitat/audio.mjs";
+import { PageLifecycle } from "../faceted-habitat/page-lifecycle.mjs";
 
 const $ = (id) => document.getElementById(id),
   canvas = $("water"),
@@ -589,14 +590,16 @@ $("aim").onclick = () => {
 $("start").onclick = $("again").onclick = start;
 $("pause").onclick = pause;
 $("resume").onclick = resume;
+new PageLifecycle({
+  page: document,
+  host: window,
+  onPause: pause,
+  onBlur: () => keys.clear(),
+});
 document.addEventListener("visibilitychange", () => {
-  if (document.hidden) pause();
   last = performance.now();
 });
-window.addEventListener("blur", pause);
-window.addEventListener("pagehide", clearInput);
 window.addEventListener("resize", () => {
-  clearInput();
   if (world) {
     world.resize();
     world.follow(player, 0, true);
