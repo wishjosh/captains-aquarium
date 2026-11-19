@@ -1,5 +1,6 @@
 import { species, clamp, sweptHit } from "./rules.mjs?v=1";
 import { sprite } from "./journey-art.mjs?v=1";
+import { initialRecord as clean } from "./reef-motion.mjs";
 const $ = (id) => document.getElementById(id);
 const sea = $("sea"),
   ctx = sea.getContext("2d"),
@@ -9,23 +10,11 @@ const KEY = "captain-dive-jeju-journey-v1",
   DURATION = 90;
 const habitats = [
   "감태 사이의 모래 공터",
-  "현무암 옆의 넓은 물길",
-  "감태숲 가운데 물길",
+  "현무암 바위턱의 깊은 물",
+  "감태숲 안쪽 물길",
 ];
 let record = { counts: [0, 0, 0], target: null, runs: 0 },
   saveOk = true;
-function clean(raw) {
-  const number = (n) =>
-    Number.isFinite(n) ? clamp(Math.floor(n), 0, 999999) : 0;
-  return {
-    counts: species.map((_, i) => number(raw?.counts?.[i])),
-    target:
-      Number.isInteger(raw?.target) && raw.target >= 0 && raw.target < 3
-        ? raw.target
-        : null,
-    runs: number(raw?.runs),
-  };
-}
 try {
   record = clean(JSON.parse(localStorage.getItem(KEY) || "null"));
 } catch {
@@ -543,6 +532,11 @@ $("choose").onclick = () => {
   $("detail").close();
   harbor("book");
 };
-save();
-harbor();
+const initialTab = new URLSearchParams(globalThis.location?.search || "").get("view") === "tank" ? "tank" : "book";
+window.addEventListener("pageshow", event => {
+  if (!event.persisted || stage !== "harbor") return;
+  try { record = clean(JSON.parse(localStorage.getItem(KEY) || "null")); } catch {}
+  renderBook();
+});
+harbor(initialTab);
 requestAnimationFrame(frame);

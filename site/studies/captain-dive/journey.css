@@ -140,6 +140,13 @@ p {
 .departure button {
   width: 100%;
 }
+.departure a.primary {
+  display: block;
+  padding: 14px;
+  margin-bottom: 8px;
+  border-radius: 13px;
+  text-decoration: none;
+}
 small#storage-note {
   display: block;
   font-size: 11px;
