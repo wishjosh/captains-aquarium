@@ -293,8 +293,8 @@ function shoreline(scene) {
         "#include <color_fragment>",
         `#include <color_fragment>
        float crest = sin(waveXY.y*5.2 + sin(waveXY.x*1.1 + surfaceTime*.5) + surfaceTime*1.2);
-       float patch = sin(waveXY.x*2.1 + waveXY.y*.7) + sin(waveXY.y*1.3 - surfaceTime*.4);
-       float glint = smoothstep(.94,.995,crest)*smoothstep(.6,1.5,patch);
+       float rippleMask = sin(waveXY.x*2.1 + waveXY.y*.7) + sin(waveXY.y*1.3 - surfaceTime*.4);
+       float glint = smoothstep(.94,.995,crest)*smoothstep(.6,1.5,rippleMask);
        diffuseColor.rgb = mix(diffuseColor.rgb, vec3(.70,.96,.92), glint*.85);`,
       );
   };
