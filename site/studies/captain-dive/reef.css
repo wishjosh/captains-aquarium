@@ -267,6 +267,8 @@ header {
 }
 .sheet {
   position: absolute;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
   bottom: max(19px, env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
@@ -284,6 +286,7 @@ header {
 .sheet h1,
 .sheet h2 {
   font-size: clamp(1.4rem, 5.8vw, 2rem);
+  text-wrap: balance;
   line-height: 1.12;
   margin: 0.38rem 0 0.5rem;
   letter-spacing: -0.065em;
