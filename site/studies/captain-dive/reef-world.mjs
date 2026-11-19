@@ -13,7 +13,10 @@ import {
   HOME,
   blend,
   fishPlace,
-} from "./reef-motion.mjs";
+  coastMix,
+  waterPose,
+  TRACK_RADIUS,
+} from "./reef-motion.mjs?v=coast1";
 
 export { T };
 const v = (x = 0, y = 0, z = 0) => new T.Vector3(x, y, z);
@@ -50,6 +53,7 @@ function makeFloor(scene) {
   g.translate(0, 0, -4);
   const p = g.attributes.position,
     colors = [],
+    beach = new T.Color("#e7c183"),
     sand = new T.Color("#b9d5bd"),
     outer = new T.Color("#347d78"),
     deep = new T.Color("#7fbcb3"),
@@ -62,6 +66,7 @@ function makeFloor(scene) {
     c.copy(sand)
       .lerp(deep, T.MathUtils.smoothstep(-z, 1, 16) * 0.9)
       .lerp(outer, T.MathUtils.smoothstep(lane, 0.8, 5.2));
+    c.lerp(beach, coastMix(z));
     c.multiplyScalar(
       0.94 + 0.06 * Math.sin(z * 0.92 + x * 0.5) + seed(i) * 0.045,
     );
@@ -83,7 +88,7 @@ function makeFloor(scene) {
       "uniform float waterTime;varying vec2 sandXZ;\n" +
       s.fragmentShader.replace(
         "#include <color_fragment>",
-        "#include <color_fragment>\nfloat waves=sin(sandXZ.x*2.55+sin(sandXZ.y*2.0+waterTime*.46))+sin(sandXZ.y*2.15+sin(sandXZ.x*2.55-waterTime*.28));diffuseColor.rgb*=.97+.135*smoothstep(1.46,1.91,waves);",
+        "#include <color_fragment>\nfloat waves=sin(sandXZ.x*2.55+sin(sandXZ.y*2.0+waterTime*.46))+sin(sandXZ.y*2.15+sin(sandXZ.x*2.55-waterTime*.28));diffuseColor.rgb*=.97+.135*smoothstep(1.46,1.91,waves)*(1.-smoothstep(9.,13.,sandXZ.y));",
       );
   };
   scene.add(new T.Mesh(g, floorMat));
@@ -163,7 +168,7 @@ function makeKelp(scene) {
       const onRock = rocks.some(
         ([rx, rz, w, d]) => ((x - rx) / w) ** 2 + ((z - rz) / d) ** 2 < 0.74,
       );
-      if (!onRock)
+      if (!onRock && bottom(x, z) < -1.8)
         items.push([
           x,
           bottom(x, z) - 0.04,
@@ -257,6 +262,132 @@ function shadow(scene) {
   m.rotation.x = -Math.PI / 2;
   return m;
 }
+function shoreline(scene) {
+  const water = mesh(
+    scene,
+    new T.PlaneGeometry(55, 56),
+    new T.MeshBasicMaterial({
+      color: "#47bbbd",
+      transparent: true,
+      depthWrite: false,
+      opacity: 0.36,
+    }),
+    0,
+    0.012,
+    -7,
+  );
+  water.rotation.x = -Math.PI / 2;
+  water.renderOrder = 1;
+  const surfaceTime = { value: 0 };
+  water.material.onBeforeCompile = (shader) => {
+    shader.uniforms.surfaceTime = surfaceTime;
+    shader.vertexShader =
+      "varying vec2 waveXY;\n" +
+      shader.vertexShader.replace(
+        "#include <begin_vertex>",
+        "#include <begin_vertex>\nwaveXY = position.xy;",
+      );
+    shader.fragmentShader =
+      "varying vec2 waveXY; uniform float surfaceTime;\n" +
+      shader.fragmentShader.replace(
+        "#include <color_fragment>",
+        `#include <color_fragment>
+       float crest = sin(waveXY.y*5.2 + sin(waveXY.x*1.1 + surfaceTime*.5) + surfaceTime*1.2);
+       float patch = sin(waveXY.x*2.1 + waveXY.y*.7) + sin(waveXY.y*1.3 - surfaceTime*.4);
+       float glint = smoothstep(.94,.995,crest)*smoothstep(.6,1.5,patch);
+       diffuseColor.rgb = mix(diffuseColor.rgb, vec3(.70,.96,.92), glint*.85);`,
+      );
+  };
+  const foam = new T.Group();
+  scene.add(foam);
+  const foamMat = new T.MeshBasicMaterial({
+    color: "#fffae5",
+    transparent: true,
+    opacity: 0.82,
+    depthWrite: false,
+  });
+  for (let i = 0; i < 27; i++) {
+    const x = (i - 13) * 0.87;
+    const lip = mesh(
+      foam,
+      new T.CircleGeometry(1, 12),
+      foamMat,
+      x,
+      0.045,
+      11.85 + Math.sin(x * 0.7) * 0.13,
+    );
+    lip.rotation.x = -Math.PI / 2;
+    lip.scale.set(0.48 + seed(i) * 0.3, 0.055 + seed(i + 1) * 0.035, 1);
+    lip.renderOrder = 2;
+  }
+  const pebbles = [];
+  for (let i = 0; i < 37; i++) {
+    const x = (seed(i + 21) - 0.5) * 18,
+      z = 12.4 + seed(i + 84) * 5;
+    const size = 0.1 + seed(i + 43) * 0.23;
+    pebbles.push([
+      x,
+      bottom(x, z) + 0.07,
+      z,
+      size * 1.5,
+      size * 0.8,
+      size,
+      i,
+      "#655d59",
+    ]);
+  }
+  batch(scene, new T.DodecahedronGeometry(1), mat("#ffffff"), pebbles);
+  const post = mat("#98663f"),
+    cap = mat("#fff0c9");
+  for (const x of [-2.1, 2.2]) {
+    const z = 13.4,
+      y = bottom(x, z);
+    mesh(
+      scene,
+      new T.CylinderGeometry(0.092, 0.11, 0.82, 8),
+      post,
+      x,
+      y + 0.39,
+      z,
+    );
+    mesh(
+      scene,
+      new T.CylinderGeometry(0.098, 0.098, 0.11, 8),
+      cap,
+      x,
+      y + 0.68,
+      z,
+    );
+  }
+  const ring = mesh(
+    scene,
+    new T.TorusGeometry(0.28, 0.07, 8, 24),
+    mat("#f07b47"),
+    -2.1,
+    bottom(-2.1, 13.4) + 0.4,
+    13.46,
+  );
+  ring.rotation.y = 0.15;
+  const wakes = [0, 1].map(() => {
+    const wake = mesh(
+      scene,
+      new T.RingGeometry(0.93, 1, 24),
+      new T.MeshBasicMaterial({
+        color: "#e4fff9",
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+      }),
+      0,
+      0.048,
+      0,
+    );
+    wake.rotation.x = -Math.PI / 2;
+    wake.renderOrder = 2;
+    return wake;
+  });
+  return { water, foam, wakes, surfaceTime };
+}
 export async function createWorld(canvas) {
   const renderer = new T.WebGLRenderer({
     canvas,
@@ -287,6 +418,23 @@ export async function createWorld(canvas) {
   ]);
   const floorTime = makeFloor(scene);
   makeCliffs(scene, stones);
+  const shore = shoreline(scene);
+  const radar = mesh(
+    scene,
+    new T.RingGeometry(TRACK_RADIUS - 0.038, TRACK_RADIUS, 64),
+    new T.MeshBasicMaterial({
+      color: "#fff2a0",
+      transparent: true,
+      opacity: 0.9,
+      side: T.DoubleSide,
+      depthWrite: false,
+    }),
+    0,
+    0,
+    0,
+  );
+  radar.rotation.x = -Math.PI / 2;
+  radar.visible = false;
   const kelp = makeKelp(scene),
     buoy = makeBuoy(scene);
   const pebbles = [];
@@ -327,6 +475,13 @@ export async function createWorld(canvas) {
   scene.add(dust);
   const captain = new Swimmer(pirate, scene),
     captainShadow = shadow(scene);
+  const walkPose = captain.base.map(([bone]) => ({
+    bone,
+    position: v(),
+    rotation: new T.Quaternion(),
+  }));
+  const seaTint = new T.Color("#5aa6b4"),
+    skyTint = new T.Color("#a2dccc");
   const animals = entries.map((e, i) => {
     const node =
       e.s === 0
@@ -426,6 +581,38 @@ export async function createWorld(canvas) {
     buoy.float.rotation.z = Math.sin(t * 0.96) * 0.06;
     buoy.zone.scale.setScalar(1 + Math.sin(t * 2) * 0.035);
     dust.position.y = Math.sin(t * 0.22) * 0.24;
+    const swimPose = waterPose(p.x, p.z);
+    const submerge = T.MathUtils.smoothstep(-p.y, 0.15, 1.4);
+    scene.fog.color.copy(skyTint).lerp(seaTint, submerge);
+    scene.fog.near = 25 - 11 * submerge;
+    scene.background.copy(scene.fog.color);
+    shore.surfaceTime.value = t;
+    shore.water.material.opacity = 0.52 * (1 - submerge);
+    shore.water.visible = submerge < 0.99;
+    shore.foam.position.z = 0.18 * Math.sin(t * 1.4);
+    shore.foam.visible = submerge < 0.94;
+    for (const [i, wake] of shore.wakes.entries()) {
+      const phase = (t * 1.1 + i * 0.5) % 1;
+      wake.visible = swimPose > 0.02 && submerge < 0.8 && p.cruise > 0.06;
+      if (wake.visible) {
+        wake.position.set(
+          p.x - p.vx * phase * 0.2,
+          0.052,
+          p.z - p.vz * phase * 0.2,
+        );
+        wake.scale.setScalar(0.23 + 0.74 * phase);
+        wake.material.opacity = (1 - phase) * p.cruise * 0.45 * (1 - submerge);
+      }
+    }
+    dust.visible = submerge > 0.25;
+    radar.position.set(p.x, p.y, p.z);
+    if (swimPose < 1) {
+      captain.actor.userData.controller.update(dt, p.cruise > 0.09);
+      for (const joint of walkPose) {
+        joint.position.copy(joint.bone.position);
+        joint.rotation.copy(joint.bone.quaternion);
+      }
+    }
     captain.update(dt, {
       position: [p.x, p.y, p.z],
       velocity: [p.vx, p.vy, p.vz],
@@ -440,6 +627,14 @@ export async function createWorld(canvas) {
     if (p.vy < -0.3 && p.verticalTime > 0.26)
       captain.tilt.rotation.x +=
         Math.min(0.75, p.verticalTime * 0.58) * Math.min(1, -p.vy);
+    if (swimPose < 1) {
+      captain.tilt.rotation.x *= swimPose;
+      captain.tilt.rotation.z *= swimPose;
+      for (const joint of walkPose) {
+        joint.bone.position.lerp(joint.position, 1 - swimPose);
+        joint.bone.quaternion.slerp(joint.rotation, 1 - swimPose);
+      }
+    }
     shadowAt(captainShadow, p, 0.51, 0.31, p.heading);
     for (const f of animals) {
       shadowAt(f.shadow, f.node.position, 0.36, 0.2, f.heading);
@@ -449,5 +644,19 @@ export async function createWorld(canvas) {
     renderer.render(scene, camera);
   }
   resize();
-  return { animals, bubble, follow, resize, draw, project, aimAt };
+  const onRadarPlane = (p, y) => ({
+    x: p.x,
+    z: p.z + ((y - p.y) * offset.z) / offset.y,
+  });
+  return {
+    animals,
+    bubble,
+    radar,
+    onRadarPlane,
+    follow,
+    resize,
+    draw,
+    project,
+    aimAt,
+  };
 }

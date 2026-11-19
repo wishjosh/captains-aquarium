@@ -10,7 +10,7 @@ test("the reef keeps steering when browser focus changes on a visible page", asy
   try {
     const page = await browser.newPage(devices["iPhone 13"]);
     await page.goto(url);
-    await page.getByRole("button", { name: "잠수하기", exact: true }).tap();
+    await page.getByRole("button", { name: "물방울 쏘기", exact: true }).tap();
     await page.mouse.move(160, 520);
     await page.mouse.down();
     await page.mouse.move(220, 500);

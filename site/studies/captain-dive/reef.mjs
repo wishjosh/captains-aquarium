@@ -7,14 +7,17 @@ import {
   routeDepth,
   blend,
   deltaAngle,
-  newSwimmer,
+  beachStart,
+  waterPose,
+  TRACK_RADIUS,
+  TRACK_SECONDS,
   swim,
   fishPlace,
   closestHit,
   initialRecord,
   registerReturn,
-} from "./reef-motion.mjs";
-import { createWorld } from "./reef-world.mjs";
+} from "./reef-motion.mjs?v=coast1";
+import { createWorld } from "./reef-world.mjs?v=coast1";
 import { CaptureAudio } from "../faceted-habitat/audio.mjs";
 import { PageLifecycle } from "../faceted-habitat/page-lifecycle.mjs";
 
@@ -36,7 +39,7 @@ function readRecord() {
 let record = readRecord(),
   world,
   stage = "loading",
-  player = newSwimmer(),
+  player = beachStart(),
   shot = null,
   effect = null;
 let time = 0,
@@ -45,9 +48,14 @@ let time = 0,
   routeShown = false,
   homeDwell = 0,
   landing = 0,
-  aimMode = false;
+  mode =
+    new URLSearchParams(location.search).get("mode") === "follow"
+      ? "follow"
+      : "bubble",
+  tracked = null,
+  trackingTime = 0,
+  lastTrackPlace = null;
 let held = null,
-  depthHold = null,
   pointerX = 0,
   pointerZ = 0,
   lastTip = "",
@@ -65,25 +73,29 @@ const say = (s, seconds = 3) => {
   lastTip = s;
   tipUntil = time + seconds;
 };
+const modeNames = { bubble: "물방울 쏘기", follow: "원 안에서 따라가기" };
 const idleTip = () =>
-  record.target !== null
-    ? "탐사 목표 · " + species[record.target].name
-    : "끌어서 이동 · 물고기 앞을 톡 눌러 쏘기";
+  mode === "bubble"
+    ? "물고기가 갈 곳을 톡 눌러요."
+    : "한 마리를 원 안에 두고 따라가요.";
 function clearInput() {
   held = null;
-  depthHold = null;
   pointerX = pointerZ = 0;
   keys.clear();
   $("stick").hidden = true;
   $("reticle").hidden = true;
 }
-function toggleAim(on) {
-  aimMode = on;
-  $("aim").setAttribute("aria-pressed", String(on));
-  $("aim").textContent = on ? "◎ 조준 중" : "◎ 조준";
-}
-function start() {
+function start(choice) {
   if (!world) return;
+  mode = choice;
+  $("mode-caption").textContent = "캡틴 다이브 · " + modeNames[mode];
+  lastTrackPlace = null;
+  tracked = null;
+  trackingTime = 0;
+  world.radar.visible = false;
+  $("track-meter").hidden = true;
+  $("place").textContent = "감태 해안";
+  $("home-text").hidden = true;
   stage = "diving";
   time = 0;
   wentOut = false;
@@ -92,9 +104,8 @@ function start() {
   shot = effect = null;
   record = readRecord();
   clearInput();
-  toggleAim(false);
   companions.length = 0;
-  player = newSwimmer();
+  player = beachStart();
   trail = [{ x: player.x, y: player.y, z: player.z }];
   trailClock = 0;
   world.bubble.visible = false;
@@ -112,35 +123,34 @@ function start() {
   }
   $("intro").hidden = $("rest").hidden = $("result").hidden = true;
   $("hud").hidden = $("pause").hidden = false;
-  $("home").setAttribute("aria-pressed", "false");
   $("count").textContent = "0종";
   last = performance.now();
   world.follow(player, 0, true);
-  say(
-    record.target === null
-      ? "노란 표시를 따라 감태숲으로 헤엄쳐요."
-      : idleTip(),
-    3,
-  );
+  say("바다 쪽으로 끌어 물에 들어가요.", 2);
   audio.unlock();
   canvas.focus({ preventScroll: true });
 }
-function stepDepth(direction, amount = 0.51) {
-  if (stage !== "diving") return;
-  player.offset = clamp(player.offset + direction * amount, -1.25, 1.3);
-  say(direction > 0 ? "조금 더 깊게 잠영해요." : "조금 더 얕게 떠올라요.", 1.1);
-}
-function toggleRoute() {
-  routeShown = !routeShown;
-  $("home").setAttribute("aria-pressed", String(routeShown));
-  say(
-    routeShown ? "나침반 방향으로 헤엄쳐 주황 부표에 다가가요." : idleTip(),
-    2,
-  );
+function nearestFish(distance, measure) {
+  let best = null;
+  for (const fish of world.animals) {
+    if (fish.caught) continue;
+    const d = measure(fish.node.position);
+    if (d < distance) {
+      best = fish;
+      distance = d;
+    }
+  }
+  return best;
 }
 function launch(x, y) {
   if (stage !== "diving" || shot || effect?.age < 0.12) return;
-  const target = world.aimAt(x, y, player.y + 0.05);
+  if (waterPose(player.x, player.z) < 0.97) return;
+  // Depth assistance leaves the horizontal aim in the player's hands.
+  const layer = nearestFish(Math.min(90, canvas.clientWidth * 0.22), (p) => {
+    const screen = world.project(p);
+    return Math.hypot(screen.x - x, screen.y - y);
+  });
+  const target = world.aimAt(x, y, layer?.node.position.y ?? player.y);
   if (!target) return;
   const origin = { x: player.x, y: player.y + 0.05, z: player.z };
   const dx = target.x - origin.x,
@@ -155,6 +165,7 @@ function launch(x, y) {
     origin,
     dx: dx / length,
     dz: dz / length,
+    dy: (target.y - origin.y) / length,
     limit,
     progress: 0,
     x: origin.x,
@@ -182,7 +193,7 @@ function capture(f) {
   companions.push(f);
   if (companions.length === 1) {
     routeShown = true;
-    $("home").setAttribute("aria-pressed", "true");
+    $("home-text").hidden = false;
   }
   $("count").textContent = new Set(companions.map((a) => a.s)).size + "종";
   say(species[f.s].name + " 동행! 주황 부표로 돌아가거나 더 둘러봐요.", 3.5);
@@ -203,6 +214,7 @@ function moveShot(dt) {
   if (!shot) return;
   const a = { x: shot.x, y: shot.y, z: shot.z };
   shot.progress = Math.min(shot.limit, shot.progress + dt * 8.0);
+  shot.y = shot.origin.y + shot.dy * shot.progress;
   shot.x = shot.origin.x + shot.dx * shot.progress;
   shot.z = shot.origin.z + shot.dz * shot.progress;
   const blocked = rocks.some(
@@ -221,23 +233,55 @@ function moveShot(dt) {
     return;
   }
   if (shot.progress >= shot.limit) {
-    const nearby = world.animals.find(
-      (f) =>
-        !f.caught &&
-        dist(f.node.position, shot) < 1.65 &&
-        Math.abs(f.node.position.y - shot.y) > 0.47,
-    );
-    miss(
-      nearby
-        ? species[nearby.s].name +
-            " 쪽으로 " +
-            (nearby.node.position.y < shot.y
-              ? "조금 더 깊게"
-              : "조금 더 얕게") +
-            " 움직여요."
-        : null,
-    );
+    miss();
   }
+}
+function updateTracking(dt) {
+  const active =
+    mode === "follow" &&
+    waterPose(player.x, player.z) > 0.97 &&
+    stage === "diving";
+  world.radar.visible = active;
+  if (!active) {
+    tracked = null;
+    trackingTime = 0;
+    return;
+  }
+  // A new encounter starts after the swimmer moves away from the last capture.
+  if (lastTrackPlace && dist(player, lastTrackPlace) < TRACK_RADIUS * 0.72)
+    return;
+  lastTrackPlace = null;
+  function range(p) {
+    const position = world.onRadarPlane(p, player.y);
+    const d = dist(player, position);
+    if (d > TRACK_RADIUS) return Infinity;
+    const blocked = rocks.some(([x, z, rx, rz, h]) => {
+      const ax = (player.x - x) / rx,
+        az = (player.z - z) / rz;
+      const dx = (p.x - player.x) / rx,
+        dz = (p.z - player.z) / rz;
+      const t = clamp(-(ax * dx + az * dz) / (dx * dx + dz * dz || 1), 0, 1);
+      return (
+        (ax + t * dx) ** 2 + (az + t * dz) ** 2 < 0.9 &&
+        player.y + (p.y - player.y) * t < bottom(x, z) + h
+      );
+    });
+    return blocked ? Infinity : d;
+  }
+  tracked ??= nearestFish(TRACK_RADIUS, range);
+  if (!tracked) return;
+  trackingTime = clamp(
+    trackingTime +
+      (range(tracked.node.position) <= TRACK_RADIUS ? dt : -dt * 1.8),
+    0,
+    TRACK_SECONDS,
+  );
+  if (trackingTime >= TRACK_SECONDS) {
+    capture(tracked);
+    lastTrackPlace = { x: player.x, z: player.z };
+    tracked = null;
+    trackingTime = 0;
+  } else if (!trackingTime) tracked = null;
 }
 function addTrail(dt) {
   trailClock += dt;
@@ -313,6 +357,9 @@ function finish() {
     record.counts.filter(Boolean).length +
     "/3종" +
     (storageOK ? "" : " · 이 창에서만 기록돼요.");
+  $("result-mode").textContent = modeNames[mode] + " · 귀환";
+  $("swap").textContent =
+    modeNames[mode === "bubble" ? "follow" : "bubble"] + " 해보기";
   $("result").hidden = false;
   $("hud").hidden = $("pause").hidden = true;
   $("open-book").focus({ preventScroll: true });
@@ -326,30 +373,34 @@ function cues() {
       ? "부표 밧줄을 따라 함께 올라가요."
       : homeDwell > 0.05
         ? "부표에 도착했어요 · 함께 올라가는 중"
-        : time < tipUntil
-          ? lastTip
-          : routeShown
-            ? "나침반을 따라 주황 부표로 돌아가요."
-            : collected
-              ? "동행과 함께 주황 부표로 돌아갈 수 있어요."
-              : idleTip();
+        : player.z > 7 && !collected
+          ? "바다 쪽으로 끌어 물에 들어가요."
+          : time < tipUntil
+            ? lastTip
+            : routeShown
+              ? "나침반을 따라 주황 부표로 돌아가요."
+              : collected
+                ? "동행과 함께 주황 부표로 돌아갈 수 있어요."
+                : idleTip();
   if ($("note").textContent !== note) $("note").textContent = note;
   $("place").textContent =
-    player.z > 3
-      ? "감태숲 입구"
-      : player.z > -4
-        ? "모래 물길"
-        : player.z > -9
-          ? "현무암 바위턱"
-          : "감태숲 안쪽";
-  $("depth").textContent = (-player.y).toFixed(1) + " m";
+    player.z >= 11.85
+      ? "감태 해안"
+      : player.z > 9.5
+        ? "얕은 물가"
+        : player.z > 6.65
+          ? "물속으로"
+          : player.z > 3
+            ? "감태숲 입구"
+            : player.z > -4
+              ? "모래 물길"
+              : player.z > -9
+                ? "현무암 바위턱"
+                : "감태숲 안쪽";
+  $("depth").textContent = Math.max(0, -player.y).toFixed(1) + " m";
   $("home-text").textContent = routeShown
     ? "부표 " + homeDistance.toFixed(0) + " m"
     : "부표 찾기";
-  $("compass").textContent = routeShown ? "▲" : "◇";
-  $("compass").style.transform = routeShown
-    ? "rotate(" + Math.atan2(HOME.x - player.x, player.z - HOME.z) + "rad)"
-    : "";
   const m = $("home-marker"),
     hp = world.project({ x: HOME.x, y: -0.48, z: HOME.z });
   const width = canvas.clientWidth,
@@ -405,18 +456,13 @@ function cues() {
       q.y < height - 90;
     label.hidden = !visible;
     if (!visible) continue;
-    const dy = player.y - p.y;
-    label.textContent =
-      species[f.s].name +
-      (Math.abs(dy) > 0.56 ? (dy > 0 ? " · 아래" : " · 위") : "");
+    label.textContent = species[f.s].name;
     label.classList.toggle("target", record.target === f.s);
     ui(label, q.x, q.y - 18);
   }
 }
 function update(dt) {
   if (stage === "diving") {
-    if (depthHold && time - depthHold.start > 0.28)
-      stepDepth(depthHold.dir, dt * 0.92);
     const ax =
       pointerX +
       Number(keys.has("ArrowRight") || keys.has("KeyD")) -
@@ -425,15 +471,20 @@ function update(dt) {
       pointerZ +
       Number(keys.has("ArrowDown") || keys.has("KeyS")) -
       Number(keys.has("ArrowUp") || keys.has("KeyW"));
+    const nearest = tracked || nearestFish(RANGE + 0.5, (p) => dist(player, p));
+    const autoOffset = nearest
+      ? -routeDepth(player.z) - nearest.node.position.y
+      : 0;
+    player.offset += (autoOffset - player.offset) * blend(4, dt);
     swim(player, ax, az, dt);
     const d = dist(player, HOME);
-    if (d > 2.7) wentOut = true;
+    if (player.z < HOME.z - 2.8) wentOut = true;
     homeDwell = wentOut && d < 1.16 ? homeDwell + dt : 0;
     if (homeDwell > 0.46) {
       stage = "surfacing";
+      $("pause").hidden = true;
       landing = 0;
       clearInput();
-      toggleAim(false);
       shot = effect = null;
       world.bubble.visible = false;
       audio.cue("dock");
@@ -450,6 +501,7 @@ function update(dt) {
     }
   }
   updateAnimals(dt);
+  updateTracking(dt);
   moveShot(dt);
 }
 function frame(stamp) {
@@ -471,6 +523,16 @@ function frame(stamp) {
   } else {
     time += dt;
     updateAnimals(dt);
+  }
+  const meter = $("track-meter");
+  meter.hidden = !tracked || stage !== "diving";
+  if (!meter.hidden) {
+    const point = world.project(tracked.node.position);
+    ui(meter, point.x, point.y);
+    meter.style.setProperty(
+      "--filled",
+      (100 * trackingTime) / TRACK_SECONDS + "%",
+    );
   }
   world.draw(player, time, dt);
 }
@@ -496,11 +558,11 @@ canvas.addEventListener("pointerdown", (e) => {
     id: e.pointerId,
     x: e.clientX,
     y: e.clientY,
-    mode: aimMode ? "aim" : "pending",
+    mode: "pending",
   };
   canvas.setPointerCapture(e.pointerId);
   ui($("reticle"), e.clientX, e.clientY);
-  $("reticle").hidden = false;
+  $("reticle").hidden = mode !== "bubble" || player.z > 6.65;
 });
 canvas.addEventListener("pointermove", (e) => {
   if (!held || held.id !== e.pointerId) return;
@@ -523,13 +585,12 @@ canvas.addEventListener("pointermove", (e) => {
 });
 canvas.addEventListener("pointerup", (e) => {
   if (!held || held.id !== e.pointerId) return;
-  const mode = held.mode;
+  const tap = held.mode === "pending";
   held = null;
   pointerX = pointerZ = 0;
   $("stick").hidden = $("reticle").hidden = true;
-  if ((mode === "pending" || mode === "aim") && stage === "diving")
+  if (tap && mode === "bubble" && stage === "diving")
     launch(e.clientX, e.clientY);
-  if (mode === "aim") toggleAim(false);
 });
 for (const ev of ["pointercancel", "lostpointercapture"])
   canvas.addEventListener(ev, (e) => {
@@ -539,26 +600,6 @@ for (const ev of ["pointercancel", "lostpointercapture"])
       $("stick").hidden = $("reticle").hidden = true;
     }
   });
-for (const [id, direction] of [
-  ["shallower", -1],
-  ["deeper", 1],
-]) {
-  const button = $(id);
-  button.addEventListener("pointerdown", (e) => {
-    if (stage !== "diving" || depthHold) return;
-    e.preventDefault();
-    button.setPointerCapture(e.pointerId);
-    depthHold = { id: e.pointerId, dir: direction, start: time };
-    stepDepth(direction);
-  });
-  for (const ev of ["pointerup", "pointercancel", "lostpointercapture"])
-    button.addEventListener(ev, (e) => {
-      if (depthHold?.id === e.pointerId) depthHold = null;
-    });
-  button.addEventListener("click", (e) => {
-    if (e.detail === 0) stepDepth(direction);
-  });
-}
 const movement = new Set([
   "KeyW",
   "KeyA",
@@ -575,19 +616,13 @@ window.addEventListener("keydown", (e) => {
     e.preventDefault();
     keys.add(e.code);
   }
-  if (e.code === "KeyE" || e.code === "KeyQ") {
-    e.preventDefault();
-    stepDepth(e.code === "KeyE" ? 1 : -1, e.repeat ? 0.12 : 0.51);
-  }
   if (e.code === "Escape") pause();
 });
 window.addEventListener("keyup", (e) => keys.delete(e.code));
-$("home").onclick = toggleRoute;
-$("aim").onclick = () => {
-  toggleAim(!aimMode);
-  say(aimMode ? "물고기가 갈 곳으로 끌어 겨냥한 뒤 놓아요." : idleTip(), 2.4);
-};
-$("start").onclick = $("again").onclick = start;
+$("start").onclick = () => start("bubble");
+$("follow-start").onclick = () => start("follow");
+$("again").onclick = () => start(mode);
+$("swap").onclick = () => start(mode === "bubble" ? "follow" : "bubble");
 $("pause").onclick = pause;
 $("resume").onclick = resume;
 new PageLifecycle({
@@ -615,6 +650,7 @@ function failure(message) {
     $("result").hidden =
       true;
   $("intro").hidden = false;
+  $("follow-start").disabled = true;
   const status = $("load-status");
   status.hidden = false;
   status.textContent = message;
@@ -637,7 +673,10 @@ try {
   trail = [{ x: player.x, y: player.y, z: player.z }];
   world.follow(player, 0, true);
   stage = "ready";
-  $("start").textContent = "잠수하기";
+  $("start").textContent = modeNames.bubble;
+  $("follow-start").disabled = false;
+  $("start").classList.toggle("primary", mode === "bubble");
+  $("follow-start").classList.toggle("primary", mode === "follow");
   $("start").disabled = false;
   last = performance.now();
   requestAnimationFrame(frame);

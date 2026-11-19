@@ -13,20 +13,20 @@
       rel="apple-touch-icon"
       href="../faceted-habitat/jeju-apple-touch-icon.png"
     />
-    <link rel="stylesheet" href="reef.css?v=2" />
+    <link rel="stylesheet" href="reef.css?v=coast1" />
   </head>
   <body>
     <main id="reef">
       <canvas
         id="water"
         tabindex="0"
-        aria-label="감태숲. 끌어서 헤엄치고, 물고기가 갈 곳을 눌러 물방울을 쏘세요."
+        aria-label="화면을 끌어 해안에서 바다로 이동하세요."
       ></canvas>
       <div class="waterlight" aria-hidden="true"></div>
       <header id="heading">
         <div class="place">
-          <small>캡틴 다이브 · 제주 연안</small
-          ><strong id="place">감태숲</strong>
+          <small id="mode-caption">캡틴 다이브 · 제주</small
+          ><strong id="place">감태 해안</strong>
         </div>
         <button id="pause" hidden aria-label="탐사 일시정지">Ⅱ</button>
       </header>
@@ -38,45 +38,34 @@
         <div id="name-tags"></div>
         <div id="home-marker" class="tag home">귀환 부표</div>
         <div id="waymark" aria-hidden="true" hidden><i></i><i></i></div>
+        <div id="track-meter" hidden aria-hidden="true"></div>
         <div id="reticle" hidden></div>
         <div id="stick" hidden><i></i></div>
         <div class="bottom-ui">
           <div id="note" role="status"></div>
-          <div class="bar">
-            <button id="home" aria-pressed="false">
-              <span id="compass">◇</span> <span id="home-text">부표 찾기</span>
-            </button>
-            <div class="depth-buttons" aria-label="수심 조절">
-              <button id="shallower" aria-label="얕게 잠영">↑ 얕게</button
-              ><button id="deeper" aria-label="깊게 잠영">↓ 깊게</button>
-            </div>
-            <button id="aim" aria-pressed="false">◎ 조준</button>
-          </div>
+          <span id="home-text" hidden></span>
         </div>
       </div>
       <section id="intro" class="sheet" aria-labelledby="title">
         <small>제주 감태숲</small>
-        <h1 id="title">부표 아래로</h1>
+        <h1 id="title">해안에서 감태숲으로</h1>
         <p>
-          물속을 끌어 헤엄치고, 물고기가 갈 곳을 톡 눌러 물방울을 쏴요. 동행과
-          함께 주황 부표로 돌아오세요.
+          바다 쪽으로 끌어 입수하세요. 물고기 앞을 톡 누르거나, 한 마리를 원
+          안에 두고 함께 헤엄쳐요.
         </p>
-        <div class="sheet-actions">
-          <button id="start" class="primary" disabled>바다를 여는 중…</button
-          ><a href="journey.html?view=book">도감</a>
+        <div class="mode-actions">
+          <button id="start" class="primary" disabled>물방울 쏘기</button>
+          <button id="follow-start" disabled>원 안에서 따라가기</button>
         </div>
         <p id="load-status" role="status" hidden></p>
       </section>
       <section id="rest" class="sheet" hidden>
         <h2>잠깐 쉬어요</h2>
-        <p>
-          화면을 끌면 이동해요. 조준을 켜면 끌어 겨냥하고 놓아 쏠 수 있어요.
-          얕게·깊게로 물고기와 수심을 맞춰요.
-        </p>
+        <p>계속하면 방금 있던 곳에서 이어져요.</p>
         <button id="resume" class="primary">계속 잠영</button>
       </section>
       <section id="result" class="sheet" hidden>
-        <small>제주 감태숲 · 귀환</small>
+        <small id="result-mode">제주 감태숲 · 귀환</small>
         <h2 id="result-title"></h2>
         <p id="result-note"></p>
         <div class="sheet-actions">
@@ -84,9 +73,10 @@
             >도감에서 목표 고르기</a
           ><a id="open-tank" href="journey.html?view=tank">작은 수조</a>
         </div>
-        <button class="quiet" id="again">다시 잠수</button>
+        <button id="swap" class="compare-next"></button>
+        <button class="quiet" id="again">같은 방식 다시 하기</button>
       </section>
     </main>
-    <script type="module" src="reef.mjs?v=steering-2"></script>
+    <script type="module" src="reef.mjs?v=coast1"></script>
   </body>
 </html>

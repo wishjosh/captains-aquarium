@@ -7,6 +7,8 @@ import {
   rocks,
   bottom,
   newSwimmer,
+  beachStart,
+  waterPose,
   swim,
   slideRocks,
   fishPlace,
@@ -16,6 +18,25 @@ import {
 function run(p, x, z, seconds) {
   for (let i = 0; i < Math.round(seconds * 60); i++) swim(p, x, z, 1 / 60);
 }
+test("the player can stop or turn back on the shore before wading and diving", () => {
+  const p = beachStart();
+  const start = p.z;
+  run(p, 0, 0, 2);
+  assert.equal(p.z, start);
+  assert.equal(waterPose(p.x, p.z), 0);
+  run(p, 0, -1, 1.8);
+  const wading = waterPose(p.x, p.z);
+  assert.ok(wading > 0 && wading < 1);
+  run(p, 0, 0, 1);
+  const stopped = p.z;
+  run(p, 0, 0, 1);
+  assert.ok(Math.abs(p.z - stopped) < 0.001);
+  run(p, 0, 1, 2);
+  assert.equal(waterPose(p.x, p.z), 0);
+  run(p, 0, -1, 4.5);
+  assert.equal(waterPose(p.x, p.z), 1);
+  assert.ok(p.y < -0.7);
+});
 test("departure requires swimming into shot range, including at the nearest point of a patrol", () => {
   const p = newSwimmer();
   for (const entry of entries)

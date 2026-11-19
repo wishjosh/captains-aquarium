@@ -65,11 +65,23 @@ const smooth = (x) => {
 };
 export const blend = (rate, dt) => 1 - Math.exp(-rate * dt);
 export const routeDepth = (z) => 1.38 + 2.13 * smooth((4 - z) / 16);
-export const bottom = (x, z) =>
+const seabed = (x, z) =>
   -routeDepth(z) -
   1.83 +
   0.15 * Math.sin(x * 1.2 + z * 0.47) +
   0.09 * Math.cos(z * 0.9 - x * 0.62);
+// A continuous foreshore joins the dry beach to the familiar kelp route.
+export const coastMix = (z) => smooth((z - 5.8) / 8.0);
+export const bottom = (x, z) => {
+  const shore = coastMix(z);
+  return seabed(x, z) * (1 - shore) + (0.42 + 0.046 * (z - 13.8)) * shore;
+};
+export const waterPose = (x, z) => smooth((-bottom(x, z) - 0.12) / 1.62);
+export function beachStart() {
+  return { ...newSwimmer(), x: 0.45, z: 14.4, y: bottom(0.45, 14.4) + 1.06 };
+}
+export const TRACK_RADIUS = 1.5;
+export const TRACK_SECONDS = 1.2;
 export const deltaAngle = (a, b) =>
   Math.atan2(Math.sin(b - a), Math.cos(b - a));
 export function newSwimmer() {
@@ -113,7 +125,7 @@ export function slideRocks(p, padding = 0.31) {
 }
 export function swim(p, axisX, axisZ, dt) {
   const norm = Math.max(1, Math.hypot(axisX, axisZ)),
-    speed = 3.05;
+    speed = 2.25 + 0.8 * waterPose(p.x, p.z);
   const wx = (axisX / norm) * speed,
     wz = (axisZ / norm) * speed;
   const k = blend(Math.abs(wx) + Math.abs(wz) > 0.01 ? 10.8 : 15, dt);
@@ -123,13 +135,16 @@ export function swim(p, axisX, axisZ, dt) {
     oldZ = p.z,
     oldY = p.y;
   p.x = clamp(p.x + p.vx * dt, -5.0, 5.0);
-  p.z = clamp(p.z + p.vz * dt, -15.1, 8.35);
+  p.z = clamp(p.z + p.vz * dt, -15.1, 15.8);
   slideRocks(p);
-  const desired = clamp(
+  const submerged = clamp(
     -routeDepth(p.z) - p.offset,
     bottom(p.x, p.z) + 0.53,
     -0.52,
   );
+  const swimming = waterPose(p.x, p.z);
+  const desired =
+    (bottom(p.x, p.z) + 1.06) * (1 - swimming) + submerged * swimming;
   p.y += clamp((desired - p.y) * 3.4, -1.45, 1.45) * dt;
   p.vy = (p.y - oldY) / dt;
   p.verticalTime =
