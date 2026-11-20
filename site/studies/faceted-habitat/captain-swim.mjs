@@ -1,16 +1,16 @@
 import * as T from './runtime/vendor/three.module.js?v=2026-10-20-jeju-rov-v1';
-import {createCaptain} from './runtime/pirate.js';
+import {createCaptain} from './runtime/pirate.js?v=adventurer1';
 import {damp,clamp} from './core.mjs';
-import {fitCaptainEquipment} from './captain-equipment.mjs?v=2026-11-02-parrot-1';
+import {fitCaptainEquipment} from './captain-equipment.mjs?v=adventurer3';
 import {DepthPose} from './depth-pose.mjs?v=2026-11-02-stroke-1';
 import {strokePose,STROKE_PERIOD,travelPitch} from './stroke-cycle.mjs?v=2026-11-02-stroke-1';
 import {TurnStroke,turnArm} from './turn-stroke.mjs?v=2026-11-02-turn-1';
 const V=(x=0,y=0,z=0)=>new T.Vector3(x,y,z);
 export class Swimmer{
- constructor(asset,scene,floor=()=>-Infinity){
-  this.floor=floor;
+ constructor(asset,scene,floor=()=>-Infinity,fitEquipment=fitCaptainEquipment){
+  this.floor=floor;this.source=asset.parser?.json.asset.extras?.author || 'original captain rig';
   this.actor=createCaptain(asset);this.actor.userData.controller.update(0,false);this.root=new T.Group();this.tilt=new T.Group();this.root.add(this.tilt);this.tilt.add(this.actor);this.actor.position.y=-1.06;scene.add(this.root);this.bones={};this.actor.traverse(n=>{if(n.isBone)this.bones[n.name]=n;});
-  this.base=Object.values(this.bones).map(b=>[b,b.position.clone(),b.quaternion.clone()]);this.depthPose=new DepthPose();this.turnStroke=new TurnStroke();this.turn={signed:0,amount:0,phase:0};this.depth={rise:0,sink:0,amount:0,blend:0};this.phase=0;this.stroke=strokePose(0);this.swimAmount=0;this.lean=.16;this.bank=0;this.lastHands={};this.equipment=fitCaptainEquipment(this);
+  this.base=Object.values(this.bones).map(b=>[b,b.position.clone(),b.quaternion.clone()]);this.depthPose=new DepthPose();this.turnStroke=new TurnStroke();this.turn={signed:0,amount:0,phase:0};this.depth={rise:0,sink:0,amount:0,blend:0};this.phase=0;this.stroke=strokePose(0);this.swimAmount=0;this.lean=.16;this.bank=0;this.lastHands={};this.equipment=fitEquipment(this);
  }
  aim(bone,from,to){const q=bone.getWorldQuaternion(new T.Quaternion()),parent=bone.parent.getWorldQuaternion(new T.Quaternion());const delta=new T.Quaternion().setFromUnitVectors(from.normalize(),to.normalize());bone.quaternion.copy(parent.invert().multiply(delta).multiply(q));this.root.updateMatrixWorld(true);}
  arm(side,target,pole){const upper=this.bones['UpperArm'+side],lower=this.bones['LowerArm'+side],tip=this.bones['Middle1'+side];if(!upper||!lower||!tip)return;
@@ -36,7 +36,7 @@ export class Swimmer{
   for(const side of ['L','R']){
    const sign=side==='L'?1:-1,upper=this.bones['UpperLeg'+side],lower=this.bones['LowerLeg'+side],foot=this.bones['Foot'+side];if(!upper||!lower||!foot)continue;
    const before=lower.matrixWorld.clone(),footBefore=foot.matrixWorld.clone();
-   const kick=pose.kick,flutter=Math.sin(w.time*2.3+(side==='L'?0:Math.PI)),assisted=side==='R';
+   const kick=pose.kick,flutter=Math.sin(w.time*2.3+(side==='L'?0:Math.PI)),assisted=side==='R' && this.equipment.motor != null;
    upper.rotateX(.12*(1-active)+active*(assisted?.035:.12)*kick+reverse*.10*flutter+w.turnRate*sign*.06);
    upper.rotateZ(sign*(.035+active*(assisted?.025:.12)*kick));
    lower.rotateX(-(.22*(1-active)+active*(assisted?.09:.52)*kick+reverse*.12*(1+flutter)));
@@ -51,9 +51,9 @@ export class Swimmer{
    hand.z+=reverse*.12*Math.sin(w.time*3.1);hand.y+=brake*.12;
    const pole=V(sign*(pose.stage==='recover'?.48:.90),.10+.30*active,.40);this.arm(side,this.tilt.localToWorld(hand),this.tilt.localToWorld(pole));
   }
-  this.root.updateMatrixWorld(true);this.equipment.update(dt,w);
+  this.root.updateMatrixWorld(true);this.equipment.update?.(dt,w);
  }
- report(){return {equipment:this.equipment.report(),source:'original captain rig',swimPose:'authored reach-catch-pull-glide-recover cycle',stroke:{...this.stroke,period:STROKE_PERIOD,amount:this.swimAmount},turn:{...this.turn,leftRole:turnArm('L',this.turn).role,rightRole:turnArm('R',this.turn).role},lean:this.lean,bank:this.bank,depth:{...this.depth},phase:this.phase,landmarks:Object.fromEntries(['Head','Abdomen','FootL','FootR'].filter(n=>this.bones[n]).map(n=>[n,this.bones[n].getWorldPosition(V()).toArray()])),hands:this.lastHands,bones:Object.keys(this.bones)};}
+ report(){return {equipment:this.equipment.report(),source:this.source,swimPose:'authored reach-catch-pull-glide-recover cycle',stroke:{...this.stroke,period:STROKE_PERIOD,amount:this.swimAmount},turn:{...this.turn,leftRole:turnArm('L',this.turn).role,rightRole:turnArm('R',this.turn).role},lean:this.lean,bank:this.bank,depth:{...this.depth},phase:this.phase,landmarks:Object.fromEntries(['Head','Abdomen','FootL','FootR'].filter(n=>this.bones[n]).map(n=>[n,this.bones[n].getWorldPosition(V()).toArray()])),hands:this.lastHands,bones:Object.keys(this.bones)};}
 }
 
 

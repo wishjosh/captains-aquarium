@@ -18,7 +18,10 @@ export function fitCaptainEquipment(swimmer){
  for(let i=0;i<weights.count;i++){let influence=0;for(let j=0;j<4;j++)if(indices.getComponent(i,j)===footIndex)influence+=weights.getComponent(i,j);if(influence>best){best=influence;woodVertex=i;}}
  const woodUV=new T.Vector2(uv.getX(woodVertex),uv.getY(woodVertex));wood.metalness=0;wood.roughness=1;
  const wooden=geometry=>{const tex=geometry.attributes.uv;for(let i=0;i<tex.count;i++)tex.setXY(i,woodUV.x,woodUV.y);const n=new T.Mesh(geometry,wood);n.castShadow=true;return n;};
- const motor=new T.Group();motor.name='Right peg-leg auxiliary propeller';tilt.add(motor);motor.position.copy(tilt.worldToLocal(foot.getWorldPosition(V())));
+ const motor = new T.Group();
+ motor.name = 'Right peg-leg auxiliary propeller';
+ tilt.add(motor);
+ motor.position.copy(tilt.worldToLocal(foot.getWorldPosition(V())));
  const spindle=wooden(new T.CylinderGeometry(.035,.03,.065,7));spindle.position.y=-.025;motor.add(spindle);
  const rotor=new T.Group();rotor.position.y=-.065;rotor.rotation.y=.45;motor.add(rotor);
  // Three swept blades: a real spanwise twist and shallow cup, with rounded tips.
@@ -35,5 +38,17 @@ export function fitCaptainEquipment(swimmer){
  for(let i=0;i<3;i++){const blade=wooden(bladeGeo);blade.rotation.y=i*Math.PI*2/3;rotor.add(blade);}
  const hub=wooden(new T.CylinderGeometry(.037,.032,.032,8));rotor.add(hub);foot.attach(motor);
  let speed=0;const objects=[parrot,...motor.children];
- return{perch,motor,objects,update(dt,w){const target=w.forwardSpeed>.04?2.4*clamp(w.forwardSpeed/2.3,0,1):0;speed=damp(speed,target,5,dt);if(speed<.025&&target===0)speed=0;rotor.rotation.y=(rotor.rotation.y+speed*dt)%(Math.PI*2);perch.quaternion.copy(perchBase);swimmer.root.updateMatrixWorld(true);},report(){return{parrot:'original mesh, scaled 0.64, upright bind geometry, centered on crown',prosthetic:'right',parrotPosition:perch.getWorldPosition(V()).toArray(),propellerPosition:motor.getWorldPosition(V()).toArray(),propellerRadiansPerSecond:speed,guardDiameter:0,bladeCount:3,bladeShape:"swept, twisted, rounded tip",bladeRadius:.168,woodPaletteUV:woodUV.toArray(),maxTurnsPerSecond:2.4/(Math.PI*2)};}};
+ return{perch,motor,objects,update(dt,w){const target=w.forwardSpeed>.04?2.4*clamp(w.forwardSpeed/2.3,0,1):0;speed=damp(speed,target,5,dt);if(speed<.025&&target===0)speed=0;rotor.rotation.y=(rotor.rotation.y+speed*dt)%(Math.PI*2);perch.quaternion.copy(perchBase);swimmer.root.updateMatrixWorld(true);},report(){return{parrot:'original mesh, scaled 0.64, upright bind geometry, centered on crown',mount:'right peg leg',prosthetic:'right',parrotPosition:perch.getWorldPosition(V()).toArray(),propellerPosition:motor.getWorldPosition(V()).toArray(),propellerRadiansPerSecond:speed,guardDiameter:0,bladeCount:3,bladeShape:"swept, twisted, rounded tip",bladeRadius:.168,woodPaletteUV:woodUV.toArray(),maxTurnsPerSecond:2.4/(Math.PI*2)};}};
+}
+
+export function fitAdventurerEquipment(swimmer) {
+ const perch = swimmer.actor.getObjectByName('ErnestPerch');
+ if (!perch) throw new Error('Adventurer requires the hat parrot');
+ return {
+  perch,
+  objects: [perch],
+  report() {
+   return { parrotPosition: perch.getWorldPosition(V()).toArray() };
+  },
+ };
 }

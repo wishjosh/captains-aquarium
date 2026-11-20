@@ -1,0 +1,84 @@
+#voyage { display:none }
+.voyage-entry #voyage {
+  --ink:#122e49; --paper:#fff2d6; --sand:#f2d59c; --coral:#f47c4f;
+  display:block; position:absolute; inset:0; z-index:5; overflow:auto;
+  color:var(--ink); background:radial-gradient(ellipse at 50% 20%,#187e91,#0a3c55 58%,#062541);
+  overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
+}
+#voyage button { color:inherit }
+.voyage-cover { height:100%; min-height:220px; display:grid; place-items:center }
+#board {
+  display:block; width:100%; height:100%; border:0; padding:0;
+  background:transparent url("voyage-art/title.webp") no-repeat center / contain;
+}
+.port-page {
+  width:min(100%,520px); min-height:100%; margin:auto; background:var(--paper);
+  box-shadow:0 0 40px #04273c70; padding-bottom:env(safe-area-inset-bottom);
+}
+.port-bar {
+  display:flex; justify-content:space-between; align-items:center; gap:8px;
+  padding:max(3px,env(safe-area-inset-top)) 12px 3px; color:#fff2d6; background:var(--ink);
+}
+.port-bar button { border:0; min-height:44px; background:none; padding:4px 6px }
+.port-bar span { font-size:.7rem; font-weight:800; letter-spacing:.16em }
+.deck-hero {
+  display:flex; align-items:center; height:clamp(100px,18vh,164px); padding:15px 19px;
+  background:linear-gradient(90deg,#00304bbf,transparent 68%),url("voyage-art/deck.webp") center 7% / cover;
+  color:#fff6e3;
+}
+.deck-hero h1 { margin:0; font-size:clamp(1.7rem,6vw,2.1rem); letter-spacing:-.07em }
+.chart-table { padding:9px; background:repeating-linear-gradient(0deg,#976e43 0 2px,#b78955 3px 20px,#bd9262 21px 39px) }
+.chart-sheet { padding:5px; background:var(--sand); box-shadow:1px 3px 5px #55392370 }
+.chart-title,.specimen-status,.specimen-title { display:flex; align-items:center; justify-content:space-between; gap:8px }
+.chart-title { padding:3px 5px 6px }
+.chart-title small { font-size:.75rem }
+#sea-chart { width:100%; height:clamp(189px,31vh,280px); position:relative; background:#09a1bc center / 100% 100% no-repeat }
+#sea-chart.world-chart { background-image:url("voyage-art/world.svg") }
+#sea-chart.jeju-chart { background-image:url("voyage-art/north-pacific.svg") }
+.chart-pin {
+  position:absolute; transform:translate(-50%,-50%); white-space:nowrap;
+  font-size:.8rem; font-weight:700; border:1px solid #496366; border-radius:5px;
+}
+.chart-pin.future { padding:2px 5px; background:#ebe9d5; color:#495d5b; border-style:dashed }
+.chart-pin.playable { padding:5px 8px; background:var(--coral); color:var(--ink); border:2px solid var(--ink); box-shadow:0 2px 0 #26445165 }
+.chart-pin.playable::after { content:""; position:absolute; inset:-10px -4px }
+.port-ticket,.specimen-card { padding:15px clamp(13px,4vw,22px) 18px }
+.target-row { display:grid; grid-template-columns:minmax(0,1fr) 90px; align-items:center; gap:8px }
+.port-ticket h2,.specimen-card h2 { margin:3px 0; font-size:clamp(1.45rem,6vw,2rem); letter-spacing:-.06em }
+.port-ticket p,.specimen-card p { margin:6px 0; line-height:1.46 }
+.port-ticket>small,.specimen-status { font-size:.75rem; font-weight:700; letter-spacing:.02em }
+#preview-model { border:1px solid #879e97; border-radius:5px; background:var(--sand); padding:2px; overflow:hidden }
+#preview-model img { display:block; width:100%; height:53px; object-fit:cover }
+#preview-model span { font-size:.72rem }
+.port-primary { border:1px solid var(--ink); border-radius:9px; background:var(--coral); min-height:46px; margin-top:11px; width:100%; box-shadow:0 2px var(--ink) }
+.specimen-card { background:linear-gradient(128deg,#fff9e7,#f5e4bd); border-top:4px solid #f6bc62 }
+.specimen-status { color:#315c5c; margin-bottom:8px }
+.specimen-title { padding:9px 0 14px; border-top:1px solid #b5aa8c }
+.specimen-title i { font:italic 15px Georgia,serif }
+.specimen-title p { text-align:right; color:#506568; font-size:.75rem }
+.specimen-title p b { font-size:.95rem; color:#183f50 }
+.pair { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px }
+.pair button { min-width:0; padding:0 3px 3px; background:#fff7df; border:1px solid #b6ac93; border-radius:6px; overflow:hidden }
+.pair button b { display:block; padding:8px 1px; font-size:clamp(.74rem,3.3vw,.94rem) }
+.specimen-frame { position:relative; display:grid; place-items:center; aspect-ratio:4/3; overflow:hidden; background:#e4decb }
+.specimen-frame img { width:100%; height:100%; display:block; object-fit:contain }
+#sea-photo { transform:scale(1.4); transform-origin:81% 69% }
+.specimen-frame i { position:absolute; right:4px; bottom:4px; background:#122e49df; color:#fff9e9; border-radius:4px; padding:1px 4px; font-style:normal }
+#photo-lock { font-size:.85rem; color:#4e615a }
+.field-note { font-size:.9rem; font-weight:650 }
+.photo-credit { font-size:.75rem; color:#495856; border-top:1px dotted #ac9e80; padding-top:7px }
+.photo-credit a { color:#24576b; text-decoration:underline }
+#detail-picture { display:block; width:100%; height:auto; max-height:70dvh; object-fit:contain }
+.voyage-entry #result,.voyage-entry #intro.shoal { max-height:calc(100dvh - 36px); overflow-y:auto }
+@media (orientation:landscape) and (max-height:600px) {
+  .port-page { width:min(100%,860px); padding-inline:max(0px,env(safe-area-inset-left),env(safe-area-inset-right)) }
+  #deck { display:grid; grid-template-columns:1.12fr 1fr; align-content:start }
+  #deck .port-bar { grid-column:1/-1 }
+  #deck .deck-hero { grid-column:2; grid-row:2; height:80px }
+  #deck .chart-table { grid-column:1; grid-row:2/4 }
+  #deck .port-ticket { grid-column:2; grid-row:3 }
+  #sea-chart { height:clamp(150px,47vh,230px) }
+  .pair { max-width:440px; margin:auto }
+  #port-card .specimen-card { padding-top:8px }
+  #port-card .specimen-title { padding:2px 0 6px }
+}

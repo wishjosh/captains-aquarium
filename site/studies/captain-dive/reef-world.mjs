@@ -1,6 +1,7 @@
 import * as T from "../faceted-habitat/runtime/vendor/three.module.js?v=2026-10-20-jeju-rov-v1";
 import { GLTFLoader } from "../faceted-habitat/runtime/vendor/GLTFLoader.js?v=2026-10-20-jeju-rov-v1";
-import { Swimmer } from "../faceted-habitat/captain-swim.mjs?v=2026-11-02-parrot-1";
+import { Swimmer } from "../faceted-habitat/captain-swim.mjs?v=adventurer3";
+import { fitAdventurerEquipment } from "../faceted-habitat/captain-equipment.mjs?v=adventurer3";
 import { createChromis } from "../faceted-habitat/chromis-model.mjs";
 import { createGardenResident } from "../faceted-habitat/garden-resident.mjs";
 import { loadFish } from "../faceted-habitat/runtime/fish.js";
@@ -455,8 +456,8 @@ export async function createWorld(canvas, singleChromis = false) {
   light.position.set(-6, 13, 2.5);
   scene.add(light);
   const loader = new GLTFLoader();
-  const [pirate, stones, puffer, snapper] = await Promise.all([
-    loader.loadAsync(asset("runtime/assets/pirate/captain.gltf")),
+  const [captainAsset, stones, puffer, snapper] = await Promise.all([
+    loader.loadAsync(new URL("./adventurer-captain.glb?v=2", import.meta.url).href),
     loader.loadAsync(asset("assets/rock-modules.glb")),
     singleChromis ? null : loadFish({ kind: "puffer" }),
     singleChromis
@@ -524,7 +525,7 @@ export async function createWorld(canvas, singleChromis = false) {
     }),
   );
   scene.add(dust);
-  const captain = new Swimmer(pirate, scene, bottom),
+  const captain = new Swimmer(captainAsset, scene, bottom, fitAdventurerEquipment),
     captainShadow = shadow(scene);
   const walkPose = captain.base.map(([bone]) => ({
     bone,

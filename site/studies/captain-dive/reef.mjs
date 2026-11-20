@@ -22,7 +22,7 @@ import {
   initialRecord,
   registerReturn,
 } from "./reef-motion.mjs?v=shoal1";
-import { createWorld } from "./reef-world.mjs?v=shoal1";
+import { createVoyage } from "./voyage.mjs?v=deck1";
 import { CaptureAudio } from "../faceted-habitat/audio.mjs";
 import { PageLifecycle } from "../faceted-habitat/page-lifecycle.mjs";
 
@@ -37,9 +37,11 @@ const key = "captain-dive-jeju-journey-v1";
 let memory = initialRecord(null),
   storageOK = true;
 function readRecord() {
+  if (!storageOK) return memory;
   try {
     const raw = localStorage.getItem(key);
-    return raw ? initialRecord(JSON.parse(raw)) : memory;
+    memory = initialRecord(raw ? JSON.parse(raw) : null);
+    return memory;
   } catch {
     storageOK = false;
     return memory;
@@ -86,7 +88,34 @@ const modeNames = {
   sector: "전방 부채꼴",
   burst: "부채꼴 · 가속과 선회",
 };
+let loadingWorld;
+function openModes() {
+  clearInput();
+  if (stage !== "lost") stage = world ? "ready" : "loading";
+  $("rest").hidden = $("result").hidden = $("hud").hidden = $("pause").hidden = true;
+  $("intro").hidden = false;
+  if (!world && !loadingWorld && stage !== "lost") {
+    $("load-status").hidden = false;
+    $("load-status").textContent = "감태숲을 불러오는 중…";
+    loadingWorld = prepareWorld();
+  }
+  if (world) $("start").focus({preventScroll:true});
+}
+const port = shoal ? createVoyage({
+  readRecord,
+  openModes,
+  onResult: () => $("arrival-card").focus({preventScroll:true}),
+}) : null;
 if (shoal) {
+  $("modes-deck").hidden = false;
+  $("modes-deck").onclick = () => port.showDeck();
+  $("arrival-actions").hidden = false;
+  $("arrival-deck").onclick = () => port.showDeck();
+  $("arrival-card").onclick = () => port.showCard(true);
+  $("choose-mode").onclick = (event) => {
+    event.preventDefault();
+    openModes();
+  };
   $("intro").classList.add("shoal");
   $("shoal-link").hidden = true;
   $("choose-mode").hidden = false;
@@ -115,6 +144,7 @@ function clearInput() {
 }
 function start(choice) {
   if (!world) return;
+  port?.hide();
   mode = choice;
   world.setRangeMode(mode);
   $("mode-caption").textContent = "캡틴 다이브 · " + modeNames[mode];
@@ -415,6 +445,10 @@ function finish() {
   $("hud").hidden = $("pause").hidden = true;
   $("open-book").focus({ preventScroll: true });
   audio.cue("recovered");
+  if (port) {
+    $("arrival-card").hidden = !record.counts[0];
+    if (newSpecies.includes(0)) port.showCard(true, true);
+  }
 }
 function cues() {
   const homeDistance = dist(player, HOME),
@@ -557,7 +591,7 @@ function update(dt) {
 }
 function frame(stamp) {
   requestAnimationFrame(frame);
-  if (!world || document.hidden) return;
+  if (!world || document.hidden || port?.visible) return;
   const dt = Math.min(0.1, Math.max(0.001, (stamp - last) / 1000));
   last = stamp;
   if (stage === "rest" || stage === "result" || stage === "lost") return;
@@ -689,6 +723,7 @@ document.addEventListener("visibilitychange", () => {
 window.addEventListener("resize", () => {
   if (world) {
     world.resize();
+    if (port?.visible) return;
     world.follow(player, 0, true);
     world.draw(player, time, 0);
   }
@@ -714,30 +749,36 @@ canvas.addEventListener("webglcontextlost", (e) => {
   e.preventDefault();
   failure("화면 연결이 끊겼어요. 다시 열면 도감 기록을 이어갈 수 있어요.");
 });
-try {
-  world = await createWorld(canvas, shoal);
-  for (const f of world.animals) {
-    f.patrol = newPatrol();
-    f.label = document.createElement("span");
-    f.label.className = "tag";
-    f.label.hidden = true;
-    $("name-tags").append(f.label);
+async function prepareWorld() {
+  try {
+    const { createWorld } = await import("./reef-world.mjs?v=adventurer3");
+    world = await createWorld(canvas, shoal);
+    for (const f of world.animals) {
+      f.patrol = newPatrol();
+      f.label = document.createElement("span");
+      f.label.className = "tag";
+      f.label.hidden = true;
+      $("name-tags").append(f.label);
+    }
+    trail = [{ x: player.x, y: player.y, z: player.z }];
+    world.follow(player, 0, true);
+    stage = "ready";
+    $("start").textContent = modeNames[modes[0]];
+    $("burst-start").disabled = !shoal;
+    $("burst-start").classList.toggle("primary", mode === "burst");
+    $("follow-start").disabled = false;
+    $("start").classList.toggle("primary", mode === modes[0]);
+    $("follow-start").classList.toggle("primary", mode === modes[1]);
+    $("start").disabled = false;
+    $("load-status").hidden = true;
+    if (port && !port.visible) $("start").focus({preventScroll:true});
+    last = performance.now();
+    requestAnimationFrame(frame);
+  } catch (error) {
+    console.error(error);
+    failure(
+      "바다를 불러오지 못했어요. 연결과 브라우저의 3D 그래픽 지원을 확인해 주세요.",
+    );
   }
-  trail = [{ x: player.x, y: player.y, z: player.z }];
-  world.follow(player, 0, true);
-  stage = "ready";
-  $("start").textContent = modeNames[modes[0]];
-  $("burst-start").disabled = !shoal;
-  $("burst-start").classList.toggle("primary", mode === "burst");
-  $("follow-start").disabled = false;
-  $("start").classList.toggle("primary", mode === modes[0]);
-  $("follow-start").classList.toggle("primary", mode === modes[1]);
-  $("start").disabled = false;
-  last = performance.now();
-  requestAnimationFrame(frame);
-} catch (error) {
-  console.error(error);
-  failure(
-    "바다를 불러오지 못했어요. 연결과 브라우저의 3D 그래픽 지원을 확인해 주세요.",
-  );
 }
+if (!shoal) loadingWorld = prepareWorld();

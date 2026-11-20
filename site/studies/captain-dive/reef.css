@@ -367,3 +367,19 @@ header {
     overflow-y: auto;
   }
 }
+
+.model-credit {
+  margin-top: .7rem;
+  color: #d2e8df;
+  font-size: .82rem;
+}
+.model-credit summary { cursor: pointer; }
+.model-credit p { margin: .35rem 0 0; font-size: inherit; }
+.model-credit a {
+  display: inline;
+  padding: 0;
+  min-height: 0;
+  border: 0;
+  background: none;
+  text-decoration: underline;
+}

@@ -52,7 +52,7 @@ export function createCaptain(asset) {
     inspect() {
       let skins=0;const pose=[];
       model.traverse(n=>{if(n.isSkinnedMesh)skins++;if(n.isBone&&pose.length<32)pose.push(...n.quaternion.toArray());});
-      return {source:'Quaternius Pirate Kit',clips:asset.animations.map(c=>c.name),skinnedMeshes:skins,action:current.getClip().name,time:current.time,pose};
+      return {source:asset.parser?.json.asset.extras?.author || 'Quaternius Pirate Kit',clips:asset.animations.map(c=>c.name),skinnedMeshes:skins,action:current.getClip().name,time:current.time,pose};
     }
   };
   return pivot;
