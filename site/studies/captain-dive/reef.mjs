@@ -11,19 +11,28 @@ import {
   waterPose,
   TRACK_RADIUS,
   TRACK_SECONDS,
+  inTrackRange,
+  isSector,
+  newPatrol,
+  beginDart,
+  advancePatrol,
   swim,
   fishPlace,
   closestHit,
   initialRecord,
   registerReturn,
-} from "./reef-motion.mjs?v=coast1";
-import { createWorld } from "./reef-world.mjs?v=coast1";
+} from "./reef-motion.mjs?v=shoal1";
+import { createWorld } from "./reef-world.mjs?v=shoal1";
 import { CaptureAudio } from "../faceted-habitat/audio.mjs";
 import { PageLifecycle } from "../faceted-habitat/page-lifecycle.mjs";
 
 const $ = (id) => document.getElementById(id),
   canvas = $("water"),
   audio = new CaptureAudio();
+const query = new URLSearchParams(location.search);
+const shoal = query.get("study") === "shoal";
+const modes = shoal ? ["circle", "sector", "burst"] : ["bubble", "follow"];
+const nextMode = () => modes[(modes.indexOf(mode) + 1) % modes.length];
 const key = "captain-dive-jeju-journey-v1";
 let memory = initialRecord(null),
   storageOK = true;
@@ -48,10 +57,7 @@ let time = 0,
   routeShown = false,
   homeDwell = 0,
   landing = 0,
-  mode =
-    new URLSearchParams(location.search).get("mode") === "follow"
-      ? "follow"
-      : "bubble",
+  mode = modes.includes(query.get("mode")) ? query.get("mode") : modes[0],
   tracked = null,
   trackingTime = 0,
   lastTrackPlace = null;
@@ -73,11 +79,33 @@ const say = (s, seconds = 3) => {
   lastTip = s;
   tipUntil = time + seconds;
 };
-const modeNames = { bubble: "물방울 쏘기", follow: "원 안에서 따라가기" };
+const modeNames = {
+  bubble: "물방울 쏘기",
+  follow: "원 안에서 따라가기",
+  circle: "기존 원형",
+  sector: "전방 부채꼴",
+  burst: "부채꼴 · 가속과 선회",
+};
+if (shoal) {
+  $("intro").classList.add("shoal");
+  $("shoal-link").hidden = true;
+  $("choose-mode").hidden = false;
+  $("swap").classList.add("primary");
+  $("open-book").classList.remove("primary");
+  $("result-note").after($("swap"));
+  $("title").textContent = "자리돔 한 마리 따라가기";
+  $("instructions").textContent =
+    "화면을 끌어 잠영하세요. 자리돔을 범위 안에 1.2초 두면 함께 헤엄쳐요. 주황 부표로 돌아오면 다음 방식도 해볼 수 있어요.";
+  $("burst-start").hidden = false;
+  $("start").textContent = modeNames.circle;
+  $("follow-start").textContent = modeNames.sector;
+}
 const idleTip = () =>
   mode === "bubble"
     ? "물고기가 갈 곳을 톡 눌러요."
-    : "한 마리를 원 안에 두고 따라가요.";
+    : isSector(mode)
+      ? "자리돔이 갈 쪽으로 몸을 돌려 부채꼴 안에 두세요."
+      : "한 마리를 원 안에 두고 따라가요.";
 function clearInput() {
   held = null;
   pointerX = pointerZ = 0;
@@ -88,6 +116,7 @@ function clearInput() {
 function start(choice) {
   if (!world) return;
   mode = choice;
+  world.setRangeMode(mode);
   $("mode-caption").textContent = "캡틴 다이브 · " + modeNames[mode];
   lastTrackPlace = null;
   tracked = null;
@@ -112,6 +141,7 @@ function start(choice) {
   for (const f of world.animals) {
     const p = fishPlace(f.e, 0);
     f.node.position.set(p.x, p.y, p.z);
+    f.patrol = newPatrol();
     f.caught = false;
     f.slot = -1;
     f.bind = 0;
@@ -126,6 +156,7 @@ function start(choice) {
   $("count").textContent = "0종";
   last = performance.now();
   world.follow(player, 0, true);
+  world.draw(player, 0, 0);
   say("바다 쪽으로 끌어 물에 들어가요.", 2);
   audio.unlock();
   canvas.focus({ preventScroll: true });
@@ -196,7 +227,13 @@ function capture(f) {
     $("home-text").hidden = false;
   }
   $("count").textContent = new Set(companions.map((a) => a.s)).size + "종";
-  say(species[f.s].name + " 동행! 주황 부표로 돌아가거나 더 둘러봐요.", 3.5);
+  say(
+    species[f.s].name +
+      (shoal
+        ? " 동행! 주황 부표로 함께 돌아가요."
+        : " 동행! 주황 부표로 돌아가거나 더 둘러봐요."),
+    3.5,
+  );
   effect = { fish: f, age: 0 };
   shot = null;
   audio.cue("impact");
@@ -238,7 +275,7 @@ function moveShot(dt) {
 }
 function updateTracking(dt) {
   const active =
-    mode === "follow" &&
+    mode !== "bubble" &&
     waterPose(player.x, player.z) > 0.97 &&
     stage === "diving";
   world.radar.visible = active;
@@ -254,7 +291,15 @@ function updateTracking(dt) {
   function range(p) {
     const position = world.onRadarPlane(p, player.y);
     const d = dist(player, position);
-    if (d > TRACK_RADIUS) return Infinity;
+    if (
+      !inTrackRange(
+        mode,
+        position.x - player.x,
+        position.z - player.z,
+        player.heading,
+      )
+    )
+      return Infinity;
     const blocked = rocks.some(([x, z, rx, rz, h]) => {
       const ax = (player.x - x) / rx,
         az = (player.z - z) / rz;
@@ -268,11 +313,13 @@ function updateTracking(dt) {
     });
     return blocked ? Infinity : d;
   }
-  tracked ??= nearestFish(TRACK_RADIUS, range);
+  tracked ??= nearestFish(Infinity, range);
   if (!tracked) return;
+  const inside = Number.isFinite(range(tracked.node.position));
+  if (inside && mode === "burst" && beginDart(tracked.patrol))
+    say("자리돔이 방향을 틀어요. 머리가 향하는 쪽을 따라가요.", 1.4);
   trackingTime = clamp(
-    trackingTime +
-      (range(tracked.node.position) <= TRACK_RADIUS ? dt : -dt * 1.8),
+    trackingTime + (inside ? dt : -dt * 1.8),
     0,
     TRACK_SECONDS,
   );
@@ -314,14 +361,19 @@ function updateAnimals(dt) {
       };
       approach = blend(3.4, dt);
     } else {
-      next = fishPlace(f.e, time);
+      next = fishPlace(
+        f.e,
+        mode === "burst" ? advancePatrol(f.patrol, dt) : time,
+      );
       approach = 1;
     }
     const p = f.node.position,
       dx = next.x - p.x,
       dz = next.z - p.z;
     if (Math.hypot(dx, dz) > 0.0003)
-      f.heading += deltaAngle(f.heading, Math.atan2(dx, dz)) * blend(8, dt);
+      f.heading +=
+        deltaAngle(f.heading, Math.atan2(dx, dz)) *
+        blend(f.patrol?.darting ? 17 : 8, dt);
     p.x += dx * approach;
     p.y += (next.y - p.y) * approach;
     p.z += dz * approach;
@@ -358,8 +410,7 @@ function finish() {
     "/3종" +
     (storageOK ? "" : " · 이 창에서만 기록돼요.");
   $("result-mode").textContent = modeNames[mode] + " · 귀환";
-  $("swap").textContent =
-    modeNames[mode === "bubble" ? "follow" : "bubble"] + " 해보기";
+  $("swap").textContent = modeNames[nextMode()] + " 해보기";
   $("result").hidden = false;
   $("hud").hidden = $("pause").hidden = true;
   $("open-book").focus({ preventScroll: true });
@@ -619,10 +670,11 @@ window.addEventListener("keydown", (e) => {
   if (e.code === "Escape") pause();
 });
 window.addEventListener("keyup", (e) => keys.delete(e.code));
-$("start").onclick = () => start("bubble");
-$("follow-start").onclick = () => start("follow");
+$("start").onclick = () => start(modes[0]);
+$("follow-start").onclick = () => start(modes[1]);
+$("burst-start").onclick = () => start("burst");
 $("again").onclick = () => start(mode);
-$("swap").onclick = () => start(mode === "bubble" ? "follow" : "bubble");
+$("swap").onclick = () => start(nextMode());
 $("pause").onclick = pause;
 $("resume").onclick = resume;
 new PageLifecycle({
@@ -650,7 +702,7 @@ function failure(message) {
     $("result").hidden =
       true;
   $("intro").hidden = false;
-  $("follow-start").disabled = true;
+  $("follow-start").disabled = $("burst-start").disabled = true;
   const status = $("load-status");
   status.hidden = false;
   status.textContent = message;
@@ -663,8 +715,9 @@ canvas.addEventListener("webglcontextlost", (e) => {
   failure("화면 연결이 끊겼어요. 다시 열면 도감 기록을 이어갈 수 있어요.");
 });
 try {
-  world = await createWorld(canvas);
+  world = await createWorld(canvas, shoal);
   for (const f of world.animals) {
+    f.patrol = newPatrol();
     f.label = document.createElement("span");
     f.label.className = "tag";
     f.label.hidden = true;
@@ -673,10 +726,12 @@ try {
   trail = [{ x: player.x, y: player.y, z: player.z }];
   world.follow(player, 0, true);
   stage = "ready";
-  $("start").textContent = modeNames.bubble;
+  $("start").textContent = modeNames[modes[0]];
+  $("burst-start").disabled = !shoal;
+  $("burst-start").classList.toggle("primary", mode === "burst");
   $("follow-start").disabled = false;
-  $("start").classList.toggle("primary", mode === "bubble");
-  $("follow-start").classList.toggle("primary", mode === "follow");
+  $("start").classList.toggle("primary", mode === modes[0]);
+  $("follow-start").classList.toggle("primary", mode === modes[1]);
   $("start").disabled = false;
   last = performance.now();
   requestAnimationFrame(frame);

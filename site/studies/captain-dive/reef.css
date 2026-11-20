@@ -318,6 +318,11 @@ header {
     top: calc(max(13px, env(safe-area-inset-top)) + 46px);
   }
 }
+
+#result .compare-next.primary {
+  width: 100%;
+  margin: 0 0 8px;
+}
 .mode-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -348,4 +353,17 @@ header {
 }
 #note:empty {
   display: none;
+}
+
+.shoal .mode-actions {
+  grid-template-columns: 1fr 1fr;
+}
+.shoal #burst-start {
+  grid-column: 1 / -1;
+}
+@media (max-height: 480px) {
+  .shoal.sheet {
+    max-height: calc(100% - 20px);
+    overflow-y: auto;
+  }
 }

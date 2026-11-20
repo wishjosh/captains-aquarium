@@ -13,7 +13,7 @@
       rel="apple-touch-icon"
       href="../faceted-habitat/jeju-apple-touch-icon.png"
     />
-    <link rel="stylesheet" href="reef.css?v=coast1" />
+    <link rel="stylesheet" href="reef.css?v=shoal1" />
   </head>
   <body>
     <main id="reef">
@@ -49,20 +49,27 @@
       <section id="intro" class="sheet" aria-labelledby="title">
         <small>제주 감태숲</small>
         <h1 id="title">해안에서 감태숲으로</h1>
-        <p>
+        <p id="instructions">
           바다 쪽으로 끌어 입수하세요. 물고기 앞을 톡 누르거나, 한 마리를 원
           안에 두고 함께 헤엄쳐요.
         </p>
         <div class="mode-actions">
           <button id="start" class="primary" disabled>물방울 쏘기</button>
           <button id="follow-start" disabled>원 안에서 따라가기</button>
+          <button id="burst-start" hidden disabled>부채꼴 · 가속과 선회</button>
         </div>
+        <a class="quiet" id="shoal-link" href="?study=shoal"
+          >자리돔 추적 세 방식 비교</a
+        >
         <p id="load-status" role="status" hidden></p>
       </section>
       <section id="rest" class="sheet" hidden>
         <h2>잠깐 쉬어요</h2>
         <p>계속하면 방금 있던 곳에서 이어져요.</p>
         <button id="resume" class="primary">계속 잠영</button>
+        <a class="quiet" id="choose-mode" href="?study=shoal" hidden
+          >비교 방식 다시 고르기</a
+        >
       </section>
       <section id="result" class="sheet" hidden>
         <small id="result-mode">제주 감태숲 · 귀환</small>
@@ -77,6 +84,6 @@
         <button class="quiet" id="again">같은 방식 다시 하기</button>
       </section>
     </main>
-    <script type="module" src="reef.mjs?v=coast1"></script>
+    <script type="module" src="reef.mjs?v=shoal1"></script>
   </body>
 </html>

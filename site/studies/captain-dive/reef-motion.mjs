@@ -82,6 +82,39 @@ export function beachStart() {
 }
 export const TRACK_RADIUS = 1.5;
 export const TRACK_SECONDS = 1.2;
+export const SECTOR_REACH = 2;
+export const SECTOR_HALF_ANGLE = (50 * Math.PI) / 180;
+export const isSector = (mode) => mode === "sector" || mode === "burst";
+export function inTrackRange(mode, dx, dz, heading) {
+  const distance = Math.hypot(dx, dz);
+  if (!isSector(mode)) return distance <= TRACK_RADIUS;
+  const forward = dx * Math.sin(heading) - dz * Math.cos(heading);
+  return (
+    distance <= SECTOR_REACH &&
+    forward >= distance * Math.cos(SECTOR_HALF_ANGLE) - 1e-9
+  );
+}
+// Speed up along the same curved patrol without changing position or tangent at onset.
+const WINDUP = 0.2,
+  DART = 0.7,
+  COOLDOWN = 3.0,
+  EXTRA_TIME = 2.5;
+export function newPatrol() {
+  return { time: 0, elapsed: Infinity, darting: false };
+}
+export function beginDart(patrol) {
+  if (patrol.elapsed < WINDUP + DART + COOLDOWN) return false;
+  patrol.elapsed = 0;
+  return true;
+}
+export function advancePatrol(patrol, dt) {
+  const u = (t) => smooth((t - WINDUP) / DART);
+  const prev = patrol.elapsed;
+  patrol.elapsed += dt;
+  patrol.time += dt + EXTRA_TIME * (u(patrol.elapsed) - u(prev));
+  patrol.darting = patrol.elapsed > WINDUP && patrol.elapsed < WINDUP + DART;
+  return patrol.time;
+}
 export const deltaAngle = (a, b) =>
   Math.atan2(Math.sin(b - a), Math.cos(b - a));
 export function newSwimmer() {

@@ -1,6 +1,6 @@
 import * as T from "../faceted-habitat/runtime/vendor/three.module.js?v=2026-10-20-jeju-rov-v1";
 import { GLTFLoader } from "../faceted-habitat/runtime/vendor/GLTFLoader.js?v=2026-10-20-jeju-rov-v1";
-import { Swimmer } from "../faceted-habitat/actor.mjs";
+import { Swimmer } from "../faceted-habitat/captain-swim.mjs?v=2026-11-02-parrot-1";
 import { createChromis } from "../faceted-habitat/chromis-model.mjs";
 import { createGardenResident } from "../faceted-habitat/garden-resident.mjs";
 import { loadFish } from "../faceted-habitat/runtime/fish.js";
@@ -16,7 +16,10 @@ import {
   coastMix,
   waterPose,
   TRACK_RADIUS,
-} from "./reef-motion.mjs?v=coast1";
+  SECTOR_REACH,
+  SECTOR_HALF_ANGLE,
+  isSector,
+} from "./reef-motion.mjs?v=shoal1";
 
 export { T };
 const v = (x = 0, y = 0, z = 0) => new T.Vector3(x, y, z);
@@ -388,7 +391,49 @@ function shoreline(scene) {
   });
   return { water, foam, wakes, surfaceTime };
 }
-export async function createWorld(canvas) {
+function makeSector(parent) {
+  const fan = new T.Group();
+  parent.add(fan);
+  const arc = [];
+  for (let i = 0; i <= 48; i++) {
+    const angle = SECTOR_HALF_ANGLE * ((2 * i) / 48 - 1);
+    arc.push(
+      v(SECTOR_REACH * Math.sin(angle), 0, -SECTOR_REACH * Math.cos(angle)),
+    );
+  }
+  const points = [v(), ...arc];
+  const surface = new T.BufferGeometry().setFromPoints(points);
+  const indices = [];
+  for (let i = 1; i < points.length - 1; i++) indices.push(0, i, i + 1);
+  surface.setIndex(indices);
+  mesh(
+    fan,
+    surface,
+    new T.MeshBasicMaterial({
+      color: "#fff1a0",
+      transparent: true,
+      opacity: 0.15,
+      side: T.DoubleSide,
+      depthWrite: false,
+    }),
+    0,
+    0,
+    0,
+  );
+  const edge = new T.LineLoop(
+    new T.BufferGeometry().setFromPoints(points),
+    new T.LineBasicMaterial({
+      color: "#fff2a0",
+      transparent: true,
+      opacity: 0.96,
+      depthWrite: false,
+    }),
+  );
+  edge.renderOrder = 2;
+  fan.add(edge);
+  return fan;
+}
+export async function createWorld(canvas, singleChromis = false) {
   const renderer = new T.WebGLRenderer({
     canvas,
     alpha: false,
@@ -413,14 +458,18 @@ export async function createWorld(canvas) {
   const [pirate, stones, puffer, snapper] = await Promise.all([
     loader.loadAsync(asset("runtime/assets/pirate/captain.gltf")),
     loader.loadAsync(asset("assets/rock-modules.glb")),
-    loadFish({ kind: "puffer" }),
-    loader.loadAsync(asset("assets/RedSnapper-source.glb")),
+    singleChromis ? null : loadFish({ kind: "puffer" }),
+    singleChromis
+      ? null
+      : loader.loadAsync(asset("assets/RedSnapper-source.glb")),
   ]);
   const floorTime = makeFloor(scene);
   makeCliffs(scene, stones);
   const shore = shoreline(scene);
-  const radar = mesh(
-    scene,
+  const radar = new T.Group();
+  scene.add(radar);
+  const ring = mesh(
+    radar,
     new T.RingGeometry(TRACK_RADIUS - 0.038, TRACK_RADIUS, 64),
     new T.MeshBasicMaterial({
       color: "#fff2a0",
@@ -433,7 +482,9 @@ export async function createWorld(canvas) {
     0,
     0,
   );
-  radar.rotation.x = -Math.PI / 2;
+  ring.rotation.x = -Math.PI / 2;
+  const sector = makeSector(radar);
+  sector.visible = false;
   radar.visible = false;
   const kelp = makeKelp(scene),
     buoy = makeBuoy(scene);
@@ -473,7 +524,7 @@ export async function createWorld(canvas) {
     }),
   );
   scene.add(dust);
-  const captain = new Swimmer(pirate, scene),
+  const captain = new Swimmer(pirate, scene, bottom),
     captainShadow = shadow(scene);
   const walkPose = captain.base.map(([bone]) => ({
     bone,
@@ -482,29 +533,31 @@ export async function createWorld(canvas) {
   }));
   const seaTint = new T.Color("#5aa6b4"),
     skyTint = new T.Color("#a2dccc");
-  const animals = entries.map((e, i) => {
-    const node =
-      e.s === 0
-        ? createChromis({ length: 1.04 })
-        : e.s === 1
-          ? createGardenResident(puffer).root
-          : createCoastalFish(snapper, { kind: "wrasse", length: 1.17 });
-    if (e.s === 1) node.scale.multiplyScalar(1.45);
-    const p = fishPlace(e, 0);
-    node.position.set(p.x, p.y, p.z);
-    scene.add(node);
-    return {
-      e,
-      s: e.s,
-      i,
-      node,
-      shadow: shadow(scene),
-      caught: false,
-      slot: -1,
-      heading: 0,
-      bind: 0,
-    };
-  });
+  const animals = (singleChromis ? entries.slice(0, 1) : entries).map(
+    (e, i) => {
+      const node =
+        e.s === 0
+          ? createChromis({ length: 1.04 })
+          : e.s === 1
+            ? createGardenResident(puffer).root
+            : createCoastalFish(snapper, { kind: "wrasse", length: 1.17 });
+      if (e.s === 1) node.scale.multiplyScalar(1.45);
+      const p = fishPlace(e, 0);
+      node.position.set(p.x, p.y, p.z);
+      scene.add(node);
+      return {
+        e,
+        s: e.s,
+        i,
+        node,
+        shadow: shadow(scene),
+        caught: false,
+        slot: -1,
+        heading: 0,
+        bind: 0,
+      };
+    },
+  );
   const sphere = new T.SphereGeometry(1, 12, 9);
   const bubbleMaterial = new T.MeshPhongMaterial({
     color: "#b2f9ff",
@@ -606,6 +659,7 @@ export async function createWorld(canvas) {
     }
     dust.visible = submerge > 0.25;
     radar.position.set(p.x, p.y, p.z);
+    radar.rotation.y = -p.heading;
     if (swimPose < 1) {
       captain.actor.userData.controller.update(dt, p.cruise > 0.09);
       for (const joint of walkPose) {
@@ -624,9 +678,6 @@ export async function createWorld(canvas) {
       effort: 0.65 + p.cruise * 0.35,
       state: "swim",
     });
-    if (p.vy < -0.3 && p.verticalTime > 0.26)
-      captain.tilt.rotation.x +=
-        Math.min(0.75, p.verticalTime * 0.58) * Math.min(1, -p.vy);
     if (swimPose < 1) {
       captain.tilt.rotation.x *= swimPose;
       captain.tilt.rotation.z *= swimPose;
@@ -638,7 +689,7 @@ export async function createWorld(canvas) {
     shadowAt(captainShadow, p, 0.51, 0.31, p.heading);
     for (const f of animals) {
       shadowAt(f.shadow, f.node.position, 0.36, 0.2, f.heading);
-      f.node.userData.update?.(dt);
+      f.node.userData.update?.(dt * (f.patrol?.darting && !f.caught ? 2.2 : 1));
     }
     if (bubble.visible) edge.quaternion.copy(camera.quaternion);
     renderer.render(scene, camera);
@@ -652,6 +703,10 @@ export async function createWorld(canvas) {
     animals,
     bubble,
     radar,
+    setRangeMode(mode) {
+      sector.visible = isSector(mode);
+      ring.visible = !sector.visible;
+    },
     onRadarPlane,
     follow,
     resize,

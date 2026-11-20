@@ -12,6 +12,10 @@ import {
   swim,
   slideRocks,
   fishPlace,
+  inTrackRange,
+  newPatrol,
+  beginDart,
+  advancePatrol,
   closestHit,
   registerReturn,
 } from "../site/studies/captain-dive/reef-motion.mjs";
@@ -100,4 +104,50 @@ test("return preserves the existing guide, its target and previous catches", () 
     runs: 1,
     target: null,
   });
+});
+
+test("circle includes the rear while both forward sectors rotate with the swimmer", () => {
+  assert.ok(inTrackRange("circle", 0, 1.4, 0));
+  assert.ok(!inTrackRange("circle", 0, -1.6, 0));
+  for (const mode of ["sector", "burst"]) {
+    assert.ok(inTrackRange(mode, 0, -2, 0));
+    assert.ok(!inTrackRange(mode, 0, 1, 0));
+    assert.ok(inTrackRange(mode, 2, 0, Math.PI / 2));
+    assert.ok(!inTrackRange(mode, 2.01, 0, Math.PI / 2));
+    for (const angle of [-51, -50, 50, 51]) {
+      const rad = (angle * Math.PI) / 180;
+      assert.equal(
+        inTrackRange(mode, Math.sin(rad), -Math.cos(rad), 0),
+        Math.abs(angle) <= 50,
+      );
+    }
+  }
+});
+test("the chromis follows its original curve until approached, then accelerates smoothly round the bend", () => {
+  for (const hz of [30, 60, 120]) {
+    const p = newPatrol(),
+      e = entries[0],
+      dt = 1 / hz;
+    assert.equal(advancePatrol(p, 4), 4);
+    assert.ok(beginDart(p));
+    const velocities = [];
+    for (let i = 0; i < hz; i++) {
+      const a = fishPlace(e, p.time);
+      const b = fishPlace(e, advancePatrol(p, dt));
+      velocities.push({ x: (b.x - a.x) / dt, z: (b.z - a.z) / dt });
+    }
+    const speeds = velocities.map((v) => Math.hypot(v.x, v.z));
+    assert.ok(
+      speeds[0] < 0.77 && Math.max(...speeds) > 2.2 && Math.max(...speeds) < 5,
+    );
+    assert.ok(
+      velocities[0].x * velocities.at(-1).x +
+        velocities[0].z * velocities.at(-1).z <
+        0,
+    );
+    assert.ok(Math.abs(p.time - 7.5) < 1e-6);
+    assert.equal(beginDart(p), false);
+    advancePatrol(p, 3);
+    assert.equal(beginDart(p), true);
+  }
 });
