@@ -1,5 +1,5 @@
 import { species, clamp, sweptHit } from "./rules.mjs?v=1";
-import { sprite } from "./journey-art.mjs?v=1";
+import { sprite } from "./journey-art.mjs?v=polyone1";
 import { initialRecord as clean } from "./reef-motion.mjs";
 const $ = (id) => document.getElementById(id);
 const sea = $("sea"),

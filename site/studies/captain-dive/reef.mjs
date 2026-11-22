@@ -751,7 +751,7 @@ canvas.addEventListener("webglcontextlost", (e) => {
 });
 async function prepareWorld() {
   try {
-    const { createWorld } = await import("./reef-world.mjs?v=adventurer3");
+    const { createWorld } = await import("./reef-world.mjs?v=polyone1");
     world = await createWorld(canvas, shoal);
     for (const f of world.animals) {
       f.patrol = newPatrol();

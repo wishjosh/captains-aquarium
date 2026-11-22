@@ -10,7 +10,7 @@ export class Swimmer{
  constructor(asset,scene,floor=()=>-Infinity,fitEquipment=fitCaptainEquipment){
   this.floor=floor;this.source=asset.parser?.json.asset.extras?.author || 'original captain rig';
   this.actor=createCaptain(asset);this.actor.userData.controller.update(0,false);this.root=new T.Group();this.tilt=new T.Group();this.root.add(this.tilt);this.tilt.add(this.actor);this.actor.position.y=-1.06;scene.add(this.root);this.bones={};this.actor.traverse(n=>{if(n.isBone)this.bones[n.name]=n;});
-  this.base=Object.values(this.bones).map(b=>[b,b.position.clone(),b.quaternion.clone()]);this.depthPose=new DepthPose();this.turnStroke=new TurnStroke();this.turn={signed:0,amount:0,phase:0};this.depth={rise:0,sink:0,amount:0,blend:0};this.phase=0;this.stroke=strokePose(0);this.swimAmount=0;this.lean=.16;this.bank=0;this.lastHands={};this.equipment=fitEquipment(this);
+  this.base=Object.values(this.bones).map(b=>[b,b.position.clone(),b.quaternion.clone()]);this.depthPose=new DepthPose();this.turnStroke=new TurnStroke();this.turn={signed:0,amount:0,phase:0};this.depth={rise:0,sink:0,amount:0,blend:0};this.phase=0;this.stroke=strokePose(0);this.swimAmount=0;this.lean=.16;this.bank=0;this.lastHands={};this.equipment=fitEquipment?.(this) ?? {report: () => ({})};
  }
  aim(bone,from,to){const q=bone.getWorldQuaternion(new T.Quaternion()),parent=bone.parent.getWorldQuaternion(new T.Quaternion());const delta=new T.Quaternion().setFromUnitVectors(from.normalize(),to.normalize());bone.quaternion.copy(parent.invert().multiply(delta).multiply(q));this.root.updateMatrixWorld(true);}
  arm(side,target,pole){const upper=this.bones['UpperArm'+side],lower=this.bones['LowerArm'+side],tip=this.bones['Middle1'+side];if(!upper||!lower||!tip)return;
@@ -42,8 +42,13 @@ export class Swimmer{
    lower.rotateX(-(.22*(1-active)+active*(assisted?.09:.52)*kick+reverse*.12*(1+flutter)));
    upper.rotateX((depth.trail-depth.dive)*.65);
    this.root.updateMatrixWorld(true);
-   // The source rig has root-parented feet: move each with its shin to preserve ankles.
-   const delta=lower.matrixWorld.clone().multiply(before.invert()),local=foot.parent.matrixWorld.clone().invert().multiply(delta).multiply(footBefore);local.decompose(foot.position,foot.quaternion,foot.scale);this.root.updateMatrixWorld(true);
+   // Only detached foot controls need to inherit the shin transform manually.
+   if (foot.parent !== lower) {
+    const delta = lower.matrixWorld.clone().multiply(before.invert());
+    const local = foot.parent.matrixWorld.clone().invert().multiply(delta).multiply(footBefore);
+    local.decompose(foot.position, foot.quaternion, foot.scale);
+    this.root.updateMatrixWorld(true);
+   }
    const floatX=.43+Math.sin(w.time*2.1)*.05,floatY=-.22+Math.cos(w.time*2.1)*.04;
    const hand=V(sign*floatX,floatY,.27);
    hand.lerp(V(sign*pose.hand[0],pose.hand[1],pose.hand[2]),this.swimAmount);

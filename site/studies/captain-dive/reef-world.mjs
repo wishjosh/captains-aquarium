@@ -1,7 +1,6 @@
 import * as T from "../faceted-habitat/runtime/vendor/three.module.js?v=2026-10-20-jeju-rov-v1";
 import { GLTFLoader } from "../faceted-habitat/runtime/vendor/GLTFLoader.js?v=2026-10-20-jeju-rov-v1";
-import { Swimmer } from "../faceted-habitat/captain-swim.mjs?v=adventurer3";
-import { fitAdventurerEquipment } from "../faceted-habitat/captain-equipment.mjs?v=adventurer3";
+import { Swimmer } from "../faceted-habitat/captain-swim.mjs?v=polyone1";
 import { createChromis } from "../faceted-habitat/chromis-model.mjs";
 import { createGardenResident } from "../faceted-habitat/garden-resident.mjs";
 import { loadFish } from "../faceted-habitat/runtime/fish.js";
@@ -457,7 +456,7 @@ export async function createWorld(canvas, singleChromis = false) {
   scene.add(light);
   const loader = new GLTFLoader();
   const [captainAsset, stones, puffer, snapper] = await Promise.all([
-    loader.loadAsync(new URL("./adventurer-captain.glb?v=2", import.meta.url).href),
+    loader.loadAsync(new URL("./polyone-captain.glb", import.meta.url).href),
     loader.loadAsync(asset("assets/rock-modules.glb")),
     singleChromis ? null : loadFish({ kind: "puffer" }),
     singleChromis
@@ -525,8 +524,10 @@ export async function createWorld(canvas, singleChromis = false) {
     }),
   );
   scene.add(dust);
-  const captain = new Swimmer(captainAsset, scene, bottom, fitAdventurerEquipment),
+  const captain = new Swimmer(captainAsset, scene, bottom, null),
     captainShadow = shadow(scene);
+  // The shared character loader fits its models to 2.15 world units.
+  captain.actor.scale.setScalar(1.74 / 2.15);
   const walkPose = captain.base.map(([bone]) => ({
     bone,
     position: v(),
@@ -636,6 +637,7 @@ export async function createWorld(canvas, singleChromis = false) {
     buoy.zone.scale.setScalar(1 + Math.sin(t * 2) * 0.035);
     dust.position.y = Math.sin(t * 0.22) * 0.24;
     const swimPose = waterPose(p.x, p.z);
+    captain.actor.position.y = T.MathUtils.lerp(-1.06, -0.86, swimPose);
     const submerge = T.MathUtils.smoothstep(-p.y, 0.15, 1.4);
     scene.fog.color.copy(skyTint).lerp(seaTint, submerge);
     scene.fog.near = 25 - 11 * submerge;

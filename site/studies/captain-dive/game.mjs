@@ -1,23 +1,11 @@
 import{W,H,DURATION,species,clamp,dist,sweptHit,inside,inspectLoop,cleanRecord}from'./rules.mjs?v=1';
+import { sprite } from './journey-art.mjs?v=polyone1';
 const $=id=>document.getElementById(id),canvas=$('sea'),ctx=canvas.getContext('2d');
 const info={
 tap:{name:'톡 쏘기',label:'01 · 타이밍 놀이',title:'톡, 물방울을 쏴요',note:'물고기가 지나갈 때 화면을 눌러요.<br>물방울은 선장 앞쪽으로 날아가요.',icon:'↑',tip:'화면 어디든 톡 · PC는 Space',hint:'물고기가 올 자리를 보고 톡!'},
 swim:{name:'헤엄치기',label:'02 · 길 고르기',title:'쓱, 친구에게 다가가요',note:'손가락을 좌우로 움직여요.<br>앞의 물방울로 만나면 함께해요.',icon:'↔',tip:'아래쪽에서 좌우로 쓱 · PC는 ← →',hint:'좌우로 움직여 물고기를 만나요.'},
 loop:{name:'원 그리기',label:'03 · 감싸기 놀이',title:'빙글, 물고기를 감싸요',note:'손가락으로 작은 고리를 그려요.<br>끝을 시작점에 이어주면 포획!',icon:'◌',tip:'물고기 주위를 빙글 · PC도 드래그',hint:'한두 마리 주위에 작은 원을 그려요.'}
 };
-const palettes={o:'#163f4b',a:'#e9c577',b:'#bd905b',c:'#f4e7b3',e:'#fcf3da',d:'#173d49',t:'#679a87',r:'#ea9470',q:'#bb6f62',g:'#a8c9a1',u:'#3e796f',h:'#f1dfb0'};
-const sprites=[
-['.....aaa......','...aaacaa.....','.bbacccccaaa..','bbaccccccceaa.','.bbacccccedaa.','...aaccccaaa..','.....bbbb.....','......bb......'],
-['....b...b....','...bcccb.....','.bbccccccbb..','..cccccccce..','bccccccccedb.','..ccccccccc..','.bbccccccbb..','...bbccbb....','....b..b.....'],
-['......rrrr......','...rrrgggrrr....','.rrggrrrgggrr...','rrrggrrrgggreer.','.rrggrrrgggrdr..','...rrrgggrrr....','......qqqq......'],
-['.....oooooo....','....ooeeeeoo...','...oooooooooo..','.....hhhhh.....','....hheeeeh....','....hheedoh....','.....hhhh......','....rrrrrr.....','...rrrerrrr....','..hhrrerrrhh...','....oooooo.....','....oo..bb.....','...uuu..bb.....','..uuuu..bb.....']
-];
-function sprite(c,index,x,y,scale=3,flip=false,alpha=1){
- const grid=sprites[index];c.save();c.globalAlpha=alpha;c.translate(Math.round(x),Math.round(y));if(flip)c.scale(-1,1);
- const width=grid[0].length,height=grid.length;
- for(let row=0;row<height;row++)for(let col=0;col<grid[row].length;col++){const color=palettes[grid[row][col]];if(color){c.fillStyle=color;c.fillRect(Math.round((col-width/2)*scale),Math.round((row-height/2)*scale),Math.ceil(scale),Math.ceil(scale));}}
- c.restore();
-}
 function ring(c,x,y,r,color='#e8f2cb',width=2){c.strokeStyle=color;c.lineWidth=width;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.stroke();}
 function text(c,s,x,y,size=12,color='#eaf0d2',align='center'){c.font='700 '+size+'px system-ui';c.fillStyle=color;c.textAlign=align;c.fillText(s,x,y);}
 let mode='tap',stage='ready',time=0,last=0,idleTime=0,fish=[],rocks=[],effects=[],friends=[],shot=null,counts=[0,0,0],attempts=0,misses=0,spawnIndex=0,nextSpawn=0,rockIndex=0,nextRock=0,trace=[],traceLife=0,traceColor='#ebf1c4',pointer=null,keyboardTrace=false,keys=new Set(),record=cleanRecord(),saved=false,sound=false,audioContext,flash=0;
